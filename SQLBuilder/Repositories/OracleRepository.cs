@@ -518,7 +518,7 @@ namespace SQLBuilder.Repositories
                     }
                     Commit();
                 }
-                catch (Exception)
+                catch
                 {
                     Rollback();
                     result = 0;
@@ -580,7 +580,7 @@ namespace SQLBuilder.Repositories
                     }
                     Commit();
                 }
-                catch (Exception)
+                catch
                 {
                     Rollback();
                     result = 0;
@@ -667,7 +667,7 @@ namespace SQLBuilder.Repositories
                     }
                     Commit();
                 }
-                catch (Exception)
+                catch
                 {
                     Rollback();
                     result = 0;
@@ -751,7 +751,7 @@ namespace SQLBuilder.Repositories
                     }
                     Commit();
                 }
-                catch (Exception)
+                catch
                 {
                     Rollback();
                     result = 0;
@@ -860,7 +860,7 @@ namespace SQLBuilder.Repositories
                     }
                     Commit();
                 }
-                catch (Exception)
+                catch
                 {
                     Rollback();
                     result = 0;
@@ -944,7 +944,7 @@ namespace SQLBuilder.Repositories
                     }
                     Commit();
                 }
-                catch (Exception)
+                catch
                 {
                     Rollback();
                     result = 0;
@@ -1032,7 +1032,7 @@ namespace SQLBuilder.Repositories
                     }
                     Commit();
                 }
-                catch (Exception)
+                catch
                 {
                     Rollback();
                     result = 0;
@@ -1118,7 +1118,7 @@ namespace SQLBuilder.Repositories
                     }
                     Commit();
                 }
-                catch (Exception)
+                catch
                 {
                     Rollback();
                     result = 0;
