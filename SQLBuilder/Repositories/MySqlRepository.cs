@@ -100,21 +100,11 @@ namespace SQLBuilder.Repositories
         /// <summary>
         /// 提交当前操作的结果
         /// </summary>
-        public int Commit()
+        public void Commit()
         {
-            try
-            {
-                Transaction.Commit();
-                return 1;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                Close();
-            }
+            Transaction.Commit();
+            Transaction.Dispose();
+            Close();
         }
 
         /// <summary>
