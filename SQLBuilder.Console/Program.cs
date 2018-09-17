@@ -464,11 +464,6 @@ namespace SQLBuilder
                 "全表更新",
                 "Update"
             );
-            Print(
-               SqlBuilder.Update<UserInfo, object>(),
-               "全表更新",
-               "Update"
-           );
 
             var obj = new UserInfo { Name = "", Sex = 1, Email = "123456@qq.com", Id = 2 };
             Print(
