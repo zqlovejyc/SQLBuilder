@@ -466,7 +466,7 @@ namespace SQLBuilder.Repositories
         public int Insert<T>(T entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Insert<T>(() => entity, DatabaseType.PostgreSQL, false);
+            var builder = Sql.Insert<T, object>(() => entity, DatabaseType.PostgreSQL, false);
             if (Transaction?.Connection != null)
             {
                 result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction);
@@ -528,7 +528,7 @@ namespace SQLBuilder.Repositories
         public async Task<int> InsertAsync<T>(T entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Insert<T>(() => entity, DatabaseType.PostgreSQL, false);
+            var builder = Sql.Insert<T, object>(() => entity, DatabaseType.PostgreSQL, false);
             if (Transaction?.Connection != null)
             {
                 result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction);
@@ -980,7 +980,7 @@ namespace SQLBuilder.Repositories
         public int Update<T>(T entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Update<T>(() => entity, DatabaseType.PostgreSQL, false).WithKey(entity);
+            var builder = Sql.Update<T, object>(() => entity, DatabaseType.PostgreSQL, false).WithKey(entity);
             if (Transaction?.Connection != null)
             {
                 result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1035,12 +1035,14 @@ namespace SQLBuilder.Repositories
         /// 根据linq条件更新实体
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="predicate">linq条件</param>
+        /// <param name="entity">要更新的实体表达式</param>
         /// <returns>返回受影响行数</returns>
-        public int Update<T>(Expression<Func<T, bool>> predicate) where T : class
+        public int Update<T, S>(Expression<Func<T, bool>> predicate, Expression<Func<S>> entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Update<T>(DatabaseType: DatabaseType.PostgreSQL, isEnableNullValue: false).Where(predicate);
+            var builder = Sql.Update<T, S>(entity, DatabaseType: DatabaseType.PostgreSQL, isEnableNullValue: false).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1066,7 +1068,7 @@ namespace SQLBuilder.Repositories
         public async Task<int> UpdateAsync<T>(T entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Update<T>(() => entity, DatabaseType.PostgreSQL, false).WithKey(entity);
+            var builder = Sql.Update<T, object>(() => entity, DatabaseType.PostgreSQL, false).WithKey(entity);
             if (Transaction?.Connection != null)
             {
                 result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1121,12 +1123,14 @@ namespace SQLBuilder.Repositories
         /// 根据linq条件更新实体
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="predicate">linq条件</param>
+        /// <param name="entity">要更新的实体表达式</param>
         /// <returns>返回受影响行数</returns>
-        public async Task<int> UpdateAsync<T>(Expression<Func<T, bool>> predicate) where T : class
+        public async Task<int> UpdateAsync<T, S>(Expression<Func<T, bool>> predicate, Expression<Func<S>> entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Update<T>(DatabaseType: DatabaseType.PostgreSQL, isEnableNullValue: false).Where(predicate);
+            var builder = Sql.Update<T, S>(entity, DatabaseType: DatabaseType.PostgreSQL, isEnableNullValue: false).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1263,7 +1267,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public T FindEntity<T>(object keyValue) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL).WithKey(keyValue);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL).WithKey(keyValue);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1281,12 +1285,13 @@ namespace SQLBuilder.Repositories
         /// 根据主键查询单个实体
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <param name="keyValue">主键值</param>
         /// <returns>返回实体</returns>
-        public T FindEntity<T>(Expression<Func<T, object>> selector, object keyValue) where T : class
+        public T FindEntity<T, S>(Expression<Func<T, S>> selector, object keyValue) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL).WithKey(keyValue);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL).WithKey(keyValue);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1308,7 +1313,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public T FindEntity<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1326,12 +1331,13 @@ namespace SQLBuilder.Repositories
         /// 根据linq条件查询单个实体
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <param name="predicate">linq条件</param>
         /// <returns>返回实体</returns>
-        public T FindEntity<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate) where T : class
+        public T FindEntity<T, S>(Expression<Func<T, S>> selector, Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1420,7 +1426,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public async Task<T> FindEntityAsync<T>(object keyValue) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL).WithKey(keyValue);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL).WithKey(keyValue);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1438,12 +1444,13 @@ namespace SQLBuilder.Repositories
         /// 根据主键查询单个实体
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <param name="keyValue">主键值</param>
         /// <returns>返回实体</returns>
-        public async Task<T> FindEntityAsync<T>(Expression<Func<T, object>> selector, object keyValue) where T : class
+        public async Task<T> FindEntityAsync<T, S>(Expression<Func<T, S>> selector, object keyValue) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL).WithKey(keyValue);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL).WithKey(keyValue);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1465,7 +1472,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public async Task<T> FindEntityAsync<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1483,12 +1490,13 @@ namespace SQLBuilder.Repositories
         /// 根据linq条件查询单个实体
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <param name="predicate">linq条件</param>
         /// <returns>返回实体</returns>
-        public async Task<T> FindEntityAsync<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate) where T : class
+        public async Task<T> FindEntityAsync<T, S>(Expression<Func<T, S>> selector, Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1578,7 +1586,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IQueryable<T> IQueryable<T>() where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction).AsQueryable();
@@ -1596,11 +1604,12 @@ namespace SQLBuilder.Repositories
         /// 查询全部
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <returns>返回集合</returns>
-        public IQueryable<T> IQueryable<T>(Expression<Func<T, object>> selector) where T : class
+        public IQueryable<T> IQueryable<T, S>(Expression<Func<T, S>> selector) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction).AsQueryable();
@@ -1622,7 +1631,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IQueryable<T> IQueryable<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction).AsQueryable();
@@ -1640,12 +1649,13 @@ namespace SQLBuilder.Repositories
         /// 根据linq查询
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <param name="predicate">linq条件</param>
         /// <returns>返回集合</returns>
-        public IQueryable<T> IQueryable<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate) where T : class
+        public IQueryable<T> IQueryable<T, S>(Expression<Func<T, S>> selector, Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction).AsQueryable();
@@ -1668,7 +1678,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IQueryable<T>> IQueryableAsync<T>() where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL);
             if (Transaction?.Connection != null)
             {
                 var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
@@ -1688,11 +1698,12 @@ namespace SQLBuilder.Repositories
         /// 查询全部
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <returns>返回集合</returns>
-        public async Task<IQueryable<T>> IQueryableAsync<T>(Expression<Func<T, object>> selector) where T : class
+        public async Task<IQueryable<T>> IQueryableAsync<T, S>(Expression<Func<T, S>> selector) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL);
             if (Transaction?.Connection != null)
             {
                 var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
@@ -1716,7 +1727,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IQueryable<T>> IQueryableAsync<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1736,12 +1747,13 @@ namespace SQLBuilder.Repositories
         /// 根据linq查询
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <param name="predicate">linq条件</param>
         /// <returns>返回集合</returns>
-        public async Task<IQueryable<T>> IQueryableAsync<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate) where T : class
+        public async Task<IQueryable<T>> IQueryableAsync<T, S>(Expression<Func<T, S>> selector, Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1768,7 +1780,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IEnumerable<T> FindList<T>() where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction);
@@ -1786,11 +1798,12 @@ namespace SQLBuilder.Repositories
         /// 查询全部
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <returns>返回集合</returns>
-        public IEnumerable<T> FindList<T>(Expression<Func<T, object>> selector) where T : class
+        public IEnumerable<T> FindList<T, S>(Expression<Func<T, S>> selector) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction);
@@ -1807,12 +1820,13 @@ namespace SQLBuilder.Repositories
         /// <summary>
         /// 查询并根据条件进行排序
         /// </summary>
-        /// <typeparam name="T">泛型类型</typeparam>        
+        /// <typeparam name="T">泛型类型</typeparam>  
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="keySelector">排序字段</param>
         /// <returns>返回集合</returns>
-        public IEnumerable<T> FindList<T>(Func<T, object> keySelector) where T : class
+        public IEnumerable<T> FindList<T, S>(Func<T, S> keySelector) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL).OrderBy(o => keySelector(o));
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL).OrderBy(o => keySelector(o));
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction);
@@ -1830,12 +1844,14 @@ namespace SQLBuilder.Repositories
         /// 查询并根据条件进行排序
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
+        /// <typeparam name="F">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <param name="keySelector">排序字段</param>
         /// <returns>返回集合</returns>
-        public IEnumerable<T> FindList<T>(Expression<Func<T, object>> selector, Func<T, object> keySelector) where T : class
+        public IEnumerable<T> FindList<T, S, F>(Expression<Func<T, S>> selector, Func<T, F> keySelector) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL).OrderBy(o => keySelector(o));
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL).OrderBy(o => keySelector(o));
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction);
@@ -1857,7 +1873,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IEnumerable<T> FindList<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1875,12 +1891,13 @@ namespace SQLBuilder.Repositories
         /// 根据linq条件进行查询
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <param name="predicate">linq条件</param>
         /// <returns>返回集合</returns>
-        public IEnumerable<T> FindList<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate) where T : class
+        public IEnumerable<T> FindList<T, S>(Expression<Func<T, S>> selector, Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -1960,7 +1977,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合和总记录数</returns>
         public (IEnumerable<T> list, long total) FindList<T>(string orderField, bool isAsc, int pageSize, int pageIndex) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL);
             var orderBy = string.Empty;
             if (!string.IsNullOrEmpty(orderField))
             {
@@ -2009,7 +2026,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合和总记录数</returns>
         public (IEnumerable<T> list, long total) FindList<T>(Expression<Func<T, bool>> predicate, string orderField, bool isAsc, int pageSize, int pageIndex) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
             var orderBy = string.Empty;
             if (!string.IsNullOrEmpty(orderField))
             {
@@ -2050,6 +2067,7 @@ namespace SQLBuilder.Repositories
         /// 根据linq条件进行分页查询
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <param name="predicate">linq条件</param>
         /// <param name="orderField">排序字段</param>
@@ -2057,9 +2075,9 @@ namespace SQLBuilder.Repositories
         /// <param name="pageSize">每页数量</param>
         /// <param name="pageIndex">当前页码</param>        
         /// <returns>返回集合和总记录数</returns>
-        public (IEnumerable<T> list, long total) FindList<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate, string orderField, bool isAsc, int pageSize, int pageIndex) where T : class
+        public (IEnumerable<T> list, long total) FindList<T, S>(Expression<Func<T, S>> selector, Expression<Func<T, bool>> predicate, string orderField, bool isAsc, int pageSize, int pageIndex) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL).Where(predicate);
             var orderBy = string.Empty;
             if (!string.IsNullOrEmpty(orderField))
             {
@@ -2332,7 +2350,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IEnumerable<T>> FindListAsync<T>() where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
@@ -2350,33 +2368,12 @@ namespace SQLBuilder.Repositories
         /// 查询全部
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <returns>返回集合</returns>
-        public async Task<IEnumerable<T>> FindListAsync<T>(Expression<Func<T, object>> selector) where T : class
+        public async Task<IEnumerable<T>> FindListAsync<T, S>(Expression<Func<T, S>> selector) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL);
-            if (Transaction?.Connection != null)
-            {
-                return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
-            }
-            else
-            {
-                using (var dbConnection = Connection)
-                {
-                    return await dbConnection.QueryAsync<T>(builder.Sql);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 查询并根据条件进行排序
-        /// </summary>
-        /// <typeparam name="T">泛型类型</typeparam>        
-        /// <param name="keySelector">排序字段</param>
-        /// <returns>返回集合</returns>
-        public async Task<IEnumerable<T>> FindListAsync<T>(Func<T, object> keySelector) where T : class
-        {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL).OrderBy(o => keySelector(o));
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
@@ -2394,12 +2391,37 @@ namespace SQLBuilder.Repositories
         /// 查询并根据条件进行排序
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
+        /// <param name="keySelector">排序字段</param>
+        /// <returns>返回集合</returns>
+        public async Task<IEnumerable<T>> FindListAsync<T, S>(Func<T, S> keySelector) where T : class
+        {
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL).OrderBy(o => keySelector(o));
+            if (Transaction?.Connection != null)
+            {
+                return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
+            }
+            else
+            {
+                using (var dbConnection = Connection)
+                {
+                    return await dbConnection.QueryAsync<T>(builder.Sql);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 查询并根据条件进行排序
+        /// </summary>
+        /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
+        /// <typeparam name="F">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <param name="keySelector">排序字段</param>
         /// <returns>返回集合</returns>
-        public async Task<IEnumerable<T>> FindListAsync<T>(Expression<Func<T, object>> selector, Func<T, object> keySelector) where T : class
+        public async Task<IEnumerable<T>> FindListAsync<T, S, F>(Expression<Func<T, S>> selector, Func<T, F> keySelector) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL).OrderBy(o => keySelector(o));
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL).OrderBy(o => keySelector(o));
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
@@ -2421,7 +2443,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IEnumerable<T>> FindListAsync<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -2439,12 +2461,13 @@ namespace SQLBuilder.Repositories
         /// 根据linq条件进行查询
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <param name="predicate">linq条件</param>
         /// <returns>返回集合</returns>
-        public async Task<IEnumerable<T>> FindListAsync<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate) where T : class
+        public async Task<IEnumerable<T>> FindListAsync<T, S>(Expression<Func<T, S>> selector, Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
@@ -2524,7 +2547,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合和总记录数</returns>
         public async Task<(IEnumerable<T> list, long total)> FindListAsync<T>(string orderField, bool isAsc, int pageSize, int pageIndex) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL);
             var orderBy = string.Empty;
             if (!string.IsNullOrEmpty(orderField))
             {
@@ -2573,7 +2596,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合和总记录数</returns>
         public async Task<(IEnumerable<T> list, long total)> FindListAsync<T>(Expression<Func<T, bool>> predicate, string orderField, bool isAsc, int pageSize, int pageIndex) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, object>(DatabaseType: DatabaseType.PostgreSQL).Where(predicate);
             var orderBy = string.Empty;
             if (!string.IsNullOrEmpty(orderField))
             {
@@ -2614,6 +2637,7 @@ namespace SQLBuilder.Repositories
         /// 根据linq条件进行分页查询
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
+        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
         /// <param name="predicate">linq条件</param>
         /// <param name="orderField">排序字段</param>
@@ -2621,9 +2645,9 @@ namespace SQLBuilder.Repositories
         /// <param name="pageSize">每页数量</param>
         /// <param name="pageIndex">当前页码</param>
         /// <returns>返回集合和总记录数</returns>
-        public async Task<(IEnumerable<T> list, long total)> FindListAsync<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate, string orderField, bool isAsc, int pageSize, int pageIndex) where T : class
+        public async Task<(IEnumerable<T> list, long total)> FindListAsync<T, S>(Expression<Func<T, S>> selector, Expression<Func<T, bool>> predicate, string orderField, bool isAsc, int pageSize, int pageIndex) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.PostgreSQL).Where(predicate);
+            var builder = Sql.Select<T, S>(selector, DatabaseType.PostgreSQL).Where(predicate);
             var orderBy = string.Empty;
             if (!string.IsNullOrEmpty(orderField))
             {
