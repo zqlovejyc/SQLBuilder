@@ -83,9 +83,9 @@ namespace SQLBuilder.Repositories
 
         #region Transaction
         /// <summary>
-        /// 开启事务
+        /// 事务开始
         /// </summary>
-        /// <returns>IRepository</returns>
+        /// <returns>返回IDatabase</returns>
         public IRepository BeginTrans()
         {
             var dbConnection = Connection;
@@ -98,7 +98,7 @@ namespace SQLBuilder.Repositories
         }
 
         /// <summary>
-        /// 提交事务
+        /// 提交当前操作的结果
         /// </summary>
         public void Commit()
         {
@@ -108,7 +108,7 @@ namespace SQLBuilder.Repositories
         }
 
         /// <summary>
-        /// 回滚事务
+        /// 把当前操作回滚成未提交状态
         /// </summary>
         public void Rollback()
         {
@@ -118,7 +118,7 @@ namespace SQLBuilder.Repositories
         }
 
         /// <summary>
-        /// 关闭连接
+        /// 关闭连接，回收内存
         /// </summary>
         public void Close()
         {

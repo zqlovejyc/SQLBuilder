@@ -39,7 +39,7 @@ namespace SQLBuilder.Repositories
         /// <summary>
         /// 开启事务
         /// </summary>
-        /// <returns>IRepository</returns>
+        /// <returns>返回IDatabase</returns>
         IRepository BeginTrans();
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace SQLBuilder.Repositories
         void Rollback();
 
         /// <summary>
-        /// 关闭连接
+        /// 关闭连接，回收内存
         /// </summary>
         void Close();
         #endregion
