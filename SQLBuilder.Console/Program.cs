@@ -54,7 +54,7 @@ namespace SQLBuilder
         {
             #region Select
             Print(
-                SqlBuilder.Select<UserInfo, object>(),
+                SqlBuilder.Select<UserInfo>(),
                 "查询单表所有字段",
                 "Select"
             );
@@ -63,115 +63,115 @@ namespace SQLBuilder
             expr = expr.And(o => o.Id > 0);
             expr = expr.Or(o => o.Email != "");
             Print(
-                SqlBuilder.Select<UserInfo, object>().Where(expr),
+                SqlBuilder.Select<UserInfo>().Where(expr),
                 "查询单表所有字段，linq拼接条件"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Id),
+                SqlBuilder.Select<UserInfo>(u => u.Id),
                 "查询单表单个字段"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Id).WithKey(2),
+                SqlBuilder.Select<UserInfo>(u => u.Id).WithKey(2),
                 "根据主键进行查询"
            );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => new { u.Id, u.Name }),
+                SqlBuilder.Select<UserInfo>(u => new { u.Id, u.Name }),
                 "查询单表多个字段"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => new { u.Id, u.Name }).Top(100),
+                SqlBuilder.Select<UserInfo>(u => new { u.Id, u.Name }).Top(100),
                 "查询单表多个字段，并返回指定TOP数量的数据"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => new { u.Id, u.Name }, DatabaseType.MySQL).Top(100),
+                SqlBuilder.Select<UserInfo>(u => new { u.Id, u.Name }, DatabaseType.MySQL).Top(100),
                 "查询单表多个字段，并返回指定TOP数量的数据 MySQL"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => new { u.Id, u.Name }, DatabaseType.Oracle).Top(100),
+                SqlBuilder.Select<UserInfo>(u => new { u.Id, u.Name }, DatabaseType.Oracle).Top(100),
                 "查询单表多个字段，并返回指定TOP数量的数据 Oracle"
             );
 
             Print(
-               SqlBuilder.Select<UserInfo, object>(u => new { u.Id, u.Name }).Top(100).Distinct(),
+               SqlBuilder.Select<UserInfo>(u => new { u.Id, u.Name }).Top(100).Distinct(),
                "查询单表多个字段，DISTINCT"
             );
 
             Print(
-               SqlBuilder.Select<UserInfo, object>(u => new { u.Id, u.Name }).Distinct().Top(100),
+               SqlBuilder.Select<UserInfo>(u => new { u.Id, u.Name }).Distinct().Top(100),
                "查询单表多个字段，DISTINCT"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => new { u.Id, UserName = u.Name }),
+                SqlBuilder.Select<UserInfo>(u => new { u.Id, UserName = u.Name }),
                 "查询单表多个字段 起别名"
             );
 
             var entity = new { name = "新用户" };
             Print(
-                SqlBuilder.Select<UserInfo, object>(o => new { o.Id, o.Name })
+                SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name })
                           .Where(u => u.Name.Equals(entity.name)),
                 "查询单表，带where 变量"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(o => new { o.Id, o.Name })
+                SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name })
                           .Where(u => 1 == 1)
                           .AndWhere(u => u.Name == ""),
                 "查询单表，带where 1==1"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Id)
+                SqlBuilder.Select<UserInfo>(u => u.Id)
                           .Where(u => u.Name.Like("张三")),
                 "查询单表，带where Like条件"
             );
 
             var name = "张三";
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Id)
+                SqlBuilder.Select<UserInfo>(u => u.Id)
                           .Where(u => u.Name.NotLike(name)),
                 "查询单表，带where Not Like"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Id)
+                SqlBuilder.Select<UserInfo>(u => u.Id)
                           .Where(u => u.Name.LikeRight(name)),
                 "查询单表，带where LikeRight条件"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Name)
+                SqlBuilder.Select<UserInfo>(u => u.Name)
                           .Where(u => u.Id.In(1, 2, 3)),
                 "查询单表，带where in条件，写法一"
             );
 
             int[] aryId = { 1, 2, 3 };
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Name)
+                SqlBuilder.Select<UserInfo>(u => u.Name)
                           .Where(u => u.Id.In(aryId)),
                 "查询单表，带where in条件，写法二"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Name)
+                SqlBuilder.Select<UserInfo>(u => u.Name)
                           .Where(u => u.Name.In(new string[] { "a", "b" })),
                 "查询单表，带where in条件，写法三"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Name)
+                SqlBuilder.Select<UserInfo>(u => u.Name)
                           .Where(u => u.Id.NotIn(1, 2, 3)),
                 "查询单表，带where not in条件，写法一"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Name)
+                SqlBuilder.Select<UserInfo>(u => u.Name)
                           .Where(u => u.Name.Contains("11"))
                           .AndWhere(u => !string.IsNullOrEmpty(u.Name))
                           .AndWhere(u => string.IsNullOrEmpty(u.Email)),
@@ -179,7 +179,7 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Id)
+                SqlBuilder.Select<UserInfo>(u => u.Id)
                           .Where(
                             u => u.Name == "b"
                                 && (u.Id > 2 && u.Name != null)
@@ -197,38 +197,38 @@ namespace SQLBuilder
 
             #region Join
             Print(
-                SqlBuilder.Select<UserInfo, Account, object>((u, a) => new { u.Id, a.Name })
+                SqlBuilder.Select<UserInfo, Account>((u, a) => new { u.Id, a.Name })
                           .Join<Account>((u, a) => u.Id == a.UserId && (u.Email == "111" || u.Email == "222")),
                 "多表Join关联查询",
                 "Join"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, Account, object>((u, a) => new { u.Id, a.Name })
+                SqlBuilder.Select<UserInfo, Account>((u, a) => new { u.Id, a.Name })
                           .InnerJoin<Account>((u, a) => u.Id == a.UserId),
                 "多表InnerJoin关联查询"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, Account, object>((u, a) => new { u.Id, a.Name })
+                SqlBuilder.Select<UserInfo, Account>((u, a) => new { u.Id, a.Name })
                           .LeftJoin<Account>((u, a) => u.Id == a.UserId),
                 "多表LeftJoin关联查询"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, Account, object>((u, a) => new { u.Id, a.Name })
+                SqlBuilder.Select<UserInfo, Account>((u, a) => new { u.Id, a.Name })
                           .RightJoin<Account>((u, a) => u.Id == a.UserId),
                 "多表RightJoin关联查询"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, Account, object>((u, a) => new { u.Id, a.Name })
+                SqlBuilder.Select<UserInfo, Account>((u, a) => new { u.Id, a.Name })
                           .FullJoin<Account>((u, a) => u.Id == a.UserId),
                 "多表FullJoin关联查询"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, Account, Student, Class, City, Country, object>((u, a, s, d, e, f) => new { u.Id, a.Name, StudentName = s.Name, ClassName = d.Name, e.CityName, CountryName = f.Name })
+                SqlBuilder.Select<UserInfo, Account, Student, Class, City, Country>((u, a, s, d, e, f) => new { u.Id, a.Name, StudentName = s.Name, ClassName = d.Name, e.CityName, CountryName = f.Name })
                           .Join<Account>((u, a) => u.Id == a.UserId)
                           .LeftJoin<Account, Student>((a, s) => a.Id == s.AccountId)
                           .RightJoin<Student, Class>((s, c) => s.Id == c.UserId)
@@ -241,7 +241,7 @@ namespace SQLBuilder
 
             #region Page
             Print(
-                SqlBuilder.Select<MyStudent, object>(DatabaseType: DatabaseType.MySQL)
+                SqlBuilder.Select<MyStudent>(DatabaseType: DatabaseType.MySQL)
                           .Where(o => o.Score != null)
                           .AndWhere(o => o.Name == "")
                           .OrWhere(o => o.Subject == "")
@@ -251,7 +251,7 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Id)
+                SqlBuilder.Select<UserInfo>(u => u.Id)
                           .Where(
                                 u => u.Name == "b" && (u.Id > 2 && u.Name != null && (u.Email == "11" || u.Email == "22" || u.Email == "ee"))
                           ).Page(10, 1, "Id"),
@@ -259,7 +259,7 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>(u => u.Id)
+                SqlBuilder.Select<UserInfo>(u => u.Id)
                           .Where(
                                 u => u.Name == "b" && (u.Id > 2 && u.Name != null && (u.Email == "11" || u.Email == "22" || u.Email == "ee"))
                           ).PageByWith(10, 1, "Id"),
@@ -267,7 +267,7 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Select<MyStudent, object>(DatabaseType: DatabaseType.MySQL)
+                SqlBuilder.Select<MyStudent>(DatabaseType: DatabaseType.MySQL)
                           .Where(o => o.Score != null)
                           .AndWhere(o => o.Name == "")
                           .OrWhere(o => o.Subject == "")
@@ -278,7 +278,7 @@ namespace SQLBuilder
 
             #region GroupBy
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                           .Where(o => o.Name == "张强")
                           .GroupBy(u => u.Id),
                 "GroupBy分组查询 用法1",
@@ -286,28 +286,28 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                           .Where(o => o.Name == "张强")
                           .GroupBy(u => new { u.Id, u.Email }),
                 "GroupBy分组查询 用法2-1"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                           .Where(o => o.Name == "张强")
                           .GroupBy(u => new[] { "Id", "Email" }),
                 "GroupBy分组查询 用法2-2"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                           .Where(o => o.Name == "张强")
                           .GroupBy(u => new List<string> { "Id", "Email" }),
                 "GroupBy分组查询 用法2-3"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                           .Where(o => o.Name == "张强")
                           .GroupBy(u => "Id,Email".Split(',')),
                 "GroupBy分组查询 用法2-4"
@@ -315,7 +315,7 @@ namespace SQLBuilder
 
             var groupByField = "Id";
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                           .Where(o => o.Name == "张强")
                           .GroupBy(u => groupByField),
                 "GroupBy分组查询 用法2-5"
@@ -323,7 +323,7 @@ namespace SQLBuilder
 
             var groupFields = "Id,Email".Split(',');
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                           .Where(o => o.Name == "张强")
                           .GroupBy(u => groupFields),
                 "GroupBy分组查询 用法2-6"
@@ -332,52 +332,52 @@ namespace SQLBuilder
 
             #region OrderBy
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                           .OrderBy(u => new[] { "Id", "Email" }, OrderType.Asc, OrderType.Desc),
                 "OrderBy排序 用法1-1",
                 "OrderBy"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                           .OrderBy(u => new List<string> { "Id", "Email" }, OrderType.Asc, OrderType.Desc),
                 "OrderBy排序 用法1-2"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                          .OrderBy(u => "Id,Email".Split(','), OrderType.Asc, OrderType.Desc),
                "OrderBy排序 用法1-3"
             );
 
             var orderByFields = "Id,Email".Split(',').ToList();
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                           .OrderBy(u => orderByFields, OrderType.Asc, OrderType.Desc),
                "OrderBy排序 用法1-4"
             );
 
             var orderByField = "Id DESC";
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                          .OrderBy(u => orderByField),
                "OrderBy排序 用法1-4"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                          .OrderBy(u => "Id DESC"),
                "OrderBy排序 用法1-5"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                           .OrderBy(u => new { u.Id, u.Email }, OrderType.Desc, OrderType.Desc),
                 "OrderBy排序 用法2"
             );
 
             Print(
-                SqlBuilder.Select<UserInfo, object>()
+                SqlBuilder.Select<UserInfo>()
                           .OrderBy(u => new { u.Id, u.Email }),
                 "OrderBy排序 用法3"
            );
@@ -385,7 +385,7 @@ namespace SQLBuilder
 
             #region Max
             Print(
-                SqlBuilder.Max<UserInfo, object>(u => u.Id)
+                SqlBuilder.Max<UserInfo>(u => u.Id)
                           .Where(o => o.Id == 3),
                 "返回一列中的最大值。NULL 值不包括在计算中。",
                 "Max"
@@ -394,7 +394,7 @@ namespace SQLBuilder
 
             #region Min
             Print(
-                SqlBuilder.Min<UserInfo, object>(u => u.Id),
+                SqlBuilder.Min<UserInfo>(u => u.Id),
                 "返回一列中的最小值。NULL 值不包括在计算中。",
                 "Min"
             );
@@ -402,7 +402,7 @@ namespace SQLBuilder
 
             #region Avg
             Print(
-                SqlBuilder.Avg<UserInfo, object>(u => u.Id),
+                SqlBuilder.Avg<UserInfo>(u => u.Id),
                 "返回数值列的平均值。NULL 值不包括在计算中。",
                 "Avg"
             );
@@ -410,20 +410,20 @@ namespace SQLBuilder
 
             #region Count
             Print(
-                SqlBuilder.Count<UserInfo, object>(),
+                SqlBuilder.Count<UserInfo>(),
                 "返回表中的记录数",
                 "Count"
             );
 
             Print(
-                SqlBuilder.Count<UserInfo, object>(u => u.Id),
+                SqlBuilder.Count<UserInfo>(u => u.Id),
                 "返回指定列的值的数目（NULL 不计入）"
             );
             #endregion
 
             #region Sum
             Print(
-                SqlBuilder.Sum<UserInfo, object>(u => u.Id),
+                SqlBuilder.Sum<UserInfo>(u => u.Id),
                 "返回数值列的总数（总额）。",
                 "Sum"
             );
@@ -460,19 +460,19 @@ namespace SQLBuilder
 
             #region Update
             Print(
-                SqlBuilder.Update<UserInfo, object>(() => new { Name = "", Sex = 1, Email = "123456@qq.com" }),
+                SqlBuilder.Update<UserInfo>(() => new { Name = "", Sex = 1, Email = "123456@qq.com" }),
                 "全表更新",
                 "Update"
             );
 
             var obj = new UserInfo { Name = "", Sex = 1, Email = "123456@qq.com", Id = 2 };
             Print(
-                SqlBuilder.Update<UserInfo, object>(() => obj).WithKey(obj),
+                SqlBuilder.Update<UserInfo>(() => obj).WithKey(obj),
                 "根据主键更新"
             );
 
             Print(
-                SqlBuilder.Update<UserInfo, object>(() => new UserInfo { Sex = 1, Email = "123456@qq.com" })
+                SqlBuilder.Update<UserInfo>(() => new UserInfo { Sex = 1, Email = "123456@qq.com" })
                           .Where(u => u.Id == 1),
                 "根据where条件更新指定表记录 用法1"
             );
@@ -483,38 +483,38 @@ namespace SQLBuilder
                 Sex = 2
             };
             Print(
-                SqlBuilder.Update<UserInfo, object>(() => userInfo2)
+                SqlBuilder.Update<UserInfo>(() => userInfo2)
                           .Where(u => u.Id == 1),
                 "根据where条件更新指定表记录 用法2-1"
             );
 
             Print(
-                SqlBuilder.Update<UserInfo, object>(() => userInfo2, isEnableNullValue: false)
+                SqlBuilder.Update<UserInfo>(() => userInfo2, isEnableNullValue: false)
                           .Where(u => u.Id == 1),
                 "根据where条件更新指定表记录 用法2-2"
             );
 
             Print(
-                SqlBuilder.Update<UserInfo, object>(() => new { Sex = 1, Email = "123456@qq.com" }, DatabaseType.MySQL)
+                SqlBuilder.Update<UserInfo>(() => new { Sex = 1, Email = "123456@qq.com" }, DatabaseType.MySQL)
                           .Where(u => u.Id == 1),
                 "根据where条件更新指定表记录 用法3"
             );
 
             Print(
-                SqlBuilder.Update<Class, object>(() => new { UserId = 1, Name = "123456@qq.com" }, DatabaseType.MySQL)
+                SqlBuilder.Update<Class>(() => new { UserId = 1, Name = "123456@qq.com" }, DatabaseType.MySQL)
                           .Where(u => u.CityId == 1),
                 "根据where条件更新指定表记录 用法4"
             );
 
             Print(
-                SqlBuilder.Update<Class, object>(() => new Class { UserId = 1, Name = "123456@qq.com" }, DatabaseType.MySQL)
+                SqlBuilder.Update<Class>(() => new Class { UserId = 1, Name = "123456@qq.com" }, DatabaseType.MySQL)
                           .Where(u => u.CityId == 1),
                 "根据where条件更新指定表记录 用法5"
             );
 
             var classData = new { UserId = 1, Name = "123456@qq.com" };
             Print(
-                SqlBuilder.Update<Class, object>(() => classData, DatabaseType.MySQL)
+                SqlBuilder.Update<Class>(() => classData, DatabaseType.MySQL)
                           .Where(u => u.CityId == 1),
                 "根据where条件更新指定表记录 用法6"
             );
@@ -522,13 +522,13 @@ namespace SQLBuilder
 
             #region Insert
             Print(
-                SqlBuilder.Insert<UserInfo, object>(() => new { Name = "张强", Sex = 2 }),
+                SqlBuilder.Insert<UserInfo>(() => new { Name = "张强", Sex = 2 }),
                 "插入数据 用法1",
                 "Insert"
             );
 
             Print(
-                SqlBuilder.Insert<UserInfo, object>(() => new UserInfo { Name = "张三", Sex = 2 }),
+                SqlBuilder.Insert<UserInfo>(() => new UserInfo { Name = "张三", Sex = 2 }),
                 "插入数据 用法2"
             );
 
@@ -538,17 +538,17 @@ namespace SQLBuilder
                 Sex = 2
             };
             Print(
-                SqlBuilder.Insert<UserInfo, object>(() => userInfo),
+                SqlBuilder.Insert<UserInfo>(() => userInfo),
                 "插入数据 用法3-1"
             );
             Print(
-                SqlBuilder.Insert<UserInfo, object>(() => userInfo, isEnableNullValue: false),
+                SqlBuilder.Insert<UserInfo>(() => userInfo, isEnableNullValue: false),
                 "插入数据 用法3-2"
             );
 
             Print(
-                SqlBuilder.Insert<UserInfo, object>(() => new[]
-                 {
+                SqlBuilder.Insert<UserInfo>(() => new[]
+                {
                     new UserInfo { Name = "张三", Sex = 2 },
                     new UserInfo { Name = "张三", Sex = 2 }
                 }),
@@ -556,8 +556,8 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Insert<UserInfo, object>(() => new[]
-                 {
+                SqlBuilder.Insert<UserInfo>(() => new[]
+                {
                     new { Name = "张三", Sex = 2 },
                     new { Name = "张三", Sex = 2 }
                 }),
@@ -570,7 +570,7 @@ namespace SQLBuilder
                 new UserInfo { Name = "张三", Sex = 2 }
             }.ToArray();
             Print(
-                SqlBuilder.Insert<UserInfo, object>(() => array),
+                SqlBuilder.Insert<UserInfo>(() => array),
                 "插入数据 用法6"
             );
 
@@ -580,13 +580,13 @@ namespace SQLBuilder
                 new { Name = "张三", Sex = 2 }
             }.ToArray();
             Print(
-                SqlBuilder.Insert<UserInfo, object>(() => array2),
+                SqlBuilder.Insert<UserInfo>(() => array2),
                 "插入数据 用法7"
             );
 
             Print(
-                SqlBuilder.Insert<Class, object>(() => new[]
-                 {
+                SqlBuilder.Insert<Class>(() => new[]
+                {
                     new Class { CityId = 2, UserId = 2, Name = "张三" },
                     new Class { CityId = 3, UserId = 3, Name = "李四" }
                 }),
@@ -594,8 +594,8 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Insert<Class, object>(() => new[]
-                 {
+                SqlBuilder.Insert<Class>(() => new[]
+                {
                     new { CityId = 2, UserId = 2, Name = "张三" },
                     new { CityId = 3, UserId = 3, Name = "李四" }
                 }),
@@ -608,12 +608,12 @@ namespace SQLBuilder
                 new { CityId = 3, UserId = 3, Name = "李四" }
             };
             Print(
-                SqlBuilder.Insert<Class, object>(() => data),
+                SqlBuilder.Insert<Class>(() => data),
                 "插入数据 用法10"
             );
 
             Print(
-              SqlBuilder.Insert<Student, object>(() => new Student
+              SqlBuilder.Insert<Student>(() => new Student
               {
                   Name = DateTime.Now.ToLongTimeString(),
                   Age = (new Random()).Next(1, 100)
@@ -627,17 +627,17 @@ namespace SQLBuilder
                 new UserInfo { Name = "张三", Sex = 2 }
             };
             Print(
-                SqlBuilder.Insert<UserInfo, object>(() => list.ToArray()),
+                SqlBuilder.Insert<UserInfo>(() => list.ToArray()),
                "插入数据 用法12"
             );
 
             Print(
-                SqlBuilder.Insert<UserInfo, object>(() => list, isEnableNullValue: false),
+                SqlBuilder.Insert<UserInfo>(() => list, isEnableNullValue: false),
                "插入数据 用法13"
             );
 
             Print(
-                SqlBuilder.Insert<UserInfo, object>(() => new List<UserInfo>
+                SqlBuilder.Insert<UserInfo>(() => new List<UserInfo>
                 {
                     new UserInfo{ Name = "张三", Sex = 2 },
                     new UserInfo { Name = "张三", Sex = 2 }
@@ -646,7 +646,7 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Insert<UserInfo, object>(() => new List<dynamic>
+                SqlBuilder.Insert<UserInfo>(() => new List<dynamic>
                 {
                     new { Name = "张三", Sex = 2 },
                     new { Name = "张三", Sex = 2 }

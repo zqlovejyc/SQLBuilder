@@ -134,10 +134,9 @@ namespace SQLBuilder
         /// <summary>
         /// Select
         /// </summary>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Select<S>(Expression<Func<T, S>> expression = null)
+        public SqlBuilderCore<T> Select(Expression<Func<T, object>> expression = null)
         {
             var sql = SelectParser(typeof(T));
             if (expression == null)
@@ -156,10 +155,9 @@ namespace SQLBuilder
         /// Select
         /// </summary>
         /// <typeparam name="T2">泛型类型2</typeparam>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Select<T2, S>(Expression<Func<T, T2, S>> expression = null)
+        public SqlBuilderCore<T> Select<T2>(Expression<Func<T, T2, object>> expression = null)
             where T2 : class
         {
             var sql = SelectParser(typeof(T), typeof(T2));
@@ -180,10 +178,9 @@ namespace SQLBuilder
         /// </summary>
         /// <typeparam name="T2">泛型类型2</typeparam>
         /// <typeparam name="T3">泛型类型3</typeparam>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Select<T2, T3, S>(Expression<Func<T, T2, T3, S>> expression = null)
+        public SqlBuilderCore<T> Select<T2, T3>(Expression<Func<T, T2, T3, object>> expression = null)
             where T2 : class
             where T3 : class
         {
@@ -206,10 +203,9 @@ namespace SQLBuilder
         /// <typeparam name="T2">泛型类型2</typeparam>
         /// <typeparam name="T3">泛型类型3</typeparam>
         /// <typeparam name="T4">泛型类型4</typeparam>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Select<T2, T3, T4, S>(Expression<Func<T, T2, T3, T4, S>> expression = null)
+        public SqlBuilderCore<T> Select<T2, T3, T4>(Expression<Func<T, T2, T3, T4, object>> expression = null)
             where T2 : class
             where T3 : class
             where T4 : class
@@ -234,10 +230,9 @@ namespace SQLBuilder
         /// <typeparam name="T3">泛型类型3</typeparam>
         /// <typeparam name="T4">泛型类型4</typeparam>
         /// <typeparam name="T5">泛型类型5</typeparam>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Select<T2, T3, T4, T5, S>(Expression<Func<T, T2, T3, T4, T5, S>> expression = null)
+        public SqlBuilderCore<T> Select<T2, T3, T4, T5>(Expression<Func<T, T2, T3, T4, T5, object>> expression = null)
             where T2 : class
             where T3 : class
             where T4 : class
@@ -264,10 +259,9 @@ namespace SQLBuilder
         /// <typeparam name="T4">泛型类型4</typeparam>
         /// <typeparam name="T5">泛型类型5</typeparam>
         /// <typeparam name="T6">泛型类型6</typeparam>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Select<T2, T3, T4, T5, T6, S>(Expression<Func<T, T2, T3, T4, T5, T6, S>> expression = null)
+        public SqlBuilderCore<T> Select<T2, T3, T4, T5, T6>(Expression<Func<T, T2, T3, T4, T5, T6, object>> expression = null)
             where T2 : class
             where T3 : class
             where T4 : class
@@ -296,10 +290,9 @@ namespace SQLBuilder
         /// <typeparam name="T5">泛型类型5</typeparam>
         /// <typeparam name="T6">泛型类型6</typeparam>
         /// <typeparam name="T7">泛型类型7</typeparam>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Select<T2, T3, T4, T5, T6, T7, S>(Expression<Func<T, T2, T3, T4, T5, T6, T7, S>> expression = null)
+        public SqlBuilderCore<T> Select<T2, T3, T4, T5, T6, T7>(Expression<Func<T, T2, T3, T4, T5, T6, T7, object>> expression = null)
             where T2 : class
             where T3 : class
             where T4 : class
@@ -330,10 +323,9 @@ namespace SQLBuilder
         /// <typeparam name="T6">泛型类型6</typeparam>
         /// <typeparam name="T7">泛型类型7</typeparam>
         /// <typeparam name="T8">泛型类型8</typeparam>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Select<T2, T3, T4, T5, T6, T7, T8, S>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, S>> expression = null)
+        public SqlBuilderCore<T> Select<T2, T3, T4, T5, T6, T7, T8>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, object>> expression = null)
             where T2 : class
             where T3 : class
             where T4 : class
@@ -366,10 +358,9 @@ namespace SQLBuilder
         /// <typeparam name="T7">泛型类型7</typeparam>
         /// <typeparam name="T8">泛型类型8</typeparam>
         /// <typeparam name="T9">泛型类型9</typeparam>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Select<T2, T3, T4, T5, T6, T7, T8, T9, S>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, S>> expression = null)
+        public SqlBuilderCore<T> Select<T2, T3, T4, T5, T6, T7, T8, T9>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, object>> expression = null)
             where T2 : class
             where T3 : class
             where T4 : class
@@ -404,10 +395,9 @@ namespace SQLBuilder
         /// <typeparam name="T8">泛型类型8</typeparam>
         /// <typeparam name="T9">泛型类型9</typeparam>
         /// <typeparam name="T10">泛型类型10</typeparam>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Select<T2, T3, T4, T5, T6, T7, T8, T9, T10, S>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, S>> expression = null)
+        public SqlBuilderCore<T> Select<T2, T3, T4, T5, T6, T7, T8, T9, T10>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, object>> expression = null)
             where T2 : class
             where T3 : class
             where T4 : class
@@ -743,10 +733,9 @@ namespace SQLBuilder
         /// <summary>
         /// GroupBy
         /// </summary>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> GroupBy<S>(Expression<Func<T, S>> expression)
+        public SqlBuilderCore<T> GroupBy(Expression<Func<T, object>> expression)
         {
             this._sqlPack += " GROUP BY ";
             SqlBuilderProvider.GroupBy(expression.Body, this._sqlPack);
@@ -758,11 +747,10 @@ namespace SQLBuilder
         /// <summary>
         /// OrderBy
         /// </summary>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <param name="orders">排序方式</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> OrderBy<S>(Expression<Func<T, S>> expression, params OrderType[] orders)
+        public SqlBuilderCore<T> OrderBy(Expression<Func<T, object>> expression, params OrderType[] orders)
         {
             this._sqlPack += " ORDER BY ";
             SqlBuilderProvider.OrderBy(expression.Body, this._sqlPack, orders);
@@ -884,11 +872,10 @@ namespace SQLBuilder
         /// <summary>
         /// Update
         /// </summary>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <param name="isEnableNullValue">是否对null值属性进行sql拼接操作，默认：是</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Update<S>(Expression<Func<S>> expression = null, bool isEnableNullValue = true)
+        public SqlBuilderCore<T> Update(Expression<Func<object>> expression = null, bool isEnableNullValue = true)
         {
             this._sqlPack.Clear();
             this._sqlPack.IsSingleTable = true;
@@ -903,11 +890,10 @@ namespace SQLBuilder
         /// <summary>
         /// Insert
         /// </summary>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <param name="isEnableNullValue">是否对null值属性进行sql拼接操作，默认：是</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Insert<S>(Expression<Func<S>> expression = null, bool isEnableNullValue = true)
+        public SqlBuilderCore<T> Insert(Expression<Func<object>> expression = null, bool isEnableNullValue = true)
         {
             this._sqlPack.Clear();
             this._sqlPack.IsSingleTable = true;
@@ -922,10 +908,9 @@ namespace SQLBuilder
         /// <summary>
         /// Max
         /// </summary>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Max<S>(Expression<Func<T, S>> expression)
+        public SqlBuilderCore<T> Max(Expression<Func<T, object>> expression)
         {
             this._sqlPack.Clear();
             this._sqlPack.IsSingleTable = true;
@@ -938,10 +923,9 @@ namespace SQLBuilder
         /// <summary>
         /// Min
         /// </summary>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Min<S>(Expression<Func<T, S>> expression)
+        public SqlBuilderCore<T> Min(Expression<Func<T, object>> expression)
         {
             this._sqlPack.Clear();
             this._sqlPack.IsSingleTable = true;
@@ -954,10 +938,9 @@ namespace SQLBuilder
         /// <summary>
         /// Avg
         /// </summary>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Avg<S>(Expression<Func<T, S>> expression)
+        public SqlBuilderCore<T> Avg(Expression<Func<T, object>> expression)
         {
             this._sqlPack.Clear();
             this._sqlPack.IsSingleTable = true;
@@ -970,10 +953,9 @@ namespace SQLBuilder
         /// <summary>
         /// Count
         /// </summary>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Count<S>(Expression<Func<T, S>> expression = null)
+        public SqlBuilderCore<T> Count(Expression<Func<T, object>> expression = null)
         {
             this._sqlPack.Clear();
             this._sqlPack.IsSingleTable = true;
@@ -993,10 +975,9 @@ namespace SQLBuilder
         /// <summary>
         /// Sum
         /// </summary>
-        /// <typeparam name="S">泛型类型</typeparam>
         /// <param name="expression">表达式树</param>
         /// <returns>SqlBuilderCore</returns>
-        public SqlBuilderCore<T> Sum<S>(Expression<Func<T, S>> expression)
+        public SqlBuilderCore<T> Sum(Expression<Func<T, object>> expression)
         {
             this._sqlPack.Clear();
             this._sqlPack.IsSingleTable = true;
