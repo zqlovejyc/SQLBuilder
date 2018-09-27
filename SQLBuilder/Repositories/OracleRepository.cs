@@ -2704,7 +2704,7 @@ namespace SQLBuilder.Repositories
             }
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"DSELECT COUNT(1) AS Total FROM ({sql}) AS T;SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,X.* FROM ({sql}) AS X) AS T WHERE RowNumber BETWEEN {(pageSize * (pageIndex - 1) + 1)} AND {(pageSize * pageIndex)};", parameter, Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"SELECT COUNT(1) AS Total FROM ({sql}) AS T;SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,X.* FROM ({sql}) AS X) AS T WHERE RowNumber BETWEEN {(pageSize * (pageIndex - 1) + 1)} AND {(pageSize * pageIndex)};", parameter, Transaction);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var list = await multiQuery?.ReadAsync<T>();
                 return (list, total);
@@ -2756,7 +2756,7 @@ namespace SQLBuilder.Repositories
             }
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"DSELECT COUNT(1) AS Total FROM ({sql}) AS T;SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,X.* FROM ({sql}) AS X) AS T WHERE RowNumber BETWEEN {(pageSize * (pageIndex - 1) + 1)} AND {(pageSize * pageIndex)};", dbParameter.ToDynamicParameters(), Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"SELECT COUNT(1) AS Total FROM ({sql}) AS T;SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,X.* FROM ({sql}) AS X) AS T WHERE RowNumber BETWEEN {(pageSize * (pageIndex - 1) + 1)} AND {(pageSize * pageIndex)};", dbParameter.ToDynamicParameters(), Transaction);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var list = await multiQuery?.ReadAsync<T>();
                 return (list, total);
