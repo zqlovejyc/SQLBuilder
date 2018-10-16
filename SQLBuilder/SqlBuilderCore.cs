@@ -1005,7 +1005,7 @@ namespace SQLBuilder
                     this._sqlPack.Sql.Replace("SELECT", $"SELECT TOP {topNumber}", this._sqlPack.Sql.ToString().IndexOf("SELECT"), 6);
                 }
             }
-            if (this._sqlPack.DatabaseType == DatabaseType.Oracle)
+            else if (this._sqlPack.DatabaseType == DatabaseType.Oracle)
             {
                 if (this._sqlPack.Sql.ToString().ToUpper().Contains("WHERE"))
                 {
@@ -1016,9 +1016,9 @@ namespace SQLBuilder
                     this._sqlPack.Sql.Append($" WHERE ROWNUM <= {topNumber}");
                 }
             }
-            if (this._sqlPack.DatabaseType == DatabaseType.MySQL || this._sqlPack.DatabaseType == DatabaseType.SQLite)
+            else if (this._sqlPack.DatabaseType == DatabaseType.MySQL || this._sqlPack.DatabaseType == DatabaseType.SQLite || this._sqlPack.DatabaseType == DatabaseType.PostgreSQL)
             {
-                this._sqlPack.Sql.Append($" LIMIT 0,{topNumber}");
+                this._sqlPack.Sql.Append($" LIMIT {topNumber} OFFSET 0");
             }
             return this;
         }
@@ -1046,7 +1046,7 @@ namespace SQLBuilder
             return this._sqlPack.GetTableName(typeof(T));
         }
         #endregion
-
+    
         #region GetTableKey
         /// <summary>
         /// 获取实体对应表的主键名称
