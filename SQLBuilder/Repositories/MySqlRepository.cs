@@ -38,7 +38,7 @@ namespace SQLBuilder.Repositories
     /// <summary>
     /// MySql仓储实现类
     /// </summary>
-    public class MySqlRepository : IRepository, IDisposable
+    public class MySqlRepository : IRepository
     {
         #region Constructor
         /// <summary>

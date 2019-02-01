@@ -38,7 +38,7 @@ namespace SQLBuilder.Repositories
     /// <summary>
     /// PostgreSQL仓储实现类
     /// </summary>
-    public class NpgsqlRepository : IRepository, IDisposable
+    public class NpgsqlRepository : IRepository
     {
         #region Constructor
         /// <summary>

@@ -38,7 +38,7 @@ namespace SQLBuilder.Repositories
     /// <summary>
     /// Oracle仓储实现类
     /// </summary>
-    public class OracleRepository : IRepository, IDisposable
+    public class OracleRepository : IRepository
     {
         #region Constructor
         /// <summary>
