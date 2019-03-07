@@ -139,6 +139,7 @@
     <None Include="Nuget\Zq.SQLBuilder.1.0.9.3.nupkg" />
     <None Include="Nuget\Zq.SQLBuilder.1.0.9.5.nupkg" />
     <None Include="Nuget\Zq.SQLBuilder.1.0.9.6.nupkg" />
+    <None Include="Nuget\Zq.SQLBuilder.1.0.9.7.nupkg" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
