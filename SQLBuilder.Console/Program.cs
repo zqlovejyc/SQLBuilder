@@ -73,7 +73,7 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Select<UserInfo>(u => u.Id).WithKey(2),
+                SqlBuilder.Select<UserInfo>(u => u.Id).WithKey(2,3),
                 "根据主键进行查询"
            );
 
@@ -443,7 +443,7 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Delete<UserInfo>().WithKey(2),
+                SqlBuilder.Delete<UserInfo>().WithKey(2,3),
                 "根据主键条件删除指定表记录1"
             );
             Print(
@@ -656,7 +656,7 @@ namespace SQLBuilder
             #endregion
 
             #region GetPrimaryKey
-            Print<UserInfo>(null, SqlBuilder.GetPrimaryKey<UserInfo>(), "GetPrimaryKey");
+            Print<UserInfo>(null, string.Join(",", SqlBuilder.GetPrimaryKey<UserInfo>()), "GetPrimaryKey");
             #endregion
 
             #region GetTableName
