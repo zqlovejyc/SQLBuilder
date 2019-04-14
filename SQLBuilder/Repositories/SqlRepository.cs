@@ -51,12 +51,21 @@ namespace SQLBuilder.Repositories
             ConnectionString = ConfigurationManager.ConnectionStrings[connString]?.ConnectionString?.Trim();
             if (string.IsNullOrEmpty(ConnectionString))
             {
+                ConnectionString = ConfigurationManager.AppSettings[connString]?.Trim();
+            }
+            else if (string.IsNullOrEmpty(ConnectionString))
+            {
                 ConnectionString = connString;
             }
         }
         #endregion
 
         #region Property
+        /// <summary>
+        /// 超时时长，默认240s
+        /// </summary>
+        public int CommandTimeout { get; set; } = 240;
+
         /// <summary>
         /// 数据库连接串
         /// </summary>
@@ -70,7 +79,7 @@ namespace SQLBuilder.Repositories
             get
             {
                 var dbconnection = new SqlConnection(ConnectionString);
-                dbconnection.Open();
+                if (dbconnection.State != ConnectionState.Open) dbconnection.Open();
                 return dbconnection;
             }
         }
@@ -89,10 +98,7 @@ namespace SQLBuilder.Repositories
         public IRepository BeginTrans()
         {
             var dbConnection = Connection;
-            if (dbConnection.State == ConnectionState.Closed)
-            {
-                dbConnection.Open();
-            }
+            if (dbConnection.State != ConnectionState.Open) dbConnection.Open();
             Transaction = dbConnection.BeginTransaction();
             return this;
         }
@@ -122,7 +128,7 @@ namespace SQLBuilder.Repositories
         /// </summary>
         public void Close()
         {
-            var dbConnection = Transaction?.Connection;
+            var dbConnection = Transaction?.Connection ?? Connection;
             if (dbConnection != null && dbConnection.State != ConnectionState.Closed)
             {
                 dbConnection.Close();
@@ -143,13 +149,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute(sql, transaction: Transaction);
+                result = Transaction.Connection.Execute(sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Execute(sql);
+                    result = connection.Execute(sql, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -166,13 +172,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute(sql, parameter, Transaction);
+                result = Transaction.Connection.Execute(sql, parameter, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Execute(sql, parameter);
+                    result = connection.Execute(sql, parameter, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -189,13 +195,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute(sql, dbParameter.ToDynamicParameters(), Transaction);
+                result = Transaction.Connection.Execute(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Execute(sql, dbParameter.ToDynamicParameters());
+                    result = connection.Execute(sql, dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -211,13 +217,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute(procName, transaction: Transaction, commandType: CommandType.StoredProcedure);
+                result = Transaction.Connection.Execute(procName, transaction: Transaction, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Execute(procName, commandType: CommandType.StoredProcedure);
+                    result = connection.Execute(procName, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -234,13 +240,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute(procName, parameter, Transaction, commandType: CommandType.StoredProcedure);
+                result = Transaction.Connection.Execute(procName, parameter, Transaction, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Execute(procName, parameter, commandType: CommandType.StoredProcedure);
+                    result = connection.Execute(procName, parameter, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -257,13 +263,13 @@ namespace SQLBuilder.Repositories
             IEnumerable<T> result = null;
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Query<T>(procName, parameter, Transaction, commandType: CommandType.StoredProcedure);
+                result = Transaction.Connection.Query<T>(procName, parameter, Transaction, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Query<T>(procName, parameter, commandType: CommandType.StoredProcedure);
+                    result = connection.Query<T>(procName, parameter, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -280,13 +286,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute(procName, dbParameter.ToDynamicParameters(), Transaction, commandType: CommandType.StoredProcedure);
+                result = Transaction.Connection.Execute(procName, dbParameter.ToDynamicParameters(), Transaction, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Execute(procName, dbParameter.ToDynamicParameters(), commandType: CommandType.StoredProcedure);
+                    result = connection.Execute(procName, dbParameter.ToDynamicParameters(), commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -304,13 +310,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync(sql, transaction: Transaction);
+                result = await Transaction.Connection.ExecuteAsync(sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.ExecuteAsync(sql);
+                    result = await connection.ExecuteAsync(sql, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -327,13 +333,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync(sql, parameter, Transaction);
+                result = await Transaction.Connection.ExecuteAsync(sql, parameter, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.ExecuteAsync(sql, parameter);
+                    result = await connection.ExecuteAsync(sql, parameter, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -350,13 +356,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync(sql, dbParameter.ToDynamicParameters(), Transaction);
+                result = await Transaction.Connection.ExecuteAsync(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.ExecuteAsync(sql, dbParameter.ToDynamicParameters());
+                    result = await connection.ExecuteAsync(sql, dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -372,13 +378,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync(procName, transaction: Transaction, commandType: CommandType.StoredProcedure);
+                result = await Transaction.Connection.ExecuteAsync(procName, transaction: Transaction, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.ExecuteAsync(procName, commandType: CommandType.StoredProcedure);
+                    result = await connection.ExecuteAsync(procName, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -395,13 +401,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync(procName, parameter, Transaction, commandType: CommandType.StoredProcedure);
+                result = await Transaction.Connection.ExecuteAsync(procName, parameter, Transaction, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.ExecuteAsync(procName, parameter, commandType: CommandType.StoredProcedure);
+                    result = await connection.ExecuteAsync(procName, parameter, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -418,13 +424,13 @@ namespace SQLBuilder.Repositories
             IEnumerable<T> result = null;
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.QueryAsync<T>(procName, parameter, Transaction, commandType: CommandType.StoredProcedure);
+                result = await Transaction.Connection.QueryAsync<T>(procName, parameter, Transaction, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.QueryAsync<T>(procName, parameter, commandType: CommandType.StoredProcedure);
+                    result = await connection.QueryAsync<T>(procName, parameter, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -441,13 +447,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync(procName, dbParameter.ToDynamicParameters(), Transaction, commandType: CommandType.StoredProcedure);
+                result = await Transaction.Connection.ExecuteAsync(procName, dbParameter.ToDynamicParameters(), Transaction, commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.ExecuteAsync(procName, dbParameter.ToDynamicParameters(), commandType: CommandType.StoredProcedure);
+                    result = await connection.ExecuteAsync(procName, dbParameter.ToDynamicParameters(), commandType: CommandType.StoredProcedure, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -469,13 +475,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Insert<T>(() => entity, isEnableNullValue: false);
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction);
+                result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Execute(builder.Sql, builder.DynamicParameters);
+                    result = connection.Execute(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -531,13 +537,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Insert<T>(() => entity, isEnableNullValue: false);
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction);
+                result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.ExecuteAsync(builder.Sql, builder.DynamicParameters);
+                    result = await connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -594,13 +600,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Delete<T>();
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute(builder.Sql, transaction: Transaction);
+                result = Transaction.Connection.Execute(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Execute(builder.Sql);
+                    result = connection.Execute(builder.Sql, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -618,13 +624,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Delete<T>().WithKey(entity);
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction);
+                result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Execute(builder.Sql, builder.DynamicParameters);
+                    result = connection.Execute(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -678,13 +684,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Delete<T>().Where(predicate);
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction);
+                result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    result = dbConnection.Execute(builder.Sql, builder.DynamicParameters);
+                    result = dbConnection.Execute(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -706,13 +712,13 @@ namespace SQLBuilder.Repositories
                 var builder = Sql.Delete<T>().WithKey(keyValues);
                 if (Transaction?.Connection != null)
                 {
-                    result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction);
+                    result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 }
                 else
                 {
                     using (var connection = Connection)
                     {
-                        result = connection.Execute(builder.Sql, builder.DynamicParameters);
+                        result = connection.Execute(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                     }
                 }
             }
@@ -758,13 +764,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute($"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=@PropertyValue", new { PropertyValue = propertyValue }, Transaction);
+                result = Transaction.Connection.Execute($"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=@PropertyValue", new { PropertyValue = propertyValue }, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Execute($"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=@PropertyValue", new { PropertyValue = propertyValue });
+                    result = connection.Execute($"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=@PropertyValue", new { PropertyValue = propertyValue }, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -783,13 +789,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Delete<T>();
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync(builder.Sql, transaction: Transaction);
+                result = await Transaction.Connection.ExecuteAsync(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.ExecuteAsync(builder.Sql);
+                    result = await connection.ExecuteAsync(builder.Sql, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -807,13 +813,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Delete<T>().WithKey(entity);
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction);
+                result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.ExecuteAsync(builder.Sql, builder.DynamicParameters);
+                    result = await connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -867,13 +873,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Delete<T>().Where(predicate);
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction);
+                result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    result = await dbConnection.ExecuteAsync(builder.Sql, builder.DynamicParameters);
+                    result = await dbConnection.ExecuteAsync(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -895,13 +901,13 @@ namespace SQLBuilder.Repositories
                 var builder = Sql.Delete<T>().WithKey(keyValues);
                 if (Transaction?.Connection != null)
                 {
-                    result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction);
+                    result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 }
                 else
                 {
                     using (var connection = Connection)
                     {
-                        result = await connection.ExecuteAsync(builder.Sql, builder.DynamicParameters);
+                        result = await connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                     }
                 }
             }
@@ -947,13 +953,13 @@ namespace SQLBuilder.Repositories
             var result = 0;
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync($"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=@PropertyValue", new { PropertyValue = propertyValue }, Transaction);
+                result = await Transaction.Connection.ExecuteAsync($"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=@PropertyValue", new { PropertyValue = propertyValue }, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.ExecuteAsync($"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=@PropertyValue", new { PropertyValue = propertyValue });
+                    result = await connection.ExecuteAsync($"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=@PropertyValue", new { PropertyValue = propertyValue }, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -975,13 +981,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Update<T>(() => entity, isEnableNullValue: false).WithKey(entity);
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction);
+                result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Execute(builder.Sql, builder.DynamicParameters);
+                    result = connection.Execute(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -1036,13 +1042,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Update<T>(entity, isEnableNullValue: false).Where(predicate);
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction);
+                result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    result = dbConnection.Execute(builder.Sql, builder.DynamicParameters);
+                    result = dbConnection.Execute(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -1062,13 +1068,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Update<T>(() => entity, isEnableNullValue: false).WithKey(entity);
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction);
+                result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.ExecuteAsync(builder.Sql, builder.DynamicParameters);
+                    result = await connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -1123,13 +1129,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Update<T>(entity, isEnableNullValue: false).Where(predicate);
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction);
+                result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    result = await dbConnection.ExecuteAsync(builder.Sql, builder.DynamicParameters);
+                    result = await dbConnection.ExecuteAsync(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -1159,13 +1165,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.QueryFirstOrDefault<string>(sql, parameter, Transaction);
+                return Transaction.Connection.QueryFirstOrDefault<string>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.QueryFirstOrDefault<string>(sql, parameter);
+                    return dbConnection.QueryFirstOrDefault<string>(sql, parameter, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1180,13 +1186,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.QueryFirstOrDefault<string>(sql, dbParameter.ToDynamicParameters(), Transaction);
+                return Transaction.Connection.QueryFirstOrDefault<string>(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.QueryFirstOrDefault<string>(sql, dbParameter.ToDynamicParameters());
+                    return dbConnection.QueryFirstOrDefault<string>(sql, dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1213,13 +1219,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryFirstOrDefaultAsync<string>(sql, parameter, Transaction);
+                return await Transaction.Connection.QueryFirstOrDefaultAsync<string>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryFirstOrDefaultAsync<string>(sql, parameter);
+                    return await dbConnection.QueryFirstOrDefaultAsync<string>(sql, parameter, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1234,13 +1240,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryFirstOrDefaultAsync<string>(sql, dbParameter.ToDynamicParameters(), Transaction);
+                return await Transaction.Connection.QueryFirstOrDefaultAsync<string>(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryFirstOrDefaultAsync<string>(sql, dbParameter.ToDynamicParameters());
+                    return await dbConnection.QueryFirstOrDefaultAsync<string>(sql, dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1260,13 +1266,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>().WithKey(keyValues);
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters);
+                    return dbConnection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1276,20 +1282,20 @@ namespace SQLBuilder.Repositories
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
         /// <param name="selector">linq选择指定列，null选择全部</param>
-        /// <param name="keyValue">主键值，多个值表示多主键</param>
+        /// <param name="keyValue">主键值</param>
         /// <returns>返回实体</returns>
         public T FindEntity<T>(Expression<Func<T, object>> selector, object keyValue) where T : class
         {
             var builder = Sql.Select<T>(selector).WithKey(keyValue);
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters);
+                    return dbConnection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1305,13 +1311,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>().Where(predicate);
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters);
+                    return dbConnection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1328,13 +1334,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector).Where(predicate);
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters);
+                    return dbConnection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1349,13 +1355,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.QueryFirstOrDefault<T>(sql, transaction: Transaction);
+                return Transaction.Connection.QueryFirstOrDefault<T>(sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.QueryFirstOrDefault<T>(sql);
+                    return dbConnection.QueryFirstOrDefault<T>(sql, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1371,13 +1377,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.QueryFirstOrDefault<T>(sql, parameter, Transaction);
+                return Transaction.Connection.QueryFirstOrDefault<T>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.QueryFirstOrDefault<T>(sql, parameter);
+                    return dbConnection.QueryFirstOrDefault<T>(sql, parameter, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1393,13 +1399,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.QueryFirstOrDefault<T>(sql, dbParameter.ToDynamicParameters(), Transaction);
+                return Transaction.Connection.QueryFirstOrDefault<T>(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.QueryFirstOrDefault<T>(sql, dbParameter.ToDynamicParameters());
+                    return dbConnection.QueryFirstOrDefault<T>(sql, dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1417,13 +1423,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>().WithKey(keyValues);
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters);
+                    return await dbConnection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1440,13 +1446,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector).WithKey(keyValue);
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters);
+                    return await dbConnection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1462,13 +1468,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>().Where(predicate);
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters);
+                    return await dbConnection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1485,13 +1491,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector).Where(predicate);
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters);
+                    return await dbConnection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1506,13 +1512,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(sql, transaction: Transaction);
+                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryFirstOrDefaultAsync<T>(sql);
+                    return await dbConnection.QueryFirstOrDefaultAsync<T>(sql, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1528,13 +1534,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(sql, parameter, Transaction);
+                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryFirstOrDefaultAsync<T>(sql, parameter);
+                    return await dbConnection.QueryFirstOrDefaultAsync<T>(sql, parameter, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1550,13 +1556,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(sql, dbParameter.ToDynamicParameters(), Transaction);
+                return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryFirstOrDefaultAsync<T>(sql, dbParameter.ToDynamicParameters());
+                    return await dbConnection.QueryFirstOrDefaultAsync<T>(sql, dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1575,13 +1581,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>();
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction).AsQueryable();
+                return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout).AsQueryable();
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.Query<T>(builder.Sql).AsQueryable();
+                    return dbConnection.Query<T>(builder.Sql, commandTimeout: CommandTimeout).AsQueryable();
                 }
             }
         }
@@ -1597,13 +1603,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector);
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction).AsQueryable();
+                return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout).AsQueryable();
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.Query<T>(builder.Sql).AsQueryable();
+                    return dbConnection.Query<T>(builder.Sql, commandTimeout: CommandTimeout).AsQueryable();
                 }
             }
         }
@@ -1619,13 +1625,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>().Where(predicate);
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction).AsQueryable();
+                return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout).AsQueryable();
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.Query<T>(builder.Sql, builder.DynamicParameters).AsQueryable();
+                    return dbConnection.Query<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout).AsQueryable();
                 }
             }
         }
@@ -1642,13 +1648,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector).Where(predicate);
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction).AsQueryable();
+                return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout).AsQueryable();
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.Query<T>(builder.Sql, builder.DynamicParameters).AsQueryable();
+                    return dbConnection.Query<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout).AsQueryable();
                 }
             }
         }
@@ -1665,14 +1671,14 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>();
             if (Transaction?.Connection != null)
             {
-                var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
+                var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
                 return query.AsQueryable();
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    var query = await dbConnection.QueryAsync<T>(builder.Sql);
+                    var query = await dbConnection.QueryAsync<T>(builder.Sql, commandTimeout: CommandTimeout);
                     return query.AsQueryable();
                 }
             }
@@ -1689,14 +1695,14 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector);
             if (Transaction?.Connection != null)
             {
-                var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
+                var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
                 return query.AsQueryable();
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    var query = await dbConnection.QueryAsync<T>(builder.Sql);
+                    var query = await dbConnection.QueryAsync<T>(builder.Sql, commandTimeout: CommandTimeout);
                     return query.AsQueryable();
                 }
             }
@@ -1713,14 +1719,14 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>().Where(predicate);
             if (Transaction?.Connection != null)
             {
-                var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 return query.AsQueryable();
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    var query = await dbConnection.QueryAsync<T>(builder.Sql, builder.DynamicParameters);
+                    var query = await dbConnection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                     return query.AsQueryable();
                 }
             }
@@ -1738,14 +1744,14 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector).Where(predicate);
             if (Transaction?.Connection != null)
             {
-                var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 return query.AsQueryable();
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    var query = await dbConnection.QueryAsync<T>(builder.Sql, builder.DynamicParameters);
+                    var query = await dbConnection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                     return query.AsQueryable();
                 }
             }
@@ -1765,13 +1771,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>();
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction);
+                return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.Query<T>(builder.Sql);
+                    return dbConnection.Query<T>(builder.Sql, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1787,13 +1793,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector);
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction);
+                return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.Query<T>(builder.Sql);
+                    return dbConnection.Query<T>(builder.Sql, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1809,13 +1815,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>().OrderBy(o => keySelector(o));
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction);
+                return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.Query<T>(builder.Sql);
+                    return dbConnection.Query<T>(builder.Sql, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1832,13 +1838,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector).OrderBy(o => keySelector(o));
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction);
+                return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.Query<T>(builder.Sql);
+                    return dbConnection.Query<T>(builder.Sql, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1854,13 +1860,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>().Where(predicate);
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.Query<T>(builder.Sql, builder.DynamicParameters);
+                    return dbConnection.Query<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1877,13 +1883,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector).Where(predicate);
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.Query<T>(builder.Sql, builder.DynamicParameters);
+                    return dbConnection.Query<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1910,13 +1916,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.Query<T>(sql, parameter, Transaction);
+                return Transaction.Connection.Query<T>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.Query<T>(sql, parameter);
+                    return dbConnection.Query<T>(sql, parameter, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1932,13 +1938,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.Query<T>(sql, dbParameter.ToDynamicParameters(), Transaction);
+                return Transaction.Connection.Query<T>(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.Query<T>(sql, dbParameter.ToDynamicParameters());
+                    return dbConnection.Query<T>(sql, dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -1973,10 +1979,10 @@ namespace SQLBuilder.Repositories
             }
             var begin = (pageIndex - 1) * pageSize + 1;
             var end = pageIndex * pageSize;
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, Transaction);
+                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                 var list = multiQuery?.Read<T>();
                 return (list, total);
@@ -1985,7 +1991,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters);
+                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, commandTimeout: CommandTimeout);
                     var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                     var list = multiQuery?.Read<T>();
                     return (list, total);
@@ -2024,10 +2030,10 @@ namespace SQLBuilder.Repositories
             }
             var begin = (pageIndex - 1) * pageSize + 1;
             var end = pageIndex * pageSize;
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, Transaction);
+                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                 var list = multiQuery?.Read<T>();
                 return (list, total);
@@ -2036,7 +2042,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters);
+                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, commandTimeout: CommandTimeout);
                     var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                     var list = multiQuery?.Read<T>();
                     return (list, total);
@@ -2076,10 +2082,10 @@ namespace SQLBuilder.Repositories
             }
             var begin = (pageIndex - 1) * pageSize + 1;
             var end = pageIndex * pageSize;
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, Transaction);
+                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                 var list = multiQuery?.Read<T>();
                 return (list, total);
@@ -2088,7 +2094,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters);
+                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, commandTimeout: CommandTimeout);
                     var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                     var list = multiQuery?.Read<T>();
                     return (list, total);
@@ -2146,10 +2152,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction);
+                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction, commandTimeout: CommandTimeout);
                 var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                 var list = multiQuery?.Read<T>();
                 return (list, total);
@@ -2158,7 +2164,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter);
+                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, commandTimeout: CommandTimeout);
                     var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                     var list = multiQuery?.Read<T>();
                     return (list, total);
@@ -2201,10 +2207,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction);
+                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                 var list = multiQuery?.Read<T>();
                 return (list, total);
@@ -2213,7 +2219,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters());
+                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                     var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                     var list = multiQuery?.Read<T>();
                     return (list, total);
@@ -2256,10 +2262,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction);
+                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction, commandTimeout: CommandTimeout);
                 var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                 var list = multiQuery?.Read<T>();
                 return (list, total);
@@ -2268,7 +2274,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter);
+                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, commandTimeout: CommandTimeout);
                     var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                     var list = multiQuery?.Read<T>();
                     return (list, total);
@@ -2311,10 +2317,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction);
+                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                 var list = multiQuery?.Read<T>();
                 return (list, total);
@@ -2323,7 +2329,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters());
+                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                     var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                     var list = multiQuery?.Read<T>();
                     return (list, total);
@@ -2343,13 +2349,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>();
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
+                return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryAsync<T>(builder.Sql);
+                    return await dbConnection.QueryAsync<T>(builder.Sql, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -2365,13 +2371,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector);
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
+                return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryAsync<T>(builder.Sql);
+                    return await dbConnection.QueryAsync<T>(builder.Sql, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -2387,13 +2393,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>().OrderBy(o => keySelector(o));
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
+                return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryAsync<T>(builder.Sql);
+                    return await dbConnection.QueryAsync<T>(builder.Sql, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -2410,13 +2416,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector).OrderBy(o => keySelector(o));
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction);
+                return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryAsync<T>(builder.Sql);
+                    return await dbConnection.QueryAsync<T>(builder.Sql, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -2432,13 +2438,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>().Where(predicate);
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                return await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryAsync<T>(builder.Sql, builder.DynamicParameters);
+                    return await dbConnection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -2455,13 +2461,13 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Select<T>(selector).Where(predicate);
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction);
+                return await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryAsync<T>(builder.Sql, builder.DynamicParameters);
+                    return await dbConnection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -2488,13 +2494,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryAsync<T>(sql, parameter, Transaction);
+                return await Transaction.Connection.QueryAsync<T>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryAsync<T>(sql, parameter);
+                    return await dbConnection.QueryAsync<T>(sql, parameter, commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -2510,13 +2516,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return await Transaction.Connection.QueryAsync<T>(sql, dbParameter.ToDynamicParameters(), Transaction);
+                return await Transaction.Connection.QueryAsync<T>(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return await dbConnection.QueryAsync<T>(sql, dbParameter.ToDynamicParameters());
+                    return await dbConnection.QueryAsync<T>(sql, dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                 }
             }
         }
@@ -2551,10 +2557,10 @@ namespace SQLBuilder.Repositories
             }
             var begin = (pageIndex - 1) * pageSize + 1;
             var end = pageIndex * pageSize;
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var list = await multiQuery?.ReadAsync<T>();
                 return (list, total);
@@ -2563,7 +2569,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters);
+                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, commandTimeout: CommandTimeout);
                     var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                     var list = await multiQuery?.ReadAsync<T>();
                     return (list, total);
@@ -2602,10 +2608,10 @@ namespace SQLBuilder.Repositories
             }
             var begin = (pageIndex - 1) * pageSize + 1;
             var end = pageIndex * pageSize;
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var list = await multiQuery?.ReadAsync<T>();
                 return (list, total);
@@ -2614,7 +2620,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters);
+                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, commandTimeout: CommandTimeout);
                     var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                     var list = await multiQuery?.ReadAsync<T>();
                     return (list, total);
@@ -2654,10 +2660,10 @@ namespace SQLBuilder.Repositories
             }
             var begin = (pageIndex - 1) * pageSize + 1;
             var end = pageIndex * pageSize;
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var list = await multiQuery?.ReadAsync<T>();
                 return (list, total);
@@ -2666,7 +2672,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters);
+                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({builder.Sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", builder.DynamicParameters, commandTimeout: CommandTimeout);
                     var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                     var list = await multiQuery?.ReadAsync<T>();
                     return (list, total);
@@ -2724,10 +2730,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction, commandTimeout: CommandTimeout);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var list = await multiQuery?.ReadAsync<T>();
                 return (list, total);
@@ -2736,7 +2742,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter);
+                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, commandTimeout: CommandTimeout);
                     var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                     var list = await multiQuery?.ReadAsync<T>();
                     return (list, total);
@@ -2779,10 +2785,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var list = await multiQuery?.ReadAsync<T>();
                 return (list, total);
@@ -2791,7 +2797,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters());
+                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                     var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                     var list = await multiQuery?.ReadAsync<T>();
                     return (list, total);
@@ -2834,10 +2840,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction, commandTimeout: CommandTimeout);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var list = await multiQuery?.ReadAsync<T>();
                 return (list, total);
@@ -2846,7 +2852,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter);
+                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, commandTimeout: CommandTimeout);
                     var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                     var list = await multiQuery?.ReadAsync<T>();
                     return (list, total);
@@ -2889,10 +2895,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var list = await multiQuery?.ReadAsync<T>();
                 return (list, total);
@@ -2901,7 +2907,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters());
+                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                     var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                     var list = await multiQuery?.ReadAsync<T>();
                     return (list, total);
@@ -2933,13 +2939,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.ExecuteReader(sql, parameter, Transaction).ToDataTable();
+                return Transaction.Connection.ExecuteReader(sql, parameter, Transaction, commandTimeout: CommandTimeout).ToDataTable();
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.ExecuteReader(sql, parameter).ToDataTable();
+                    return dbConnection.ExecuteReader(sql, parameter, commandTimeout: CommandTimeout).ToDataTable();
                 }
             }
         }
@@ -2954,13 +2960,13 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                return Transaction.Connection.ExecuteReader(sql, dbParameter.ToDynamicParameters(), Transaction).ToDataTable();
+                return Transaction.Connection.ExecuteReader(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout).ToDataTable();
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    return dbConnection.ExecuteReader(sql, dbParameter.ToDynamicParameters()).ToDataTable();
+                    return dbConnection.ExecuteReader(sql, dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout).ToDataTable();
                 }
             }
         }
@@ -3013,10 +3019,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction);
+                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction, commandTimeout: CommandTimeout);
                 var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                 var table = multiQuery?.Read()?.ToList()?.ToDataTable();
                 table?.Columns?.Remove("RowNumber");
@@ -3026,7 +3032,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter);
+                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, commandTimeout: CommandTimeout);
                     var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                     var table = multiQuery?.Read()?.ToList()?.ToDataTable();
                     table?.Columns?.Remove("RowNumber");
@@ -3069,10 +3075,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction);
+                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                 var table = multiQuery?.Read()?.ToList()?.ToDataTable();
                 table?.Columns?.Remove("RowNumber");
@@ -3082,7 +3088,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters());
+                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                     var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                     var table = multiQuery?.Read()?.ToList()?.ToDataTable();
                     table?.Columns?.Remove("RowNumber");
@@ -3125,10 +3131,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND RowNumber {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction);
+                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND RowNumber {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction, commandTimeout: CommandTimeout);
                 var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                 var table = multiQuery?.Read()?.ToList()?.ToDataTable();
                 table?.Columns?.Remove("RowNumber");
@@ -3138,7 +3144,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter);
+                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, commandTimeout: CommandTimeout);
                     var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                     var table = multiQuery?.Read()?.ToList()?.ToDataTable();
                     table?.Columns?.Remove("RowNumber");
@@ -3181,10 +3187,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND RowNumber {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction);
+                var multiQuery = Transaction.Connection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND RowNumber {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                 var table = multiQuery?.Read()?.ToList()?.ToDataTable();
                 table?.Columns?.Remove("RowNumber");
@@ -3194,7 +3200,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters());
+                    var multiQuery = dbConnection.QueryMultiple($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                     var total = multiQuery?.ReadFirstOrDefault<long>() ?? 0;
                     var table = multiQuery?.Read()?.ToList()?.ToDataTable();
                     table?.Columns?.Remove("RowNumber");
@@ -3225,14 +3231,14 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                var reader = await Transaction.Connection.ExecuteReaderAsync(sql, parameter, Transaction);
+                var reader = await Transaction.Connection.ExecuteReaderAsync(sql, parameter, Transaction, commandTimeout: CommandTimeout);
                 return reader.ToDataTable();
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    var reader = await dbConnection.ExecuteReaderAsync(sql, parameter);
+                    var reader = await dbConnection.ExecuteReaderAsync(sql, parameter, commandTimeout: CommandTimeout);
                     return reader.ToDataTable();
                 }
             }
@@ -3248,14 +3254,14 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection != null)
             {
-                var reader = await Transaction.Connection.ExecuteReaderAsync(sql, dbParameter.ToDynamicParameters(), Transaction);
+                var reader = await Transaction.Connection.ExecuteReaderAsync(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 return reader.ToDataTable();
             }
             else
             {
                 using (var dbConnection = Connection)
                 {
-                    var reader = await dbConnection.ExecuteReaderAsync(sql, dbParameter.ToDynamicParameters());
+                    var reader = await dbConnection.ExecuteReaderAsync(sql, dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                     return reader.ToDataTable();
                 }
             }
@@ -3309,10 +3315,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction, commandTimeout: CommandTimeout);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var reader = await multiQuery?.ReadAsync();
                 var table = reader?.ToList()?.ToDataTable();
@@ -3323,7 +3329,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter);
+                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, commandTimeout: CommandTimeout);
                     var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                     var reader = await multiQuery?.ReadAsync();
                     var table = reader?.ToList()?.ToDataTable();
@@ -3367,10 +3373,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var reader = await multiQuery?.ReadAsync();
                 var table = reader?.ToList()?.ToDataTable();
@@ -3381,7 +3387,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters());
+                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};SELECT * INTO #TEMPORARY_{guid} FROM ({sql}) AS T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};SELECT * FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber, * FROM #TEMPORARY_{guid}) AS N WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                     var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                     var reader = await multiQuery?.ReadAsync();
                     var table = reader?.ToList()?.ToDataTable();
@@ -3425,10 +3431,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, Transaction, commandTimeout: CommandTimeout);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var reader = await multiQuery?.ReadAsync();
                 var table = reader?.ToList()?.ToDataTable();
@@ -3439,7 +3445,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter);
+                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", parameter, commandTimeout: CommandTimeout);
                     var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                     var reader = await multiQuery?.ReadAsync();
                     var table = reader?.ToList()?.ToDataTable();
@@ -3483,10 +3489,10 @@ namespace SQLBuilder.Repositories
             {
                 orderBy = "ORDER BY (SELECT 0)";
             }
-            var guid = Guid.NewGuid().ToString().Replace("-", "");
+            var guid = Guid.NewGuid().ToString().Replace("-", "").ToUpper();
             if (Transaction?.Connection != null)
             {
-                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction);
+                var multiQuery = await Transaction.Connection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                 var reader = await multiQuery?.ReadAsync();
                 var table = reader?.ToList()?.ToDataTable();
@@ -3497,7 +3503,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters());
+                    var multiQuery = await dbConnection.QueryMultipleAsync($"IF OBJECT_ID(N'TEMPDB..#TEMPORARY_{guid}') IS NOT NULL DROP TABLE #TEMPORARY_{guid};{sql} SELECT * INTO #TEMPORARY_{guid} FROM T;SELECT COUNT(1) AS Total FROM #TEMPORARY_{guid};WITH T AS (SELECT * FROM #TEMPORARY_{guid}),R AS (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,* FROM T) SELECT * FROM R  WHERE RowNumber BETWEEN {begin} AND {end};DROP TABLE #TEMPORARY_{guid};", dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                     var total = await multiQuery?.ReadFirstOrDefaultAsync<long>();
                     var reader = await multiQuery?.ReadAsync();
                     var table = reader?.ToList()?.ToDataTable();
@@ -3532,7 +3538,7 @@ namespace SQLBuilder.Repositories
             var list = new List<IEnumerable<dynamic>>();
             if (Transaction?.Connection != null)
             {
-                var result = Transaction.Connection.QueryMultiple(sql, parameter, Transaction);
+                var result = Transaction.Connection.QueryMultiple(sql, parameter, Transaction, commandTimeout: CommandTimeout);
                 while (result?.IsConsumed == false)
                 {
                     list.Add(result.Read());
@@ -3542,7 +3548,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var result = dbConnection.QueryMultiple(sql, parameter);
+                    var result = dbConnection.QueryMultiple(sql, parameter, commandTimeout: CommandTimeout);
                     while (result?.IsConsumed == false)
                     {
                         list.Add(result.Read());
@@ -3563,7 +3569,7 @@ namespace SQLBuilder.Repositories
             var list = new List<IEnumerable<dynamic>>();
             if (Transaction?.Connection != null)
             {
-                var result = Transaction.Connection.QueryMultiple(sql, dbParameter.ToDynamicParameters(), Transaction);
+                var result = Transaction.Connection.QueryMultiple(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 while (result?.IsConsumed == false)
                 {
                     list.Add(result.Read());
@@ -3573,7 +3579,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var result = dbConnection.QueryMultiple(sql, dbParameter.ToDynamicParameters());
+                    var result = dbConnection.QueryMultiple(sql, dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                     while (result?.IsConsumed == false)
                     {
                         list.Add(result.Read());
@@ -3606,7 +3612,7 @@ namespace SQLBuilder.Repositories
             var list = new List<IEnumerable<dynamic>>();
             if (Transaction?.Connection != null)
             {
-                var result = await Transaction.Connection.QueryMultipleAsync(sql, parameter, Transaction);
+                var result = await Transaction.Connection.QueryMultipleAsync(sql, parameter, Transaction, commandTimeout: CommandTimeout);
                 while (result?.IsConsumed == false)
                 {
                     list.Add(await result.ReadAsync());
@@ -3616,7 +3622,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var result = await dbConnection.QueryMultipleAsync(sql, parameter);
+                    var result = await dbConnection.QueryMultipleAsync(sql, parameter, commandTimeout: CommandTimeout);
                     while (result?.IsConsumed == false)
                     {
                         list.Add(await result.ReadAsync());
@@ -3637,7 +3643,7 @@ namespace SQLBuilder.Repositories
             var list = new List<IEnumerable<dynamic>>();
             if (Transaction?.Connection != null)
             {
-                var result = await Transaction.Connection.QueryMultipleAsync(sql, dbParameter.ToDynamicParameters(), Transaction);
+                var result = await Transaction.Connection.QueryMultipleAsync(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 while (result?.IsConsumed == false)
                 {
                     list.Add(await result.ReadAsync());
@@ -3647,7 +3653,7 @@ namespace SQLBuilder.Repositories
             {
                 using (var dbConnection = Connection)
                 {
-                    var result = await dbConnection.QueryMultipleAsync(sql, dbParameter.ToDynamicParameters());
+                    var result = await dbConnection.QueryMultipleAsync(sql, dbParameter.ToDynamicParameters(), commandTimeout: CommandTimeout);
                     while (result?.IsConsumed == false)
                     {
                         list.Add(await result.ReadAsync());
