@@ -73,7 +73,7 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Select<UserInfo>(u => u.Id).WithKey(2,3),
+                SqlBuilder.Select<UserInfo>(u => u.Id).WithKey(2, 3),
                 "根据主键进行查询"
            );
 
@@ -443,11 +443,11 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Delete<UserInfo>().WithKey(2,3),
+                SqlBuilder.Delete<UserInfo>().WithKey(2, 3),
                 "根据主键条件删除指定表记录1"
             );
             Print(
-                SqlBuilder.Delete<UserInfo>().WithKey(new UserInfo { Id = 2 }),
+                SqlBuilder.Delete<UserInfo>().WithKey(new UserInfo { Id = 2, Sex = 1 }),
                 "根据主键条件删除指定表记录2"
             );
 
