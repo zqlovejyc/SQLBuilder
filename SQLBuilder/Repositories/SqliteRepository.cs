@@ -71,10 +71,24 @@ namespace SQLBuilder.Repositories
                     if (_dbConnection.State != ConnectionState.Open)
                         _dbConnection.Open();
                 }
-                //DbConnection被using后连接字符串被置为空
-                else if (_dbConnection.ConnectionString.IsNullOrEmpty())
+                else
                 {
-                    _dbConnection.ConnectionString = ConnectionString;
+                    try
+                    {
+                        /***
+                         * 判断DbConnection被using后连接字符串是否被置为空
+                         * 注意：Framework版本Sqlite数据库连接对象using后无法再次访问，否则抛出无法访问已释放的对象异常，.Net Core版本Sqlite则可以正常访问。
+                         */
+                        if (_dbConnection.ConnectionString.IsNullOrEmpty())
+                            _dbConnection.ConnectionString = ConnectionString;
+                    }
+                    catch
+                    {
+                        //重新创建数据库连接对象
+                        _dbConnection = new SQLiteConnection(ConnectionString);
+                        if (_dbConnection.State != ConnectionState.Open)
+                            _dbConnection.Open();
+                    }
                 }
                 return _dbConnection;
             }
