@@ -42,7 +42,7 @@ namespace SQLBuilder.Repositories
     {
         #region Field
         /// <summary>
-        /// 私有数据库连接对象
+        /// 事务数据库连接对象
         /// </summary>
         private DbConnection _dbConnection;
         #endregion
@@ -65,36 +65,10 @@ namespace SQLBuilder.Repositories
         {
             get
             {
-                if (_dbConnection == null)
-                {
-                    _dbConnection = new SQLiteConnection(ConnectionString);
-                    if (_dbConnection.State != ConnectionState.Open)
-                        _dbConnection.Open();
-                }
-                else
-                {
-                    try
-                    {
-                        /***
-                         * 判断DbConnection被using后连接字符串是否被置为空
-                         * 注意：Framework版本Sqlite数据库连接对象using后无法再次访问，否则抛出无法访问已释放的对象异常，.Net Core版本Sqlite则可以正常访问。
-                         */
-                        if (_dbConnection.ConnectionString.IsNullOrEmpty())
-                            _dbConnection.ConnectionString = ConnectionString;
-                    }
-                    catch
-                    {
-                        //重新创建数据库连接对象
-                        _dbConnection = new SQLiteConnection(ConnectionString);
-                        if (_dbConnection.State != ConnectionState.Open)
-                            _dbConnection.Open();
-                    }
-                }
-                return _dbConnection;
-            }
-            set
-            {
-                _dbConnection = value;
+                var dbConnection = new SQLiteConnection(ConnectionString);
+                if (dbConnection.State != ConnectionState.Open)
+                    dbConnection.Open();
+                return dbConnection;
             }
         }
 
@@ -127,9 +101,8 @@ namespace SQLBuilder.Repositories
         /// <returns>IRepository</returns>
         public IRepository BeginTrans()
         {
-            if (Connection.State != ConnectionState.Open)
-                Connection.Open();
-            Transaction = Connection.BeginTransaction();
+            _dbConnection = Connection;
+            Transaction = _dbConnection.BeginTransaction();
             return this;
         }
 
@@ -158,8 +131,8 @@ namespace SQLBuilder.Repositories
         /// </summary>
         public void Close()
         {
-            if (Connection.State != ConnectionState.Closed)
-                Connection.Close();
+            _dbConnection?.Close();
+            _dbConnection?.Dispose();
             Transaction = null;
         }
         #endregion

@@ -104,26 +104,6 @@
   <ItemGroup />
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.6.0.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.6.1.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.6.2.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.6.3.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.6.4.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.6.5.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.6.6.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.6.7.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.6.8.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.6.9.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.7.0.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.7.1.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.7.2.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.7.3.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.7.4.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.7.5.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.7.6.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.7.7.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.7.8.nupkg" />
-    <None Include="Nuget\Zq.SQLBuilder.1.0.7.9.nupkg" />
     <None Include="Nuget\Zq.SQLBuilder.1.0.8.0.nupkg" />
     <None Include="Nuget\Zq.SQLBuilder.1.0.8.1.nupkg" />
     <None Include="Nuget\Zq.SQLBuilder.1.0.8.2.nupkg" />
@@ -144,6 +124,7 @@
     <None Include="Nuget\Zq.SQLBuilder.1.0.9.9.nupkg" />
     <None Include="Nuget\Zq.SQLBuilder.1.1.0.0.nupkg" />
     <None Include="Nuget\Zq.SQLBuilder.1.1.0.1.nupkg" />
+    <None Include="Nuget\Zq.SQLBuilder.1.1.0.2.nupkg" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
