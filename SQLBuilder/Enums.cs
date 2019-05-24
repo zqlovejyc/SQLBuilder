@@ -58,14 +58,14 @@ namespace SQLBuilder
     public enum OrderType
     {
         /// <summary>
-        /// 降序
-        /// </summary>
-        Desc,
-
-        /// <summary>
         /// 升序
         /// </summary>
-        Asc
+        Ascending,
+
+        /// <summary>
+        /// 降序
+        /// </summary>
+        Descending
     }
     #endregion
 }
