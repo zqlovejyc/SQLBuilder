@@ -333,27 +333,27 @@ namespace SQLBuilder
             #region OrderBy
             Print(
                 SqlBuilder.Select<UserInfo>()
-                          .OrderBy(u => new[] { "Id", "Email" }, OrderType.Asc, OrderType.Desc),
+                          .OrderBy(u => new[] { "Id", "Email" }, OrderType.Ascending, OrderType.Descending),
                 "OrderBy排序 用法1-1",
                 "OrderBy"
             );
 
             Print(
                 SqlBuilder.Select<UserInfo>()
-                          .OrderBy(u => new List<string> { "Id", "Email" }, OrderType.Asc, OrderType.Desc),
+                          .OrderBy(u => new List<string> { "Id", "Email" }, OrderType.Ascending, OrderType.Descending),
                 "OrderBy排序 用法1-2"
             );
 
             Print(
                 SqlBuilder.Select<UserInfo>()
-                         .OrderBy(u => "Id,Email".Split(','), OrderType.Asc, OrderType.Desc),
+                         .OrderBy(u => "Id,Email".Split(','), OrderType.Ascending, OrderType.Descending),
                "OrderBy排序 用法1-3"
             );
 
             var orderByFields = "Id,Email".Split(',').ToList();
             Print(
                 SqlBuilder.Select<UserInfo>()
-                          .OrderBy(u => orderByFields, OrderType.Asc, OrderType.Desc),
+                          .OrderBy(u => orderByFields, OrderType.Ascending, OrderType.Descending),
                "OrderBy排序 用法1-4"
             );
 
@@ -372,7 +372,7 @@ namespace SQLBuilder
 
             Print(
                 SqlBuilder.Select<UserInfo>()
-                          .OrderBy(u => new { u.Id, u.Email }, OrderType.Desc, OrderType.Desc),
+                          .OrderBy(u => new { u.Id, u.Email }, OrderType.Descending, OrderType.Descending),
                 "OrderBy排序 用法2"
             );
 

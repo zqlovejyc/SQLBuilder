@@ -190,7 +190,7 @@ namespace SQLBuilder.UnitTest
         public void Test_OrderBy_01()
         {
             var builder = SqlBuilder.Select<UserInfo>()
-                                    .OrderBy(u => new { u.Id, u.Email }, OrderType.Asc, OrderType.Desc);
+                                    .OrderBy(u => new { u.Id, u.Email }, OrderType.Ascending, OrderType.Descending);
             Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS A ORDER BY A.Id ASC,A.Email DESC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
@@ -202,7 +202,7 @@ namespace SQLBuilder.UnitTest
         public void Test_OrderBy_02()
         {
             var builder = SqlBuilder.Select<UserInfo>()
-                                    .OrderBy(u => new { u.Id, u.Email }, OrderType.Desc);
+                                    .OrderBy(u => new { u.Id, u.Email }, OrderType.Descending);
             Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS A ORDER BY A.Id DESC,A.Email ASC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
@@ -315,7 +315,7 @@ namespace SQLBuilder.UnitTest
         {
             var orderFields = "Id,Email".Split(',');
             var builder = SqlBuilder.Select<UserInfo>()
-                                    .OrderBy(u => orderFields.ToList(), OrderType.Desc, OrderType.Desc);
+                                    .OrderBy(u => orderFields.ToList(), OrderType.Descending, OrderType.Descending);
             Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS A ORDER BY A.Id DESC,A.Email DESC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
