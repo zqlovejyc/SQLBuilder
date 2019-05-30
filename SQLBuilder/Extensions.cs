@@ -830,7 +830,7 @@ namespace SQLBuilder
                     var fields = new List<string>();
                     for (int i = 0; i < @this.FieldCount; i++)
                     {
-                        fields.Add(@this.GetName(i).ToLower());
+                        fields.Add(@this.GetName(i));
                     }
                     while (@this.Read())
                     {
@@ -839,9 +839,10 @@ namespace SQLBuilder
                         foreach (var p in props)
                         {
                             if (!p.CanWrite) continue;
-                            if (fields.Contains(p.Name.ToLower()) && !@this[p.Name].IsNull())
+                            var field = fields.Where(o => o.ToLower() == p.Name.ToLower()).FirstOrDefault();
+                            if (!field.IsNullOrEmpty() && !@this[field].IsNull())
                             {
-                                p.SetValue(instance, @this[p.Name].ToSafeValue(p.PropertyType), null);
+                                p.SetValue(instance, @this[field].ToSafeValue(p.PropertyType), null);
                             }
                         }
                         yield return instance;
@@ -937,7 +938,7 @@ namespace SQLBuilder
                             var fields = new List<string>();
                             for (int i = 0; i < @this.FieldCount; i++)
                             {
-                                fields.Add(@this.GetName(i).ToLower());
+                                fields.Add(@this.GetName(i));
                             }
                             while (@this.Read())
                             {
@@ -946,9 +947,10 @@ namespace SQLBuilder
                                 foreach (var p in props)
                                 {
                                     if (!p.CanWrite) continue;
-                                    if (fields.Contains(p.Name.ToLower()) && !@this[p.Name].IsNull())
+                                    var field = fields.Where(o => o.ToLower() == p.Name.ToLower()).FirstOrDefault();
+                                    if (!field.IsNullOrEmpty() && !@this[field].IsNull())
                                     {
-                                        p.SetValue(instance, @this[p.Name].ToSafeValue(p.PropertyType), null);
+                                        p.SetValue(instance, @this[field].ToSafeValue(p.PropertyType), null);
                                     }
                                 }
                                 list.Add(instance);
