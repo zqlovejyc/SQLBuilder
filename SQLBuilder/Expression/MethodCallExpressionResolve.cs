@@ -99,11 +99,11 @@ namespace SQLBuilder
                 case DatabaseType.Oracle:
                 case DatabaseType.SQLite:
                     sqlPack += " LIKE '%' || ";
-                    break;               
+                    break;
                 default:
                     break;
             }
-            SqlBuilderProvider.Where(expression.Arguments[1], sqlPack);            
+            SqlBuilderProvider.Where(expression.Arguments[1], sqlPack);
             switch (sqlPack.DatabaseType)
             {
                 case DatabaseType.SQLServer:
@@ -116,7 +116,7 @@ namespace SQLBuilder
                 case DatabaseType.Oracle:
                 case DatabaseType.SQLite:
                     sqlPack += " || '%'";
-                    break;               
+                    break;
                 default:
                     break;
             }
@@ -235,7 +235,7 @@ namespace SQLBuilder
                 default:
                     break;
             }
-            SqlBuilderProvider.Where(expression.Arguments[1], sqlPack);            
+            SqlBuilderProvider.Where(expression.Arguments[1], sqlPack);
             switch (sqlPack.DatabaseType)
             {
                 case DatabaseType.SQLServer:
@@ -350,7 +350,7 @@ namespace SQLBuilder
                 sqlPack += "UPPER(";
                 SqlBuilderProvider.Where(expression.Object, sqlPack);
                 sqlPack += ")";
-            }            
+            }
         }
 
         /// <summary>
@@ -365,7 +365,7 @@ namespace SQLBuilder
                 sqlPack += "LOWER(";
                 SqlBuilderProvider.Where(expression.Object, sqlPack);
                 sqlPack += ")";
-            }            
+            }
         }
 
         /// <summary>
@@ -394,7 +394,7 @@ namespace SQLBuilder
                 {
                     sqlPack += ")";
                 }
-            }            
+            }
         }
 
         /// <summary>
@@ -409,7 +409,7 @@ namespace SQLBuilder
                 sqlPack += "LTRIM(";
                 SqlBuilderProvider.Where(expression.Object, sqlPack);
                 sqlPack += ")";
-            }            
+            }
         }
 
         /// <summary>
@@ -424,7 +424,7 @@ namespace SQLBuilder
                 sqlPack += "RTRIM(";
                 SqlBuilderProvider.Where(expression.Object, sqlPack);
                 sqlPack += ")";
-            }            
+            }
         }
         #endregion
 
@@ -439,9 +439,7 @@ namespace SQLBuilder
         {
             var key = expression.Method;
             if (key.IsGenericMethod)
-            {
                 key = key.GetGenericMethodDefinition();
-            }
             if (_Methods.TryGetValue(key.Name, out Action<MethodCallExpression, SqlPack> action))
             {
                 action(expression, sqlPack);
@@ -460,17 +458,20 @@ namespace SQLBuilder
         {
             var fields = new List<string>();
             var array = expression.ToObject() as object[];
-            foreach (var item in array)
+            for (var i = 0; i < array.Length; i++)
             {
-                sqlPack.Sql.Append("(");
-                var properties = item?.GetType().GetProperties();
+                if (sqlPack.DatabaseType != DatabaseType.Oracle)
+                    sqlPack.Sql.Append("(");
+                if (i > 0 && sqlPack.DatabaseType == DatabaseType.Oracle)
+                    sqlPack.Sql.Append(" UNION ALL SELECT ");
+                var properties = array[i]?.GetType().GetProperties();
                 foreach (var p in properties)
                 {
                     var type = p.DeclaringType.ToString().Contains("AnonymousType") ? sqlPack.DefaultType : p.DeclaringType;
                     (string columnName, bool isInsert, bool isUpdate) = sqlPack.GetColumnInfo(type, p);
                     if (isInsert)
                     {
-                        var value = p.GetValue(item, null);
+                        var value = p.GetValue(array[i], null);
                         if (value != null || (sqlPack.IsEnableNullValue && value == null))
                         {
                             sqlPack.AddDbParameter(value);
@@ -482,13 +483,14 @@ namespace SQLBuilder
                 if (sqlPack[sqlPack.Length - 1] == ',')
                 {
                     sqlPack.Sql.Remove(sqlPack.Length - 1, 1);
-                    sqlPack.Sql.Append("),");
+                    if (sqlPack.DatabaseType != DatabaseType.Oracle)
+                        sqlPack.Sql.Append("),");
+                    else
+                        sqlPack.Sql.Append(" FROM DUAL");
                 }
             }
             if (sqlPack.Sql[sqlPack.Sql.Length - 1] == ',')
-            {
                 sqlPack.Sql.Remove(sqlPack.Sql.Length - 1, 1);
-            }
             sqlPack.Sql = new StringBuilder(string.Format(sqlPack.ToString(), string.Join(",", fields).TrimEnd(',')));
             return sqlPack;
         }
