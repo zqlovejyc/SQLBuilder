@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("张强")]
 [assembly: AssemblyProduct("SqlBuilder")]
-[assembly: AssemblyCopyright("Copyright © 2018-2019 , 张强 943620963@qq.com")]
+[assembly: AssemblyCopyright("Copyright © 2018-2020 , 张强 943620963@qq.com")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
