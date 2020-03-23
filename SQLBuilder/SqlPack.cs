@@ -255,76 +255,67 @@ namespace SQLBuilder
         }
         #endregion
 
+        #region GetFormatName
+        /// <summary>
+        /// GetFormatName
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public string GetFormatName(string name)
+        {
+            if (
+                name?.StartsWith("[") == false &&
+                name?.StartsWith("`") == false &&
+                name?.StartsWith("\"") == false)
+            {
+                name = string.Format(this.FormatTempl, name);
+            }
+            return name;
+        }
+        #endregion
+
         #region GetTableName
         /// <summary>
         /// GetTableName
         /// </summary>
         /// <param name="type">类型</param>
-        /// <param name="isFormat">是否格式化</param>
         /// <returns>string</returns>
-        public string GetTableName(Type type, bool isFormat = true)
+        public string GetTableName(Type type)
         {
-            var tableName = isFormat || this.DatabaseType == DatabaseType.PostgreSQL ?
-                string.Format(this.FormatTempl, type.Name) :
-                type.Name;
+            var tableName = this.GetFormatName(type.Name);
             if (type.GetCustomAttributes(typeof(CusTableAttribute), false).FirstOrDefault() is CusTableAttribute cta)
             {
                 if (!string.IsNullOrEmpty(cta.Name))
                 {
-                    tableName = isFormat || this.DatabaseType == DatabaseType.PostgreSQL ?
-                        string.Format(this.FormatTempl, cta.Name) :
-                        cta.Name;
+                    tableName = this.GetFormatName(cta.Name);
                 }
                 if (!string.IsNullOrEmpty(cta.Schema))
                 {
-                    tableName = isFormat || this.DatabaseType == DatabaseType.PostgreSQL ?
-                        $"{string.Format(this.FormatTempl, cta.Schema)}.{tableName}" :
-                        $"{cta.Schema}.{tableName}";
+                    tableName = $"{this.GetFormatName(cta.Schema)}.{tableName}";
                 }
             }
             else if (type.GetCustomAttributes(typeof(SysTableAttribute), false).FirstOrDefault() is SysTableAttribute sta)
             {
                 if (!string.IsNullOrEmpty(sta.Name))
                 {
-                    tableName = isFormat || this.DatabaseType == DatabaseType.PostgreSQL ?
-                        string.Format(this.FormatTempl, sta.Name) :
-                        sta.Name;
+                    tableName = this.GetFormatName(sta.Name);
                 }
                 if (!string.IsNullOrEmpty(sta.Schema))
                 {
-                    tableName = isFormat || this.DatabaseType == DatabaseType.PostgreSQL ?
-                        $"{string.Format(this.FormatTempl, sta.Schema)}.{tableName}" :
-                        $"{sta.Schema}.{tableName}";
+                    tableName = $"{this.GetFormatName(sta.Schema)}.{tableName}";
                 }
             }
             return tableName;
         }
         #endregion
 
-        #region GetFormatColumnName
+        #region GetColumnName
         /// <summary>
         /// GetFormatColumnName
         /// </summary>
         /// <param name="columnName">列名</param>
         /// <returns></returns>
-        public string GetFormatColumnName(string columnName)
-        {
-            //PostgreSQL列名在起别名的情况下也需要格式化
-            if (this.DatabaseType == DatabaseType.PostgreSQL)
-            {
-                columnName = string.Format(this.FormatTempl, columnName);
-            }
-            else
-            {
-                if ((columnName?.StartsWith("[") == false
-                || columnName?.StartsWith("`") == false)
-                && columnName?.Contains(".") == false)
-                {
-                    columnName = string.Format(this.FormatTempl, columnName);
-                }
-            }
-            return columnName;
-        }
+        public string GetColumnName(string columnName) => this.GetFormatName(columnName);
         #endregion
 
         #region GetColumnInfo
@@ -333,9 +324,8 @@ namespace SQLBuilder
         /// </summary>
         /// <param name="type">类型</param>
         /// <param name="member">成员</param>
-        /// <param name="isFormat">是否格式化</param>
         /// <returns>Tuple</returns>
-        public (string columnName, bool isInsert, bool isUpdate) GetColumnInfo(Type type, MemberInfo member, bool isFormat = true)
+        public (string columnName, bool isInsert, bool isUpdate) GetColumnInfo(Type type, MemberInfo member)
         {
             string columnName = null;
             var isInsert = true;
@@ -348,7 +338,7 @@ namespace SQLBuilder
             }
             if (isHaveColumnAttribute)
             {
-                if (member?.GetFirstOrDefaultAttribute<CusColumnAttribute>() is CusColumnAttribute cca)
+                if (member.GetFirstOrDefaultAttribute<CusColumnAttribute>() is CusColumnAttribute cca)
                 {
                     columnName = cca.Name;
                     isInsert = cca.Insert;
@@ -378,13 +368,14 @@ namespace SQLBuilder
             if (member?.GetFirstOrDefaultAttribute<CusKeyAttribute>() is CusKeyAttribute cka)
             {
                 isUpdate = false;
-                if (!string.IsNullOrEmpty(cka.Name) && cka.Name != columnName) columnName = cka.Name;
+                if (!cka.Name.IsNullOrEmpty() && cka.Name != columnName)
+                    columnName = cka.Name;
             }
             else if (member?.GetFirstOrDefaultAttribute<SysKeyAttribute>() is SysKeyAttribute ska)
             {
                 isUpdate = false;
             }
-            return ((isFormat || this.DatabaseType == DatabaseType.PostgreSQL ? this.GetFormatColumnName(columnName) : columnName), isInsert, isUpdate);
+            return (this.GetColumnName(columnName), isInsert, isUpdate);
         }
         #endregion
 
@@ -423,7 +414,7 @@ namespace SQLBuilder
                     {
                         keyName = propertyName;
                     }
-                    result.Add(((isFormat || this.DatabaseType == DatabaseType.PostgreSQL ? this.GetFormatColumnName(keyName) : keyName), propertyName));
+                    result.Add((this.GetColumnName(keyName), propertyName));
                 }
             }
             return result;
