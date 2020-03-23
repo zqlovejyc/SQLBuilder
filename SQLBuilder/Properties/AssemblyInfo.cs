@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
 [assembly: AssemblyTitle("SqlBuilder")]
-[assembly: AssemblyDescription("Expression表达式转换为SQL语句，支持SqlServer、MySQL、Oracle、SQLite")]
+[assembly: AssemblyDescription("Expression表达式转换为SQL语句，支持SqlServer、MySQL、Oracle、SQLite、PostgreSQL；基于Dapper实现了不同数据库对应的数据仓储Repository；")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("张强")]
 [assembly: AssemblyProduct("SqlBuilder")]
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.1.3")]
-[assembly: AssemblyFileVersion("1.1.1.3")]
+[assembly: AssemblyVersion("1.1.1.4")]
+[assembly: AssemblyFileVersion("1.1.1.4")]
