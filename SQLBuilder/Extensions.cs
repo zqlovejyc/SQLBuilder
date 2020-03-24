@@ -1096,7 +1096,7 @@ namespace SQLBuilder
     }
 
     /// <summary>
-    /// Oracle DynamicParameters实现，用于支持Oracle游标类型
+    /// Oracle的DynamicParameters实现，用于支持Oracle游标类型
     /// </summary>
     public class OracleDynamicParameters : SqlMapper.IDynamicParameters
     {
