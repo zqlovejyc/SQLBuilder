@@ -50,6 +50,11 @@ namespace SQLBuilder.Repositories
         /// 事务对象
         /// </summary>
         DbTransaction Transaction { get; set; }
+
+        /// <summary>
+        /// sql拦截委托
+        /// </summary>
+        Func<string, object, string> SqlIntercept { get; set; }
         #endregion
 
         #region Transaction

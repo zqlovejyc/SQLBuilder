@@ -18,6 +18,7 @@
 
 using Dapper;
 using Oracle.ManagedDataAccess.Client;
+using SQLBuilder;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -76,6 +77,11 @@ namespace SQLBuilder.Repositories
         /// 事务对象
         /// </summary>
         public DbTransaction Transaction { get; set; }
+
+        /// <summary>
+        /// sql拦截委托
+        /// </summary>
+        public Func<string, object, string> SqlIntercept { get; set; }
         #endregion
 
         #region Constructor
@@ -146,6 +152,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public int ExecuteBySql(string sql)
         {
+            sql = SqlIntercept?.Invoke(sql, null) ?? sql;
             var result = 0;
             if (Transaction?.Connection != null)
             {
@@ -169,6 +176,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public int ExecuteBySql(string sql, object parameter)
         {
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             var result = 0;
             if (Transaction?.Connection != null)
             {
@@ -192,6 +200,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public int ExecuteBySql(string sql, params DbParameter[] dbParameter)
         {
+            sql = SqlIntercept?.Invoke(sql, dbParameter) ?? sql;
             var result = 0;
             if (Transaction?.Connection != null)
             {
@@ -214,6 +223,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public int ExecuteByProc(string procName)
         {
+            procName = SqlIntercept?.Invoke(procName, null) ?? procName;
             var result = 0;
             if (Transaction?.Connection != null)
             {
@@ -237,6 +247,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public int ExecuteByProc(string procName, object parameter)
         {
+            procName = SqlIntercept?.Invoke(procName, parameter) ?? procName;
             var result = 0;
             if (Transaction?.Connection != null)
             {
@@ -260,6 +271,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public IEnumerable<T> ExecuteByProc<T>(string procName, object parameter)
         {
+            procName = SqlIntercept?.Invoke(procName, parameter) ?? procName;
             IEnumerable<T> result = null;
             if (Transaction?.Connection != null)
             {
@@ -283,6 +295,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public int ExecuteByProc(string procName, params DbParameter[] dbParameter)
         {
+            procName = SqlIntercept?.Invoke(procName, dbParameter) ?? procName;
             var result = 0;
             if (Transaction?.Connection != null)
             {
@@ -307,6 +320,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public async Task<int> ExecuteBySqlAsync(string sql)
         {
+            sql = SqlIntercept?.Invoke(sql, null) ?? sql;
             var result = 0;
             if (Transaction?.Connection != null)
             {
@@ -330,6 +344,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public async Task<int> ExecuteBySqlAsync(string sql, object parameter)
         {
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             var result = 0;
             if (Transaction?.Connection != null)
             {
@@ -353,6 +368,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public async Task<int> ExecuteBySqlAsync(string sql, params DbParameter[] dbParameter)
         {
+            sql = SqlIntercept?.Invoke(sql, dbParameter) ?? sql;
             var result = 0;
             if (Transaction?.Connection != null)
             {
@@ -375,6 +391,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public async Task<int> ExecuteByProcAsync(string procName)
         {
+            procName = SqlIntercept?.Invoke(procName, null) ?? procName;
             var result = 0;
             if (Transaction?.Connection != null)
             {
@@ -398,6 +415,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public async Task<int> ExecuteByProcAsync(string procName, object parameter)
         {
+            procName = SqlIntercept?.Invoke(procName, parameter) ?? procName;
             var result = 0;
             if (Transaction?.Connection != null)
             {
@@ -421,6 +439,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public async Task<IEnumerable<T>> ExecuteByProcAsync<T>(string procName, object parameter)
         {
+            procName = SqlIntercept?.Invoke(procName, parameter) ?? procName;
             IEnumerable<T> result = null;
             if (Transaction?.Connection != null)
             {
@@ -444,6 +463,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回受影响行数</returns>
         public async Task<int> ExecuteByProcAsync(string procName, params DbParameter[] dbParameter)
         {
+            procName = SqlIntercept?.Invoke(procName, dbParameter) ?? procName;
             var result = 0;
             if (Transaction?.Connection != null)
             {
@@ -472,7 +492,7 @@ namespace SQLBuilder.Repositories
         public int Insert<T>(T entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Insert<T>(() => entity, DatabaseType.Oracle, false);
+            var builder = Sql.Insert<T>(() => entity, DatabaseType.Oracle, false, SqlIntercept);
             if (Transaction?.Connection != null)
             {
                 result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -534,7 +554,7 @@ namespace SQLBuilder.Repositories
         public async Task<int> InsertAsync<T>(T entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Insert<T>(() => entity, DatabaseType.Oracle, false);
+            var builder = Sql.Insert<T>(() => entity, DatabaseType.Oracle, false, SqlIntercept);
             if (Transaction?.Connection != null)
             {
                 result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -597,7 +617,7 @@ namespace SQLBuilder.Repositories
         public int Delete<T>() where T : class
         {
             var result = 0;
-            var builder = Sql.Delete<T>(DatabaseType.Oracle);
+            var builder = Sql.Delete<T>(DatabaseType.Oracle, SqlIntercept);
             if (Transaction?.Connection != null)
             {
                 result = Transaction.Connection.Execute(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -621,7 +641,7 @@ namespace SQLBuilder.Repositories
         public int Delete<T>(T entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Delete<T>(DatabaseType.Oracle).WithKey(entity);
+            var builder = Sql.Delete<T>(DatabaseType.Oracle, SqlIntercept).WithKey(entity);
             if (Transaction?.Connection != null)
             {
                 result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -681,7 +701,7 @@ namespace SQLBuilder.Repositories
         public int Delete<T>(Expression<Func<T, bool>> predicate) where T : class
         {
             var result = 0;
-            var builder = Sql.Delete<T>(DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Delete<T>(DatabaseType.Oracle, SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -709,7 +729,7 @@ namespace SQLBuilder.Repositories
             //多主键或者单主键
             if (keys.Count > 1 || keyValues.Length == 1)
             {
-                var builder = Sql.Delete<T>(DatabaseType.Oracle).WithKey(keyValues);
+                var builder = Sql.Delete<T>(DatabaseType.Oracle, SqlIntercept).WithKey(keyValues);
                 if (Transaction?.Connection != null)
                 {
                     result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -762,15 +782,18 @@ namespace SQLBuilder.Repositories
         public int Delete<T>(string propertyName, object propertyValue) where T : class
         {
             var result = 0;
+            var sql = $"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=:PropertyValue";
+            var parameter = new { PropertyValue = propertyValue };
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             if (Transaction?.Connection != null)
             {
-                result = Transaction.Connection.Execute($"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=@PropertyValue", new { PropertyValue = propertyValue }, Transaction, commandTimeout: CommandTimeout);
+                result = Transaction.Connection.Execute(sql, parameter, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = connection.Execute($"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=@PropertyValue", new { PropertyValue = propertyValue }, commandTimeout: CommandTimeout);
+                    result = connection.Execute(sql, parameter, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -786,7 +809,7 @@ namespace SQLBuilder.Repositories
         public async Task<int> DeleteAsync<T>() where T : class
         {
             var result = 0;
-            var builder = Sql.Delete<T>(DatabaseType.Oracle);
+            var builder = Sql.Delete<T>(DatabaseType.Oracle, SqlIntercept);
             if (Transaction?.Connection != null)
             {
                 result = await Transaction.Connection.ExecuteAsync(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -810,7 +833,7 @@ namespace SQLBuilder.Repositories
         public async Task<int> DeleteAsync<T>(T entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Delete<T>(DatabaseType.Oracle).WithKey(entity);
+            var builder = Sql.Delete<T>(DatabaseType.Oracle, SqlIntercept).WithKey(entity);
             if (Transaction?.Connection != null)
             {
                 result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -870,7 +893,7 @@ namespace SQLBuilder.Repositories
         public async Task<int> DeleteAsync<T>(Expression<Func<T, bool>> predicate) where T : class
         {
             var result = 0;
-            var builder = Sql.Delete<T>(DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Delete<T>(DatabaseType.Oracle, SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -898,7 +921,7 @@ namespace SQLBuilder.Repositories
             //多主键或者单主键
             if (keys.Count > 1 || keyValues.Length == 1)
             {
-                var builder = Sql.Delete<T>(DatabaseType.Oracle).WithKey(keyValues);
+                var builder = Sql.Delete<T>(DatabaseType.Oracle, SqlIntercept).WithKey(keyValues);
                 if (Transaction?.Connection != null)
                 {
                     result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -951,15 +974,18 @@ namespace SQLBuilder.Repositories
         public async Task<int> DeleteAsync<T>(string propertyName, object propertyValue) where T : class
         {
             var result = 0;
+            var sql = $"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=:PropertyValue";
+            var parameter = new { PropertyValue = propertyValue };
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             if (Transaction?.Connection != null)
             {
-                result = await Transaction.Connection.ExecuteAsync($"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=@PropertyValue", new { PropertyValue = propertyValue }, Transaction, commandTimeout: CommandTimeout);
+                result = await Transaction.Connection.ExecuteAsync(sql, parameter, Transaction, commandTimeout: CommandTimeout);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    result = await connection.ExecuteAsync($"DELETE FROM {Sql.GetTableName<T>()} WHERE {propertyName}=@PropertyValue", new { PropertyValue = propertyValue }, commandTimeout: CommandTimeout);
+                    result = await connection.ExecuteAsync(sql, parameter, commandTimeout: CommandTimeout);
                 }
             }
             return result;
@@ -978,7 +1004,7 @@ namespace SQLBuilder.Repositories
         public int Update<T>(T entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Update<T>(() => entity, DatabaseType.Oracle, false).WithKey(entity);
+            var builder = Sql.Update<T>(() => entity, DatabaseType.Oracle, false, SqlIntercept).WithKey(entity);
             if (Transaction?.Connection != null)
             {
                 result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1039,7 +1065,7 @@ namespace SQLBuilder.Repositories
         public int Update<T>(Expression<Func<T, bool>> predicate, Expression<Func<object>> entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Update<T>(entity, DatabaseType: DatabaseType.Oracle, isEnableNullValue: false).Where(predicate);
+            var builder = Sql.Update<T>(entity, DatabaseType.Oracle, false, SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 result = Transaction.Connection.Execute(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1065,7 +1091,7 @@ namespace SQLBuilder.Repositories
         public async Task<int> UpdateAsync<T>(T entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Update<T>(() => entity, DatabaseType.Oracle, false).WithKey(entity);
+            var builder = Sql.Update<T>(() => entity, DatabaseType.Oracle, false, SqlIntercept).WithKey(entity);
             if (Transaction?.Connection != null)
             {
                 result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1126,7 +1152,7 @@ namespace SQLBuilder.Repositories
         public async Task<int> UpdateAsync<T>(Expression<Func<T, bool>> predicate, Expression<Func<object>> entity) where T : class
         {
             var result = 0;
-            var builder = Sql.Update<T>(entity, DatabaseType: DatabaseType.Oracle, isEnableNullValue: false).Where(predicate);
+            var builder = Sql.Update<T>(entity, DatabaseType.Oracle, false, SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 result = await Transaction.Connection.ExecuteAsync(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1163,6 +1189,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回查询结果对象</returns>
         public object FindObject(string sql, object parameter)
         {
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<string>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
@@ -1184,6 +1211,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回查询结果对象</returns>
         public object FindObject(string sql, params DbParameter[] dbParameter)
         {
+            sql = SqlIntercept?.Invoke(sql, dbParameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<string>(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
@@ -1217,6 +1245,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回查询结果对象</returns>
         public async Task<object> FindObjectAsync(string sql, object parameter)
         {
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<string>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
@@ -1238,6 +1267,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回查询结果对象</returns>
         public async Task<object> FindObjectAsync(string sql, params DbParameter[] dbParameter)
         {
+            sql = SqlIntercept?.Invoke(sql, dbParameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<string>(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
@@ -1264,7 +1294,7 @@ namespace SQLBuilder.Repositories
         public T FindEntity<T>(params object[] keyValues) where T : class
         {
             if (keyValues == null) return default(T);
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle).WithKey(keyValues);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle, sqlIntercept: SqlIntercept).WithKey(keyValues);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1288,7 +1318,7 @@ namespace SQLBuilder.Repositories
         public T FindEntity<T>(Expression<Func<T, object>> selector, params object[] keyValues) where T : class
         {
             if (keyValues == null) return default(T);
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).WithKey(keyValues);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).WithKey(keyValues);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1310,7 +1340,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public T FindEntity<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle, sqlIntercept: SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1333,7 +1363,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public T FindEntity<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1355,6 +1385,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public T FindEntityBySql<T>(string sql)
         {
+            sql = SqlIntercept?.Invoke(sql, null) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<T>(sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -1377,6 +1408,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public T FindEntityBySql<T>(string sql, object parameter)
         {
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<T>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
@@ -1399,6 +1431,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public T FindEntityBySql<T>(string sql, params DbParameter[] dbParameter)
         {
+            sql = SqlIntercept?.Invoke(sql, dbParameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.QueryFirstOrDefault<T>(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
@@ -1423,7 +1456,7 @@ namespace SQLBuilder.Repositories
         public async Task<T> FindEntityAsync<T>(params object[] keyValues) where T : class
         {
             if (keyValues == null) return await Task.FromResult(default(T));
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle).WithKey(keyValues);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle, sqlIntercept: SqlIntercept).WithKey(keyValues);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1447,7 +1480,7 @@ namespace SQLBuilder.Repositories
         public async Task<T> FindEntityAsync<T>(Expression<Func<T, object>> selector, params object[] keyValues) where T : class
         {
             if (keyValues == null) return await Task.FromResult(default(T));
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).WithKey(keyValues);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).WithKey(keyValues);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1469,7 +1502,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public async Task<T> FindEntityAsync<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle, sqlIntercept: SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1492,7 +1525,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public async Task<T> FindEntityAsync<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1514,6 +1547,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public async Task<T> FindEntityBySqlAsync<T>(string sql)
         {
+            sql = SqlIntercept?.Invoke(sql, null) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -1536,6 +1570,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public async Task<T> FindEntityBySqlAsync<T>(string sql, object parameter)
         {
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
@@ -1558,6 +1593,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回实体</returns>
         public async Task<T> FindEntityBySqlAsync<T>(string sql, params DbParameter[] dbParameter)
         {
+            sql = SqlIntercept?.Invoke(sql, dbParameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryFirstOrDefaultAsync<T>(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
@@ -1582,7 +1618,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IQueryable<T> IQueryable<T>() where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle, sqlIntercept: SqlIntercept);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout).AsQueryable();
@@ -1604,7 +1640,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IQueryable<T> IQueryable<T>(Expression<Func<T, object>> selector) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout).AsQueryable();
@@ -1628,7 +1664,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IQueryable<T> IQueryable<T>(Expression<Func<T, object>> selector, Expression<Func<T, object>> orderField, params OrderType[] orderTypes) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).OrderBy(orderField, orderTypes);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).OrderBy(orderField, orderTypes);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout).AsQueryable();
@@ -1650,7 +1686,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IQueryable<T> IQueryable<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle, sqlIntercept: SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout).AsQueryable();
@@ -1673,7 +1709,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IQueryable<T> IQueryable<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout).AsQueryable();
@@ -1698,7 +1734,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IQueryable<T> IQueryable<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> orderField, params OrderType[] orderTypes) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).Where(predicate).OrderBy(orderField, orderTypes);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).Where(predicate).OrderBy(orderField, orderTypes);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout).AsQueryable();
@@ -1721,7 +1757,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IQueryable<T>> IQueryableAsync<T>() where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle, sqlIntercept: SqlIntercept);
             if (Transaction?.Connection != null)
             {
                 var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -1745,7 +1781,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IQueryable<T>> IQueryableAsync<T>(Expression<Func<T, object>> selector) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept);
             if (Transaction?.Connection != null)
             {
                 var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -1771,7 +1807,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IQueryable<T>> IQueryableAsync<T>(Expression<Func<T, object>> selector, Expression<Func<T, object>> orderField, params OrderType[] orderTypes) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).OrderBy(orderField, orderTypes);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).OrderBy(orderField, orderTypes);
             if (Transaction?.Connection != null)
             {
                 var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -1795,7 +1831,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IQueryable<T>> IQueryableAsync<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle, sqlIntercept: SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1820,7 +1856,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IQueryable<T>> IQueryableAsync<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1847,7 +1883,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IQueryable<T>> IQueryableAsync<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> orderField, params OrderType[] orderTypes) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).Where(predicate).OrderBy(orderField, orderTypes);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).Where(predicate).OrderBy(orderField, orderTypes);
             if (Transaction?.Connection != null)
             {
                 var query = await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1874,7 +1910,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IEnumerable<T> FindList<T>() where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle, sqlIntercept: SqlIntercept);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -1896,7 +1932,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IEnumerable<T> FindList<T>(Expression<Func<T, object>> selector) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -1920,7 +1956,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IEnumerable<T> FindList<T>(Expression<Func<T, object>> selector, Expression<Func<T, object>> orderField, params OrderType[] orderTypes) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).OrderBy(orderField, orderTypes);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).OrderBy(orderField, orderTypes);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -1942,7 +1978,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IEnumerable<T> FindList<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle, sqlIntercept: SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1965,7 +2001,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IEnumerable<T> FindList<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -1990,7 +2026,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IEnumerable<T> FindList<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> orderField, params OrderType[] orderTypes) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).Where(predicate).OrderBy(orderField, orderTypes);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).Where(predicate).OrderBy(orderField, orderTypes);
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -2024,6 +2060,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IEnumerable<T> FindList<T>(string sql, object parameter)
         {
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
@@ -2046,6 +2083,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public IEnumerable<T> FindList<T>(string sql, params DbParameter[] dbParameter)
         {
+            sql = SqlIntercept?.Invoke(sql, dbParameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.Query<T>(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
@@ -2070,7 +2108,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合和总记录数</returns>
         public (IEnumerable<T> list, long total) FindList<T>(string orderField, bool isAscending, int pageSize, int pageIndex) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle);
             if (!orderField.IsNullOrEmpty())
             {
                 if (orderField.Contains(@"(/\*(?:|)*?\*/)|(\b(ASC|DESC)\b)", RegexOptions.IgnoreCase))
@@ -2078,18 +2116,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, builder.Parameters) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, builder.Parameters) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = Transaction.Connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
-                var list = Transaction.Connection.Query<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                var total = Transaction.Connection.QueryFirstOrDefault<long>(sqlCount, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                var list = Transaction.Connection.Query<T>(sqlQuery, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
-                    var list = connection.Query<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                    var total = connection.QueryFirstOrDefault<long>(sqlCount, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                    var list = connection.Query<T>(sqlQuery, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2107,7 +2149,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合和总记录数</returns>
         public (IEnumerable<T> list, long total) FindList<T>(Expression<Func<T, bool>> predicate, string orderField, bool isAscending, int pageSize, int pageIndex) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle).Where(predicate);
             if (!orderField.IsNullOrEmpty())
             {
                 if (orderField.Contains(@"(/\*(?:|)*?\*/)|(\b(ASC|DESC)\b)", RegexOptions.IgnoreCase))
@@ -2115,18 +2157,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, builder.Parameters) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, builder.Parameters) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = Transaction.Connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
-                var list = Transaction.Connection.Query<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                var total = Transaction.Connection.QueryFirstOrDefault<long>(sqlCount, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                var list = Transaction.Connection.Query<T>(sqlQuery, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
-                    var list = connection.Query<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                    var total = connection.QueryFirstOrDefault<long>(sqlCount, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                    var list = connection.Query<T>(sqlQuery, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2153,18 +2199,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, builder.Parameters) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, builder.Parameters) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = Transaction.Connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
-                var list = Transaction.Connection.Query<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                var total = Transaction.Connection.QueryFirstOrDefault<long>(sqlCount, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                var list = Transaction.Connection.Query<T>(sqlQuery, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
-                    var list = connection.Query<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                    var total = connection.QueryFirstOrDefault<long>(sqlCount, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                    var list = connection.Query<T>(sqlQuery, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2205,18 +2255,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, parameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, parameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = Transaction.Connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", parameter, Transaction, commandTimeout: CommandTimeout);
-                var list = Transaction.Connection.Query<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                var total = Transaction.Connection.QueryFirstOrDefault<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                var list = Transaction.Connection.Query<T>(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", parameter, Transaction, commandTimeout: CommandTimeout);
-                    var list = connection.Query<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                    var total = connection.QueryFirstOrDefault<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                    var list = connection.Query<T>(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2242,18 +2296,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, dbParameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, dbParameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = Transaction.Connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                var list = Transaction.Connection.Query<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var total = Transaction.Connection.QueryFirstOrDefault<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var list = Transaction.Connection.Query<T>(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                    var list = connection.Query<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var total = connection.QueryFirstOrDefault<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var list = connection.Query<T>(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2279,18 +2337,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"{sql} SELECT COUNT(1) AS Total FROM T";
+            var sqlQuery = $"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, parameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, parameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = Transaction.Connection.QueryFirstOrDefault<long>($"{sql} SELECT COUNT(1) AS Total FROM T", parameter, Transaction, commandTimeout: CommandTimeout);
-                var list = Transaction.Connection.Query<T>($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                var total = Transaction.Connection.QueryFirstOrDefault<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                var list = Transaction.Connection.Query<T>(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = connection.QueryFirstOrDefault<long>($"{sql} SELECT COUNT(1) AS Total FROM T", parameter, Transaction, commandTimeout: CommandTimeout);
-                    var list = connection.Query<T>($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                    var total = connection.QueryFirstOrDefault<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                    var list = connection.Query<T>(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2316,18 +2378,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"{sql} SELECT COUNT(1) AS Total FROM T";
+            var sqlQuery = $"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, dbParameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, dbParameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = Transaction.Connection.QueryFirstOrDefault<long>($"{sql} SELECT COUNT(1) AS Total FROM T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                var list = Transaction.Connection.Query<T>($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var total = Transaction.Connection.QueryFirstOrDefault<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var list = Transaction.Connection.Query<T>(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = connection.QueryFirstOrDefault<long>($"{sql} SELECT COUNT(1) AS Total FROM T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                    var list = connection.Query<T>($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var total = connection.QueryFirstOrDefault<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var list = connection.Query<T>(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2342,7 +2408,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IEnumerable<T>> FindListAsync<T>() where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle, sqlIntercept: SqlIntercept);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -2364,7 +2430,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IEnumerable<T>> FindListAsync<T>(Expression<Func<T, object>> selector) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -2388,7 +2454,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IEnumerable<T>> FindListAsync<T>(Expression<Func<T, object>> selector, Expression<Func<T, object>> orderField, params OrderType[] orderTypes) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).OrderBy(orderField, orderTypes);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).OrderBy(orderField, orderTypes);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(builder.Sql, transaction: Transaction, commandTimeout: CommandTimeout);
@@ -2410,7 +2476,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IEnumerable<T>> FindListAsync<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle, sqlIntercept: SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -2433,7 +2499,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IEnumerable<T>> FindListAsync<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).Where(predicate);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -2458,7 +2524,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IEnumerable<T>> FindListAsync<T>(Expression<Func<T, object>> selector, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> orderField, params OrderType[] orderTypes) where T : class
         {
-            var builder = Sql.Select<T>(selector, DatabaseType.Oracle).Where(predicate).OrderBy(orderField, orderTypes);
+            var builder = Sql.Select<T>(selector, DatabaseType.Oracle, SqlIntercept).Where(predicate).OrderBy(orderField, orderTypes);
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(builder.Sql, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
@@ -2492,6 +2558,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IEnumerable<T>> FindListAsync<T>(string sql, object parameter)
         {
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
@@ -2514,6 +2581,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合</returns>
         public async Task<IEnumerable<T>> FindListAsync<T>(string sql, params DbParameter[] dbParameter)
         {
+            sql = SqlIntercept?.Invoke(sql, dbParameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return await Transaction.Connection.QueryAsync<T>(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
@@ -2538,7 +2606,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合和总记录数</returns>
         public async Task<(IEnumerable<T> list, long total)> FindListAsync<T>(string orderField, bool isAscending, int pageSize, int pageIndex) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle);
             if (!orderField.IsNullOrEmpty())
             {
                 if (orderField.Contains(@"(/\*(?:|)*?\*/)|(\b(ASC|DESC)\b)", RegexOptions.IgnoreCase))
@@ -2546,18 +2614,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, builder.Parameters) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, builder.Parameters) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
-                var list = await Transaction.Connection.QueryAsync<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>(sqlCount, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                var list = await Transaction.Connection.QueryAsync<T>(sqlQuery, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = await connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
-                    var list = await connection.QueryAsync<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                    var total = await connection.QueryFirstOrDefaultAsync<long>(sqlCount, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                    var list = await connection.QueryAsync<T>(sqlQuery, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2575,7 +2647,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回集合和总记录数</returns>
         public async Task<(IEnumerable<T> list, long total)> FindListAsync<T>(Expression<Func<T, bool>> predicate, string orderField, bool isAscending, int pageSize, int pageIndex) where T : class
         {
-            var builder = Sql.Select<T>(DatabaseType: DatabaseType.Oracle).Where(predicate);
+            var builder = Sql.Select<T>(databaseType: DatabaseType.Oracle).Where(predicate);
             if (!orderField.IsNullOrEmpty())
             {
                 if (orderField.Contains(@"(/\*(?:|)*?\*/)|(\b(ASC|DESC)\b)", RegexOptions.IgnoreCase))
@@ -2583,18 +2655,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, builder.Parameters) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, builder.Parameters) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
-                var list = await Transaction.Connection.QueryAsync<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>(sqlCount, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                var list = await Transaction.Connection.QueryAsync<T>(sqlQuery, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = await connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
-                    var list = await connection.QueryAsync<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                    var total = await connection.QueryFirstOrDefaultAsync<long>(sqlCount, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                    var list = await connection.QueryAsync<T>(sqlQuery, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2621,18 +2697,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, builder.Parameters) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, builder.Parameters) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
-                var list = await Transaction.Connection.QueryAsync<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>(sqlCount, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                var list = await Transaction.Connection.QueryAsync<T>(sqlQuery, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = await connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({builder.Sql}) T", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
-                    var list = await connection.QueryAsync<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({builder.Sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                    var total = await connection.QueryFirstOrDefaultAsync<long>(sqlCount, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
+                    var list = await connection.QueryAsync<T>(sqlQuery, builder.DynamicParameters, Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2673,18 +2753,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, parameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, parameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", parameter, Transaction, commandTimeout: CommandTimeout);
-                var list = await Transaction.Connection.QueryAsync<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                var list = await Transaction.Connection.QueryAsync<T>(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = await connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", parameter, Transaction, commandTimeout: CommandTimeout);
-                    var list = await connection.QueryAsync<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                    var total = await connection.QueryFirstOrDefaultAsync<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                    var list = await connection.QueryAsync<T>(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2710,18 +2794,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, dbParameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, dbParameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                var list = await Transaction.Connection.QueryAsync<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var list = await Transaction.Connection.QueryAsync<T>(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = await connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                    var list = await connection.QueryAsync<T>($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var total = await connection.QueryFirstOrDefaultAsync<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var list = await connection.QueryAsync<T>(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2747,18 +2835,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"{sql} SELECT COUNT(1) AS Total FROM T";
+            var sqlQuery = $"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, parameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, parameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>($"{sql} SELECT COUNT(1) AS Total FROM T", parameter, Transaction, commandTimeout: CommandTimeout);
-                var list = await Transaction.Connection.QueryAsync<T>($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                var list = await Transaction.Connection.QueryAsync<T>(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = await connection.QueryFirstOrDefaultAsync<long>($"{sql} SELECT COUNT(1) AS Total FROM T", parameter, Transaction, commandTimeout: CommandTimeout);
-                    var list = await connection.QueryAsync<T>($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                    var total = await connection.QueryFirstOrDefaultAsync<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                    var list = await connection.QueryAsync<T>(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2784,18 +2876,22 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"{sql} SELECT COUNT(1) AS Total FROM T";
+            var sqlQuery = $"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, dbParameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, dbParameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>($"{sql} SELECT COUNT(1) AS Total FROM T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                var list = await Transaction.Connection.QueryAsync<T>($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var list = await Transaction.Connection.QueryAsync<T>(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 return (list, total);
             }
             else
             {
                 using (var connection = Connection)
                 {
-                    var total = await connection.QueryFirstOrDefaultAsync<long>($"{sql} SELECT COUNT(1) AS Total FROM T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                    var list = await connection.QueryAsync<T>($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var total = await connection.QueryFirstOrDefaultAsync<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var list = await connection.QueryAsync<T>(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                     return (list, total);
                 }
             }
@@ -2823,6 +2919,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回DataTable</returns>
         public DataTable FindTable(string sql, object parameter)
         {
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.ExecuteReader(sql, parameter, Transaction, commandTimeout: CommandTimeout).ToDataTable();
@@ -2844,6 +2941,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回DataTable</returns>
         public DataTable FindTable(string sql, params DbParameter[] dbParameter)
         {
+            sql = SqlIntercept?.Invoke(sql, dbParameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 return Transaction.Connection.ExecuteReader(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout).ToDataTable();
@@ -2890,10 +2988,14 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, parameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, parameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = Transaction.Connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", parameter, Transaction, commandTimeout: CommandTimeout);
-                var reader = Transaction.Connection.ExecuteReader($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                var total = Transaction.Connection.QueryFirstOrDefault<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                var reader = Transaction.Connection.ExecuteReader(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                 var table = reader?.ToDataTable();
                 table?.Columns?.Remove("RowNumber");
                 return (table, total);
@@ -2902,8 +3004,8 @@ namespace SQLBuilder.Repositories
             {
                 using (var connection = Connection)
                 {
-                    var total = connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", parameter, Transaction, commandTimeout: CommandTimeout);
-                    var reader = connection.ExecuteReader($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                    var total = connection.QueryFirstOrDefault<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                    var reader = connection.ExecuteReader(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                     var table = reader?.ToDataTable();
                     table?.Columns?.Remove("RowNumber");
                     return (table, total);
@@ -2930,10 +3032,14 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, dbParameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, dbParameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = Transaction.Connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                var reader = Transaction.Connection.ExecuteReader($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var total = Transaction.Connection.QueryFirstOrDefault<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var reader = Transaction.Connection.ExecuteReader(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 var table = reader?.ToDataTable();
                 table?.Columns?.Remove("RowNumber");
                 return (table, total);
@@ -2942,8 +3048,8 @@ namespace SQLBuilder.Repositories
             {
                 using (var connection = Connection)
                 {
-                    var total = connection.QueryFirstOrDefault<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                    var reader = connection.ExecuteReader($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var total = connection.QueryFirstOrDefault<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var reader = connection.ExecuteReader(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                     var table = reader?.ToDataTable();
                     table?.Columns?.Remove("RowNumber");
                     return (table, total);
@@ -2970,10 +3076,14 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"{sql} SELECT COUNT(1) AS Total FROM T";
+            var sqlQuery = $"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, parameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, parameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = Transaction.Connection.QueryFirstOrDefault<long>($"{sql} SELECT COUNT(1) AS Total FROM T", parameter, Transaction, commandTimeout: CommandTimeout);
-                var reader = Transaction.Connection.ExecuteReader($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                var total = Transaction.Connection.QueryFirstOrDefault<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                var reader = Transaction.Connection.ExecuteReader(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                 var table = reader?.ToDataTable();
                 table?.Columns?.Remove("RowNumber");
                 return (table, total);
@@ -2982,8 +3092,8 @@ namespace SQLBuilder.Repositories
             {
                 using (var connection = Connection)
                 {
-                    var total = connection.QueryFirstOrDefault<long>($"{sql} SELECT COUNT(1) AS Total FROM T", parameter, Transaction, commandTimeout: CommandTimeout);
-                    var reader = connection.ExecuteReader($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                    var total = connection.QueryFirstOrDefault<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                    var reader = connection.ExecuteReader(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                     var table = reader?.ToDataTable();
                     table?.Columns?.Remove("RowNumber");
                     return (table, total);
@@ -3010,10 +3120,14 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"{sql} SELECT COUNT(1) AS Total FROM T";
+            var sqlQuery = $"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, dbParameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, dbParameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = Transaction.Connection.QueryFirstOrDefault<long>($"{sql} SELECT COUNT(1) AS Total FROM T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                var reader = Transaction.Connection.ExecuteReader($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var total = Transaction.Connection.QueryFirstOrDefault<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var reader = Transaction.Connection.ExecuteReader(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 var table = reader?.ToDataTable();
                 table?.Columns?.Remove("RowNumber");
                 return (table, total);
@@ -3022,8 +3136,8 @@ namespace SQLBuilder.Repositories
             {
                 using (var connection = Connection)
                 {
-                    var total = connection.QueryFirstOrDefault<long>($"{sql} SELECT COUNT(1) AS Total FROM T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                    var reader = connection.ExecuteReader($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var total = connection.QueryFirstOrDefault<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var reader = connection.ExecuteReader(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                     var table = reader?.ToDataTable();
                     table?.Columns?.Remove("RowNumber");
                     return (table, total);
@@ -3051,6 +3165,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回DataTable</returns>
         public async Task<DataTable> FindTableAsync(string sql, object parameter)
         {
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 var reader = await Transaction.Connection.ExecuteReaderAsync(sql, parameter, Transaction, commandTimeout: CommandTimeout);
@@ -3074,6 +3189,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回DataTable</returns>
         public async Task<DataTable> FindTableAsync(string sql, params DbParameter[] dbParameter)
         {
+            sql = SqlIntercept?.Invoke(sql, dbParameter) ?? sql;
             if (Transaction?.Connection != null)
             {
                 var reader = await Transaction.Connection.ExecuteReaderAsync(sql, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
@@ -3122,10 +3238,14 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, parameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, parameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", parameter, Transaction, commandTimeout: CommandTimeout);
-                var reader = await Transaction.Connection.ExecuteReaderAsync($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                var reader = await Transaction.Connection.ExecuteReaderAsync(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                 var table = reader?.ToDataTable();
                 table?.Columns?.Remove("RowNumber");
                 return (table, total);
@@ -3134,8 +3254,8 @@ namespace SQLBuilder.Repositories
             {
                 using (var connection = Connection)
                 {
-                    var total = await connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", parameter, Transaction, commandTimeout: CommandTimeout);
-                    var reader = await connection.ExecuteReaderAsync($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                    var total = await connection.QueryFirstOrDefaultAsync<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                    var reader = await connection.ExecuteReaderAsync(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                     var table = reader?.ToDataTable();
                     table?.Columns?.Remove("RowNumber");
                     return (table, total);
@@ -3162,10 +3282,14 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"SELECT COUNT(1) AS Total FROM ({sql}) T";
+            var sqlQuery = $"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, dbParameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, dbParameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                var reader = await Transaction.Connection.ExecuteReaderAsync($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var reader = await Transaction.Connection.ExecuteReaderAsync(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 var table = reader?.ToDataTable();
                 table?.Columns?.Remove("RowNumber");
                 return (table, total);
@@ -3174,8 +3298,8 @@ namespace SQLBuilder.Repositories
             {
                 using (var connection = Connection)
                 {
-                    var total = await connection.QueryFirstOrDefaultAsync<long>($"SELECT COUNT(1) AS Total FROM ({sql}) T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                    var reader = await connection.ExecuteReaderAsync($"SELECT * FROM (SELECT X.*,ROWNUM AS RowNumber FROM ({sql} {orderField}) X WHERE ROWNUM <= {pageSize * pageIndex}) T WHERE T.RowNumber >= {pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var total = await connection.QueryFirstOrDefaultAsync<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var reader = await connection.ExecuteReaderAsync(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                     var table = reader?.ToDataTable();
                     table?.Columns?.Remove("RowNumber");
                     return (table, total);
@@ -3202,10 +3326,14 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"{sql} SELECT COUNT(1) AS Total FROM T";
+            var sqlQuery = $"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, parameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, parameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>($"{sql} SELECT COUNT(1) AS Total FROM T", parameter, Transaction, commandTimeout: CommandTimeout);
-                var reader = await Transaction.Connection.ExecuteReaderAsync($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                var reader = await Transaction.Connection.ExecuteReaderAsync(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                 var table = reader?.ToDataTable();
                 table?.Columns?.Remove("RowNumber");
                 return (table, total);
@@ -3214,8 +3342,8 @@ namespace SQLBuilder.Repositories
             {
                 using (var connection = Connection)
                 {
-                    var total = await connection.QueryFirstOrDefaultAsync<long>($"{sql} SELECT COUNT(1) AS Total FROM T", parameter, Transaction, commandTimeout: CommandTimeout);
-                    var reader = await connection.ExecuteReaderAsync($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", parameter, Transaction, commandTimeout: CommandTimeout);
+                    var total = await connection.QueryFirstOrDefaultAsync<long>(sqlCount, parameter, Transaction, commandTimeout: CommandTimeout);
+                    var reader = await connection.ExecuteReaderAsync(sqlQuery, parameter, Transaction, commandTimeout: CommandTimeout);
                     var table = reader?.ToDataTable();
                     table?.Columns?.Remove("RowNumber");
                     return (table, total);
@@ -3242,10 +3370,14 @@ namespace SQLBuilder.Repositories
                 else
                     orderField = $"ORDER BY {orderField} {(isAscending ? "ASC" : "DESC")}";
             }
+            var sqlCount = $"{sql} SELECT COUNT(1) AS Total FROM T";
+            var sqlQuery = $"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}";
+            sqlCount = SqlIntercept?.Invoke(sqlCount, dbParameter) ?? sqlCount;
+            sqlQuery = SqlIntercept?.Invoke(sqlQuery, dbParameter) ?? sqlQuery;
             if (Transaction?.Connection != null)
             {
-                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>($"{sql} SELECT COUNT(1) AS Total FROM T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                var reader = await Transaction.Connection.ExecuteReaderAsync($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var total = await Transaction.Connection.QueryFirstOrDefaultAsync<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                var reader = await Transaction.Connection.ExecuteReaderAsync(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                 var table = reader?.ToDataTable();
                 table?.Columns?.Remove("RowNumber");
                 return (table, total);
@@ -3254,8 +3386,8 @@ namespace SQLBuilder.Repositories
             {
                 using (var connection = Connection)
                 {
-                    var total = await connection.QueryFirstOrDefaultAsync<long>($"{sql} SELECT COUNT(1) AS Total FROM T", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
-                    var reader = await connection.ExecuteReaderAsync($"{sql},R AS (SELECT ROWNUM AS RowNumber,T.* FROM T WHERE ROWNUM <= {pageSize * pageIndex} {orderField}) SELECT * FROM R WHERE RowNumber>={pageSize * (pageIndex - 1) + 1}", dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var total = await connection.QueryFirstOrDefaultAsync<long>(sqlCount, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
+                    var reader = await connection.ExecuteReaderAsync(sqlQuery, dbParameter.ToDynamicParameters(), Transaction, commandTimeout: CommandTimeout);
                     var table = reader?.ToDataTable();
                     table?.Columns?.Remove("RowNumber");
                     return (table, total);
@@ -3285,6 +3417,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回查询结果集</returns>
         public List<IEnumerable<dynamic>> FindMultiple(string sql, object parameter)
         {
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             var list = new List<IEnumerable<dynamic>>();
             if (Transaction?.Connection != null)
             {
@@ -3316,6 +3449,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回查询结果集</returns>
         public List<IEnumerable<dynamic>> FindMultiple(string sql, params DbParameter[] dbParameter)
         {
+            sql = SqlIntercept?.Invoke(sql, dbParameter) ?? sql;
             var list = new List<IEnumerable<dynamic>>();
             if (Transaction?.Connection != null)
             {
@@ -3359,6 +3493,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回查询结果集</returns>
         public async Task<List<IEnumerable<dynamic>>> FindMultipleAsync(string sql, object parameter)
         {
+            sql = SqlIntercept?.Invoke(sql, parameter) ?? sql;
             var list = new List<IEnumerable<dynamic>>();
             if (Transaction?.Connection != null)
             {
@@ -3390,6 +3525,7 @@ namespace SQLBuilder.Repositories
         /// <returns>返回查询结果集</returns>
         public async Task<List<IEnumerable<dynamic>>> FindMultipleAsync(string sql, params DbParameter[] dbParameter)
         {
+            sql = SqlIntercept?.Invoke(sql, dbParameter) ?? sql;
             var list = new List<IEnumerable<dynamic>>();
             if (Transaction?.Connection != null)
             {

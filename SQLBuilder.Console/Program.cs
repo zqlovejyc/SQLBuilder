@@ -113,8 +113,8 @@ namespace SQLBuilder
             );
 
             Print(
-               SqlBuilder.Select<Student>(o => new { o.Id, o.Name }).Where(x => x.IsEffective.Value && x.IsOnLine),
-               "查询单表，带where bool类型字段"
+                SqlBuilder.Select<Student>(o => new { o.Id, o.Name }).Where(x => x.IsEffective.Value && x.IsOnLine),
+                "查询单表，带where bool类型字段"
             );
 
             Print(
@@ -173,7 +173,7 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Select<UserInfo>(u => u.Name)
+                SqlBuilder.Select<UserInfo>(u => "*")
                           .Where(u => !new string[] { "a", "b" }.Contains(u.Name)),
                 "查询单表，带where contains条件，写法三"
             );
@@ -287,7 +287,7 @@ namespace SQLBuilder
 
             #region Page
             Print(
-                SqlBuilder.Select<MyStudent>(DatabaseType: DatabaseType.MySQL)
+                SqlBuilder.Select<MyStudent>(databaseType: DatabaseType.MySQL)
                           .Where(o => o.Score != null)
                           .AndWhere(o => o.Name == "")
                           .OrWhere(o => o.Subject == "")
@@ -313,7 +313,7 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Select<MyStudent>(DatabaseType: DatabaseType.MySQL)
+                SqlBuilder.Select<MyStudent>(databaseType: DatabaseType.MySQL)
                           .Where(o => o.Score != null)
                           .AndWhere(o => o.Name == "")
                           .OrWhere(o => o.Subject == "")
@@ -489,7 +489,7 @@ namespace SQLBuilder
             );
 
             Print(
-                SqlBuilder.Delete<UserInfo>().WithKey(2, 3),
+                SqlBuilder.Delete<UserInfo>().WithKey(2, 1),
                 "根据主键条件删除指定表记录1"
             );
             Print(
@@ -707,6 +707,30 @@ namespace SQLBuilder
 
             #region GetTableName
             Print<UserInfo>(null, SqlBuilder.GetTableName<UserInfo>(), "GetTableName");
+            #endregion
+
+            #region SqlIntercept
+            Print(
+                SqlBuilder.Select<UserInfo>(sqlIntercept: (sql, parameter) =>
+                {
+                    Console.WriteLine($"执行sql日志：{sql}");
+                    //不修改原sql内容
+                    return null;
+                }),
+                "查询单表所有字段",
+                "Select"
+            );
+
+            Print(
+                SqlBuilder.Select<UserInfo>(sqlIntercept: (sql, parameter) =>
+                {
+                    Console.WriteLine($"执行sql日志：{sql}");
+                    //修改原sql
+                    return sql.Replace(" AS A", "");
+                }),
+                "查询单表所有字段",
+                "Select"
+            );
             #endregion
 
             Console.ReadLine();

@@ -91,6 +91,7 @@
     <Compile Include="Expression\MethodCallExpressionResolve.cs" />
     <Compile Include="Expression\NewArrayExpressionResolve.cs" />
     <Compile Include="Expression\NewExpressionResolve.cs" />
+    <Compile Include="Expression\ParameterExpressionResolve.cs" />
     <Compile Include="Expression\UnaryExpressionResolve.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ISqlBuilder.cs" />
