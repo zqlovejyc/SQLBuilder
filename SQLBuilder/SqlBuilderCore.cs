@@ -56,8 +56,7 @@ namespace SQLBuilder
             {
                 var sql = this._sqlPack.ToString();
                 //添加sql日志拦截
-                sql = SqlIntercept?.Invoke(sql, this._sqlPack.DbParams) ?? sql;
-                return sql;
+                return this.SqlIntercept?.Invoke(sql, this._sqlPack.DbParams) ?? sql;
             }
         }
 
