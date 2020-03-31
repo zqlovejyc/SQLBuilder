@@ -282,13 +282,9 @@ namespace SQLBuilder
                 else
                 {
                     if (sqlPack.ToString().ToUpper().EndsWith("NULL"))
-                    {
                         OperatorParser(expression.NodeType, signIndex, sqlPack, true);
-                    }
                     else
-                    {
                         OperatorParser(expression.NodeType, signIndex, sqlPack);
-                    }
                 }
             }
             return sqlPack;
