@@ -108,20 +108,42 @@ namespace SQLBuilder
         /// <returns>SqlPack</returns>
         public override SqlPack Join(BinaryExpression expression, SqlPack sqlPack)
         {
-            SqlBuilderProvider.Join(expression.Left, sqlPack);
-            var operatorIndex = sqlPack.Sql.Length;
-            //嵌套条件
-            var flag = false;
-            if (expression.Right is BinaryExpression binaryExpression && (binaryExpression.Right as BinaryExpression) != null)
+            //左侧嵌套
+            var leftBinary = expression.Left as BinaryExpression;
+            var isBinaryLeft = leftBinary?.Left is BinaryExpression;
+            var isBoolMethodCallLeft = (leftBinary?.Left as MethodCallExpression)?.Method.ReturnType == typeof(bool);
+            var isBinaryRight = leftBinary?.Right is BinaryExpression;
+            var isBoolMethodCallRight = (leftBinary?.Right as MethodCallExpression)?.Method.ReturnType == typeof(bool);
+            var leftNested = (isBinaryLeft || isBoolMethodCallLeft) && (isBinaryRight || isBoolMethodCallRight);
+            if (leftNested)
             {
-                flag = true;
                 sqlPack += "(";
             }
-            SqlBuilderProvider.Where(expression.Right, sqlPack);
-            if (flag)
+            SqlBuilderProvider.Join(expression.Left, sqlPack);
+            if (leftNested)
             {
                 sqlPack += ")";
             }
+
+            var operatorIndex = sqlPack.Sql.Length;
+
+            //右侧嵌套
+            var rightBinary = expression.Right as BinaryExpression;
+            isBinaryLeft = rightBinary?.Left is BinaryExpression;
+            isBoolMethodCallLeft = (rightBinary?.Left as MethodCallExpression)?.Method.ReturnType == typeof(bool);
+            isBinaryRight = rightBinary?.Right is BinaryExpression;
+            isBoolMethodCallRight = (rightBinary?.Right as MethodCallExpression)?.Method.ReturnType == typeof(bool);
+            var rightNested = (isBinaryLeft || isBoolMethodCallLeft) && (isBinaryRight || isBoolMethodCallRight);
+            if (rightNested)
+            {
+                sqlPack += "(";
+            }
+            SqlBuilderProvider.Where(expression.Right, sqlPack);
+            if (rightNested)
+            {
+                sqlPack += ")";
+            }
+
             var sqlLength = sqlPack.Sql.Length;
             if (sqlLength - operatorIndex == 5 && sqlPack.ToString().ToUpper().EndsWith("NULL"))
             {
