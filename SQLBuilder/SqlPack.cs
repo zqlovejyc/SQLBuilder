@@ -67,6 +67,11 @@ namespace SQLBuilder
         public bool IsEnableNullValue { get; set; } = true;
 
         /// <summary>
+        /// 是否启用表名和列名格式化
+        /// </summary>
+        public bool IsEnableFormat { get; set; } = true;
+
+        /// <summary>
         /// 默认T类型
         /// </summary>
         public Type DefaultType { get; set; }
@@ -264,6 +269,7 @@ namespace SQLBuilder
         public string GetFormatName(string name)
         {
             if (
+                this.IsEnableFormat == true &&
                 name?.StartsWith("[") == false &&
                 name?.StartsWith("`") == false &&
                 name?.StartsWith("\"") == false)
@@ -384,9 +390,8 @@ namespace SQLBuilder
         /// GetPrimaryKey
         /// </summary>
         /// <param name="type">类型</param>
-        /// <param name="isFormat">是否格式化</param>
         /// <returns>Tuple</returns>
-        public List<(string key, string property)> GetPrimaryKey(Type type, bool isFormat = true)
+        public List<(string key, string property)> GetPrimaryKey(Type type)
         {
             var result = new List<(string key, string property)>();
             var props = type.GetProperties();
