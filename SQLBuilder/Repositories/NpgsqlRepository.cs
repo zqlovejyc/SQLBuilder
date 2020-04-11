@@ -98,9 +98,9 @@ namespace SQLBuilder.Repositories
         {
             //判断是链接字符串，还是链接字符串名称
             ConnectionString = ConfigurationManager.ConnectionStrings[connString]?.ConnectionString?.Trim();
-            if (string.IsNullOrEmpty(ConnectionString))
+            if (ConnectionString.IsNullOrEmpty())
                 ConnectionString = ConfigurationManager.AppSettings[connString]?.Trim();
-            if (string.IsNullOrEmpty(ConnectionString))
+            if (ConnectionString.IsNullOrEmpty())
                 ConnectionString = connString;
         }
         #endregion

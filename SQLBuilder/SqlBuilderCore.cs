@@ -474,9 +474,9 @@ namespace SQLBuilder
             string joinTableName = this._sqlPack.GetTableName(typeof(T2));
             this._sqlPack.SetTableAlias(joinTableName);
             if (this._sqlPack.DatabaseType == DatabaseType.Oracle)
-                this._sqlPack.Sql.Append($"{(string.IsNullOrEmpty(leftOrRightJoin) ? "" : " " + leftOrRightJoin)} JOIN {joinTableName} {this._sqlPack.GetTableAlias(joinTableName)} ON ");
+                this._sqlPack.Sql.Append($"{(leftOrRightJoin.IsNullOrEmpty() ? "" : " " + leftOrRightJoin)} JOIN {joinTableName} {this._sqlPack.GetTableAlias(joinTableName)} ON ");
             else
-                this._sqlPack.Sql.Append($"{(string.IsNullOrEmpty(leftOrRightJoin) ? "" : " " + leftOrRightJoin)} JOIN {joinTableName} AS {this._sqlPack.GetTableAlias(joinTableName)} ON ");
+                this._sqlPack.Sql.Append($"{(leftOrRightJoin.IsNullOrEmpty() ? "" : " " + leftOrRightJoin)} JOIN {joinTableName} AS {this._sqlPack.GetTableAlias(joinTableName)} ON ");
             SqlBuilderProvider.Join(expression.Body, this._sqlPack);
             return this;
         }
@@ -496,9 +496,9 @@ namespace SQLBuilder
             string joinTableName = this._sqlPack.GetTableName(typeof(T3));
             this._sqlPack.SetTableAlias(joinTableName);
             if (this._sqlPack.DatabaseType == DatabaseType.Oracle)
-                this._sqlPack.Sql.Append($"{(string.IsNullOrEmpty(leftOrRightJoin) ? "" : " " + leftOrRightJoin)} JOIN {joinTableName} {this._sqlPack.GetTableAlias(joinTableName)} ON ");
+                this._sqlPack.Sql.Append($"{(leftOrRightJoin.IsNullOrEmpty() ? "" : " " + leftOrRightJoin)} JOIN {joinTableName} {this._sqlPack.GetTableAlias(joinTableName)} ON ");
             else
-                this._sqlPack.Sql.Append($"{(string.IsNullOrEmpty(leftOrRightJoin) ? "" : " " + leftOrRightJoin)} JOIN {joinTableName} AS {this._sqlPack.GetTableAlias(joinTableName)} ON ");
+                this._sqlPack.Sql.Append($"{(leftOrRightJoin.IsNullOrEmpty() ? "" : " " + leftOrRightJoin)} JOIN {joinTableName} AS {this._sqlPack.GetTableAlias(joinTableName)} ON ");
             SqlBuilderProvider.Join(expression.Body, this._sqlPack);
             return this;
         }
@@ -660,7 +660,7 @@ namespace SQLBuilder
         public SqlBuilderCore<T> AndWhere(Expression<Func<T, bool>> expression)
         {
             var sql = this._sqlPack.ToString();
-            if (sql.Contains("WHERE") && !string.IsNullOrEmpty(sql.Substring("WHERE").Trim()))
+            if (sql.Contains("WHERE") && !sql.Substring("WHERE").Trim().IsNullOrEmpty())
             {
                 this._sqlPack += " AND ";
             }
@@ -684,7 +684,7 @@ namespace SQLBuilder
         public SqlBuilderCore<T> OrWhere(Expression<Func<T, bool>> expression)
         {
             var sql = this._sqlPack.ToString();
-            if (sql.Contains("WHERE") && !string.IsNullOrEmpty(sql.Substring("WHERE").Trim()))
+            if (sql.Contains("WHERE") && !sql.Substring("WHERE").Trim().IsNullOrEmpty())
             {
                 this._sqlPack += " OR ";
             }
@@ -718,14 +718,14 @@ namespace SQLBuilder
             }
             var tableName = this._sqlPack.GetTableName(typeof(T));
             var tableAlias = this._sqlPack.GetTableAlias(tableName);
-            if (!string.IsNullOrEmpty(tableAlias)) tableAlias += ".";
+            if (!tableAlias.IsNullOrEmpty()) tableAlias += ".";
             var keys = this._sqlPack.GetPrimaryKey(typeof(T));
             if (keys.Count > 0 && entity != null)
             {
                 for (int i = 0; i < keys.Count; i++)
                 {
                     var (key, property) = keys[i];
-                    if (!string.IsNullOrEmpty(key))
+                    if (!key.IsNullOrEmpty())
                     {
                         var keyValue = typeof(T).GetProperty(property)?.GetValue(entity, null);
                         if (keyValue != null)
@@ -769,14 +769,14 @@ namespace SQLBuilder
             }
             var tableName = this._sqlPack.GetTableName(typeof(T));
             var tableAlias = this._sqlPack.GetTableAlias(tableName);
-            if (!string.IsNullOrEmpty(tableAlias)) tableAlias += ".";
+            if (!tableAlias.IsNullOrEmpty()) tableAlias += ".";
             var keys = this._sqlPack.GetPrimaryKey(typeof(T));
             if (keys.Count > 0 && keyValue != null)
             {
                 for (int i = 0; i < keys.Count; i++)
                 {
                     var (key, property) = keys[i];
-                    if (!string.IsNullOrEmpty(key))
+                    if (!key.IsNullOrEmpty())
                     {
                         this._sqlPack += $" {(sql.Contains("WHERE") || i > 0 ? "AND" : "WHERE")} {(tableAlias + key)} = ";
                         this._sqlPack.AddDbParameter(keyValue[i]);
@@ -835,12 +835,12 @@ namespace SQLBuilder
             var sb = new StringBuilder();
             if (!orderField.ToUpper().Contains(" ASC") && !orderField.ToUpper().Contains(" DESC"))
                 orderField = this._sqlPack.GetColumnName(orderField);
-            if (!string.IsNullOrEmpty(sql))
+            if (!sql.IsNullOrEmpty())
             {
                 this._sqlPack.DbParams.Clear();
                 if (parameters != null) this._sqlPack.DbParams = parameters;
             }
-            sql = string.IsNullOrEmpty(sql) ? this._sqlPack.Sql.ToString().TrimEnd(';') : sql.TrimEnd(';');
+            sql = sql.IsNullOrEmpty() ? this._sqlPack.Sql.ToString().TrimEnd(';') : sql.TrimEnd(';');
             //SQLServer
             if (this._sqlPack.DatabaseType == DatabaseType.SQLServer)
             {
@@ -899,12 +899,12 @@ namespace SQLBuilder
             var sb = new StringBuilder();
             if (!orderField.ToUpper().Contains(" ASC") && !orderField.ToUpper().Contains(" DESC"))
                 orderField = this._sqlPack.GetColumnName(orderField);
-            if (!string.IsNullOrEmpty(sql))
+            if (!sql.IsNullOrEmpty())
             {
                 this._sqlPack.DbParams.Clear();
                 if (parameters != null) this._sqlPack.DbParams = parameters;
             }
-            sql = string.IsNullOrEmpty(sql) ? this._sqlPack.Sql.ToString().TrimEnd(';') : sql.TrimEnd(';');
+            sql = sql.IsNullOrEmpty() ? this._sqlPack.Sql.ToString().TrimEnd(';') : sql.TrimEnd(';');
             //SQLServer
             if (this._sqlPack.DatabaseType == DatabaseType.SQLServer)
             {
