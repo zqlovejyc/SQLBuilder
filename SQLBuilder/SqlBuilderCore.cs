@@ -2821,6 +2821,98 @@ namespace SQLBuilder
         }
         #endregion
 
+        #region WithKey
+        /// <summary>
+        /// 添加主键条件，主要针对更新实体和删除实体操作
+        /// </summary>
+        /// <param name="entity">实体对象</param>
+        /// <returns>SqlBuilderCore</returns>
+        public SqlBuilderCore<T> WithKey(T entity)
+        {
+            if (entity == null)
+            {
+                throw new ArgumentNullException("实体参数不能为空！");
+            }
+            var sql = this._sqlPack.ToString().ToUpper();
+            if (!sql.Contains("SELECT") && !sql.Contains("UPDATE") && !sql.Contains("DELETE"))
+            {
+                throw new ArgumentException("此方法只能用于Select、Update、Delete方法！");
+            }
+            var tableName = this._sqlPack.GetTableName(typeof(T));
+            var tableAlias = this._sqlPack.GetTableAlias(tableName);
+            if (!tableAlias.IsNullOrEmpty()) tableAlias += ".";
+            var keys = this._sqlPack.GetPrimaryKey(typeof(T));
+            if (keys.Count > 0 && entity != null)
+            {
+                for (int i = 0; i < keys.Count; i++)
+                {
+                    var (key, property) = keys[i];
+                    if (!key.IsNullOrEmpty())
+                    {
+                        var keyValue = typeof(T).GetProperty(property)?.GetValue(entity, null);
+                        if (keyValue != null)
+                        {
+                            this._sqlPack += $" {(sql.Contains("WHERE") || i > 0 ? "AND" : "WHERE")} {(tableAlias + key)} = ";
+                            this._sqlPack.AddDbParameter(keyValue);
+                        }
+                        else
+                        {
+                            throw new ArgumentNullException("主键值不能为空！");
+                        }
+                    }
+                }
+            }
+            else
+            {
+                throw new ArgumentException("实体不存在Key属性！");
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// 添加主键条件，主要针对更新实体和删除实体操作
+        /// </summary>
+        /// <param name="keyValue">主键值</param>
+        /// <returns>SqlBuilderCore</returns>
+        public SqlBuilderCore<T> WithKey(params dynamic[] keyValue)
+        {
+            if (keyValue == null)
+            {
+                throw new ArgumentNullException("keyValue不能为空！");
+            }
+            if (!keyValue.Any(o => o.GetType().IsValueType || o.GetType() == typeof(string)))
+            {
+                throw new ArgumentException("keyValue只能为值类型或者字符串类型数据！");
+            }
+            var sql = this._sqlPack.ToString().ToUpper();
+            if (!sql.Contains("SELECT") && !sql.Contains("UPDATE") && !sql.Contains("DELETE"))
+            {
+                throw new ArgumentException("WithKey方法只能用于Select、Update、Delete方法！");
+            }
+            var tableName = this._sqlPack.GetTableName(typeof(T));
+            var tableAlias = this._sqlPack.GetTableAlias(tableName);
+            if (!tableAlias.IsNullOrEmpty()) tableAlias += ".";
+            var keys = this._sqlPack.GetPrimaryKey(typeof(T));
+            if (keys.Count > 0 && keyValue != null)
+            {
+                for (int i = 0; i < keys.Count; i++)
+                {
+                    var (key, property) = keys[i];
+                    if (!key.IsNullOrEmpty())
+                    {
+                        this._sqlPack += $" {(sql.Contains("WHERE") || i > 0 ? "AND" : "WHERE")} {(tableAlias + key)} = ";
+                        this._sqlPack.AddDbParameter(keyValue[i]);
+                    }
+                }
+            }
+            else
+            {
+                throw new ArgumentException("实体不存在Key属性！");
+            }
+            return this;
+        }
+        #endregion
+
         #region GroupBy
         /// <summary>
         /// GroupBy
