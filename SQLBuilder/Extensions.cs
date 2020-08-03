@@ -689,16 +689,16 @@ namespace SQLBuilder
         }
         #endregion
 
-        #region WhereIF
+        #region WhereIf
         /// <summary>
-        /// WhereIF
+        /// WhereIf
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="this"></param>
         /// <param name="condition"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        public static Expression<Func<T, bool>> WhereIF<T>(this Expression<Func<T, bool>> @this, bool condition, Expression<Func<T, bool>> other)
+        public static Expression<Func<T, bool>> WhereIf<T>(this Expression<Func<T, bool>> @this, bool condition, Expression<Func<T, bool>> other)
         {
             if (condition)
                 @this = @this.And(other);
@@ -707,7 +707,28 @@ namespace SQLBuilder
         }
 
         /// <summary>
-        /// WhereIF
+        /// WhereIf
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="condition"></param>
+        /// <param name="other"></param>
+        /// <param name="callback">当条件满足时，执行完拼接后回调委托</param>
+        /// <returns></returns>
+        public static Expression<Func<T, bool>> WhereIf<T>(this Expression<Func<T, bool>> @this, bool condition, Expression<Func<T, bool>> other, Action callback)
+        {
+            if (condition)
+            {
+                @this = @this.And(other);
+
+                callback?.Invoke();
+            }
+
+            return @this;
+        }
+
+        /// <summary>
+        /// WhereIf
         /// </summary>
         /// <typeparam name="T1"></typeparam>
         /// <typeparam name="T2"></typeparam>
@@ -715,7 +736,7 @@ namespace SQLBuilder
         /// <param name="condition"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        public static Expression<Func<T1, T2, bool>> WhereIF<T1, T2>(this Expression<Func<T1, T2, bool>> @this, bool condition, Expression<Func<T1, T2, bool>> other)
+        public static Expression<Func<T1, T2, bool>> WhereIf<T1, T2>(this Expression<Func<T1, T2, bool>> @this, bool condition, Expression<Func<T1, T2, bool>> other)
         {
             if (condition)
                 @this = @this.And(other);
@@ -724,7 +745,29 @@ namespace SQLBuilder
         }
 
         /// <summary>
-        /// WhereIF
+        /// WhereIf
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="condition"></param>
+        /// <param name="other"></param>
+        /// <param name="callback">当条件满足时，执行完拼接后回调委托</param>
+        /// <returns></returns>
+        public static Expression<Func<T1, T2, bool>> WhereIf<T1, T2>(this Expression<Func<T1, T2, bool>> @this, bool condition, Expression<Func<T1, T2, bool>> other, Action callback)
+        {
+            if (condition)
+            {
+                @this = @this.And(other);
+
+                callback?.Invoke();
+            }
+
+            return @this;
+        }
+
+        /// <summary>
+        /// WhereIf
         /// </summary>
         /// <typeparam name="T1"></typeparam>
         /// <typeparam name="T2"></typeparam>
@@ -733,7 +776,7 @@ namespace SQLBuilder
         /// <param name="condition"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        public static Expression<Func<T1, T2, T3, bool>> WhereIF<T1, T2, T3>(this Expression<Func<T1, T2, T3, bool>> @this, bool condition, Expression<Func<T1, T2, T3, bool>> other)
+        public static Expression<Func<T1, T2, T3, bool>> WhereIf<T1, T2, T3>(this Expression<Func<T1, T2, T3, bool>> @this, bool condition, Expression<Func<T1, T2, T3, bool>> other)
         {
             if (condition)
                 @this = @this.And(other);
@@ -742,7 +785,30 @@ namespace SQLBuilder
         }
 
         /// <summary>
-        /// WhereIF
+        /// WhereIf
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <typeparam name="T3"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="condition"></param>
+        /// <param name="other"></param>
+        /// <param name="callback">当条件满足时，执行完拼接后回调委托</param>
+        /// <returns></returns>
+        public static Expression<Func<T1, T2, T3, bool>> WhereIf<T1, T2, T3>(this Expression<Func<T1, T2, T3, bool>> @this, bool condition, Expression<Func<T1, T2, T3, bool>> other, Action callback)
+        {
+            if (condition)
+            {
+                @this = @this.And(other);
+
+                callback?.Invoke();
+            }
+
+            return @this;
+        }
+
+        /// <summary>
+        /// WhereIf
         /// </summary>
         /// <typeparam name="T1"></typeparam>
         /// <typeparam name="T2"></typeparam>
@@ -752,7 +818,7 @@ namespace SQLBuilder
         /// <param name="condition"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        public static Expression<Func<T1, T2, T3, T4, bool>> WhereIF<T1, T2, T3, T4>(this Expression<Func<T1, T2, T3, T4, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, bool>> other)
+        public static Expression<Func<T1, T2, T3, T4, bool>> WhereIf<T1, T2, T3, T4>(this Expression<Func<T1, T2, T3, T4, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, bool>> other)
         {
             if (condition)
                 @this = @this.And(other);
@@ -761,7 +827,31 @@ namespace SQLBuilder
         }
 
         /// <summary>
-        /// WhereIF
+        /// WhereIf
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <typeparam name="T3"></typeparam>
+        /// <typeparam name="T4"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="condition"></param>
+        /// <param name="other"></param>
+        /// <param name="callback">当条件满足时，执行完拼接后回调委托</param>
+        /// <returns></returns>
+        public static Expression<Func<T1, T2, T3, T4, bool>> WhereIf<T1, T2, T3, T4>(this Expression<Func<T1, T2, T3, T4, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, bool>> other, Action callback)
+        {
+            if (condition)
+            {
+                @this = @this.And(other);
+
+                callback?.Invoke();
+            }
+
+            return @this;
+        }
+
+        /// <summary>
+        /// WhereIf
         /// </summary>
         /// <typeparam name="T1"></typeparam>
         /// <typeparam name="T2"></typeparam>
@@ -772,7 +862,7 @@ namespace SQLBuilder
         /// <param name="condition"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        public static Expression<Func<T1, T2, T3, T4, T5, bool>> WhereIF<T1, T2, T3, T4, T5>(this Expression<Func<T1, T2, T3, T4, T5, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, bool>> other)
+        public static Expression<Func<T1, T2, T3, T4, T5, bool>> WhereIf<T1, T2, T3, T4, T5>(this Expression<Func<T1, T2, T3, T4, T5, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, bool>> other)
         {
             if (condition)
                 @this = @this.And(other);
@@ -781,7 +871,32 @@ namespace SQLBuilder
         }
 
         /// <summary>
-        /// WhereIF
+        /// WhereIf
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <typeparam name="T3"></typeparam>
+        /// <typeparam name="T4"></typeparam>
+        /// <typeparam name="T5"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="condition"></param>
+        /// <param name="other"></param>
+        /// <param name="callback">当条件满足时，执行完拼接后回调委托</param>
+        /// <returns></returns>
+        public static Expression<Func<T1, T2, T3, T4, T5, bool>> WhereIf<T1, T2, T3, T4, T5>(this Expression<Func<T1, T2, T3, T4, T5, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, bool>> other, Action callback)
+        {
+            if (condition)
+            {
+                @this = @this.And(other);
+
+                callback?.Invoke();
+            }
+
+            return @this;
+        }
+
+        /// <summary>
+        /// WhereIf
         /// </summary>
         /// <typeparam name="T1"></typeparam>
         /// <typeparam name="T2"></typeparam>
@@ -793,7 +908,7 @@ namespace SQLBuilder
         /// <param name="condition"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        public static Expression<Func<T1, T2, T3, T4, T5, T6, bool>> WhereIF<T1, T2, T3, T4, T5, T6>(this Expression<Func<T1, T2, T3, T4, T5, T6, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, bool>> other)
+        public static Expression<Func<T1, T2, T3, T4, T5, T6, bool>> WhereIf<T1, T2, T3, T4, T5, T6>(this Expression<Func<T1, T2, T3, T4, T5, T6, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, bool>> other)
         {
             if (condition)
                 @this = @this.And(other);
@@ -802,7 +917,33 @@ namespace SQLBuilder
         }
 
         /// <summary>
-        /// WhereIF
+        /// WhereIf
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <typeparam name="T3"></typeparam>
+        /// <typeparam name="T4"></typeparam>
+        /// <typeparam name="T5"></typeparam>
+        /// <typeparam name="T6"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="condition"></param>
+        /// <param name="other"></param>
+        /// <param name="callback">当条件满足时，执行完拼接后回调委托</param>
+        /// <returns></returns>
+        public static Expression<Func<T1, T2, T3, T4, T5, T6, bool>> WhereIf<T1, T2, T3, T4, T5, T6>(this Expression<Func<T1, T2, T3, T4, T5, T6, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, bool>> other, Action callback)
+        {
+            if (condition)
+            {
+                @this = @this.And(other);
+
+                callback?.Invoke();
+            }
+
+            return @this;
+        }
+
+        /// <summary>
+        /// WhereIf
         /// </summary>
         /// <typeparam name="T1"></typeparam>
         /// <typeparam name="T2"></typeparam>
@@ -815,7 +956,7 @@ namespace SQLBuilder
         /// <param name="condition"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        public static Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> WhereIF<T1, T2, T3, T4, T5, T6, T7>(this Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> other)
+        public static Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> WhereIf<T1, T2, T3, T4, T5, T6, T7>(this Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> other)
         {
             if (condition)
                 @this = @this.And(other);
@@ -824,7 +965,34 @@ namespace SQLBuilder
         }
 
         /// <summary>
-        /// WhereIF
+        /// WhereIf
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <typeparam name="T3"></typeparam>
+        /// <typeparam name="T4"></typeparam>
+        /// <typeparam name="T5"></typeparam>
+        /// <typeparam name="T6"></typeparam>
+        /// <typeparam name="T7"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="condition"></param>
+        /// <param name="other"></param>
+        /// <param name="callback">当条件满足时，执行完拼接后回调委托</param>
+        /// <returns></returns>
+        public static Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> WhereIf<T1, T2, T3, T4, T5, T6, T7>(this Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, T7, bool>> other, Action callback)
+        {
+            if (condition)
+            {
+                @this = @this.And(other);
+
+                callback?.Invoke();
+            }
+
+            return @this;
+        }
+
+        /// <summary>
+        /// WhereIf
         /// </summary>
         /// <typeparam name="T1"></typeparam>
         /// <typeparam name="T2"></typeparam>
@@ -838,7 +1006,7 @@ namespace SQLBuilder
         /// <param name="condition"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        public static Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> WhereIF<T1, T2, T3, T4, T5, T6, T7, T8>(this Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> other)
+        public static Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> WhereIf<T1, T2, T3, T4, T5, T6, T7, T8>(this Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> other)
         {
             if (condition)
                 @this = @this.And(other);
@@ -847,7 +1015,35 @@ namespace SQLBuilder
         }
 
         /// <summary>
-        /// WhereIF
+        /// WhereIf
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <typeparam name="T3"></typeparam>
+        /// <typeparam name="T4"></typeparam>
+        /// <typeparam name="T5"></typeparam>
+        /// <typeparam name="T6"></typeparam>
+        /// <typeparam name="T7"></typeparam>
+        /// <typeparam name="T8"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="condition"></param>
+        /// <param name="other"></param>
+        /// <param name="callback">当条件满足时，执行完拼接后回调委托</param>
+        /// <returns></returns>
+        public static Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> WhereIf<T1, T2, T3, T4, T5, T6, T7, T8>(this Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, bool>> other, Action callback)
+        {
+            if (condition)
+            {
+                @this = @this.And(other);
+
+                callback?.Invoke();
+            }
+
+            return @this;
+        }
+
+        /// <summary>
+        /// WhereIf
         /// </summary>
         /// <typeparam name="T1"></typeparam>
         /// <typeparam name="T2"></typeparam>
@@ -862,7 +1058,7 @@ namespace SQLBuilder
         /// <param name="condition"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        public static Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, bool>> WhereIF<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, bool>> other)
+        public static Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, bool>> WhereIf<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, bool>> other)
         {
             if (condition)
                 @this = @this.And(other);
@@ -871,7 +1067,36 @@ namespace SQLBuilder
         }
 
         /// <summary>
-        /// WhereIF
+        /// WhereIf
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <typeparam name="T3"></typeparam>
+        /// <typeparam name="T4"></typeparam>
+        /// <typeparam name="T5"></typeparam>
+        /// <typeparam name="T6"></typeparam>
+        /// <typeparam name="T7"></typeparam>
+        /// <typeparam name="T8"></typeparam>
+        /// <typeparam name="T9"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="condition"></param>
+        /// <param name="other"></param>
+        /// <param name="callback">当条件满足时，执行完拼接后回调委托</param>
+        /// <returns></returns>
+        public static Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, bool>> WhereIf<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, bool>> other, Action callback)
+        {
+            if (condition)
+            {
+                @this = @this.And(other);
+
+                callback?.Invoke();
+            }
+
+            return @this;
+        }
+
+        /// <summary>
+        /// WhereIf
         /// </summary>
         /// <typeparam name="T1"></typeparam>
         /// <typeparam name="T2"></typeparam>
@@ -887,10 +1112,40 @@ namespace SQLBuilder
         /// <param name="condition"></param>
         /// <param name="other"></param>
         /// <returns></returns>
-        public static Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> WhereIF<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> other)
+        public static Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> WhereIf<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> other)
         {
             if (condition)
                 @this = @this.And(other);
+
+            return @this;
+        }
+
+        /// <summary>
+        /// WhereIf
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <typeparam name="T3"></typeparam>
+        /// <typeparam name="T4"></typeparam>
+        /// <typeparam name="T5"></typeparam>
+        /// <typeparam name="T6"></typeparam>
+        /// <typeparam name="T7"></typeparam>
+        /// <typeparam name="T8"></typeparam>
+        /// <typeparam name="T9"></typeparam>
+        /// <typeparam name="T10"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="condition"></param>
+        /// <param name="other"></param>
+        /// <param name="callback">当条件满足时，执行完拼接后回调委托</param>
+        /// <returns></returns>
+        public static Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> WhereIf<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> @this, bool condition, Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> other, Action callback)
+        {
+            if (condition)
+            {
+                @this = @this.And(other);
+
+                callback?.Invoke();
+            }
 
             return @this;
         }
