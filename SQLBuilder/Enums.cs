@@ -27,12 +27,12 @@ namespace SQLBuilder
         /// <summary>
         /// SqlServer数据库类型
         /// </summary>
-        SQLServer,
+        SqlServer,
 
         /// <summary>
-        /// MySQL数据库类型
+        /// MySql数据库类型
         /// </summary>
-        MySQL,
+        MySql,
 
         /// <summary>
         /// Oracle数据库类型
@@ -40,14 +40,14 @@ namespace SQLBuilder
         Oracle,
 
         /// <summary>
-        /// SQLite数据库类型
+        /// Sqlite数据库类型
         /// </summary>
-        SQLite,
+        Sqlite,
 
         /// <summary>
-        /// PostgreSQL数据库类型
+        /// PostgreSql数据库类型
         /// </summary>
-        PostgreSQL,
+        PostgreSql,
     }
     #endregion
 
