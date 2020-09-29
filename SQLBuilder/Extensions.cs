@@ -1640,7 +1640,10 @@ namespace SQLBuilder
             var table = new DataTable();
             if (@this?.IsClosed == false)
             {
-                table.Load(@this);
+                using (@this)
+                {
+                    table.Load(@this);
+                }
             }
             return table;
         }
@@ -1702,29 +1705,32 @@ namespace SQLBuilder
         public static DataSet ToDataSet(this IDataReader @this)
         {
             var ds = new DataSet();
-            if (@this.IsClosed == false)
+            if (@this?.IsClosed == false)
             {
-                do
+                using (@this)
                 {
-                    var schemaTable = @this.GetSchemaTable();
-                    var dt = new DataTable();
-                    for (var i = 0; i < schemaTable.Rows.Count; i++)
+                    do
                     {
-                        var row = schemaTable.Rows[i];
-                        dt.Columns.Add(new DataColumn((string)row["ColumnName"], (Type)row["DataType"]));
-                    }
-                    while (@this.Read())
-                    {
-                        var dataRow = dt.NewRow();
-                        for (var i = 0; i < @this.FieldCount; i++)
+                        var schemaTable = @this.GetSchemaTable();
+                        var dt = new DataTable();
+                        for (var i = 0; i < schemaTable.Rows.Count; i++)
                         {
-                            dataRow[i] = @this.GetValue(i);
+                            var row = schemaTable.Rows[i];
+                            dt.Columns.Add(new DataColumn((string)row["ColumnName"], (Type)row["DataType"]));
                         }
-                        dt.Rows.Add(dataRow);
+                        while (@this.Read())
+                        {
+                            var dataRow = dt.NewRow();
+                            for (var i = 0; i < @this.FieldCount; i++)
+                            {
+                                dataRow[i] = @this.GetValue(i);
+                            }
+                            dt.Rows.Add(dataRow);
+                        }
+                        ds.Tables.Add(dt);
                     }
-                    ds.Tables.Add(dt);
+                    while (@this.NextResult());
                 }
-                while (@this.NextResult());
             }
             return ds;
         }
@@ -1815,7 +1821,7 @@ namespace SQLBuilder
             {
                 return result.FirstOrDefault();
             }
-            return default(T);
+            return default;
         }
 
         /// <summary>
@@ -2004,7 +2010,7 @@ namespace SQLBuilder
             {
                 return list.FirstOrDefault();
             }
-            return default(T);
+            return default;
         }
         #endregion
 

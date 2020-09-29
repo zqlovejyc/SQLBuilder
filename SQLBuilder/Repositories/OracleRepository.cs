@@ -18,6 +18,7 @@
 
 using Dapper;
 using Oracle.ManagedDataAccess.Client;
+using SQLBuilder.LoadBalancer;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -55,9 +56,21 @@ namespace SQLBuilder.Repositories
         {
             get
             {
-                var connection = new OracleConnection(ConnectionString);
+                OracleConnection connection;
+                if (!Master && SlaveConnectionStrings?.Count() > 0 && LoadBalancer != null)
+                {
+                    var connectionStrings = SlaveConnectionStrings.Select(x => x.connectionString);
+                    var weights = SlaveConnectionStrings.Select(x => x.weight).ToArray();
+                    var connectionString = LoadBalancer.Get(connectionStrings, weights);
+
+                    connection = new OracleConnection(connectionString);
+                }
+                else
+                    connection = new OracleConnection(MasterConnectionString);
+
                 if (connection.State != ConnectionState.Open)
                     connection.Open();
+
                 return connection;
             }
         }
@@ -67,15 +80,15 @@ namespace SQLBuilder.Repositories
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="connString">链接字符串，或者链接字符串名称</param>
-        public OracleRepository(string connString)
+        /// <param name="masterConnectionString">主库连接字符串，或者链接字符串名称</param>
+        public OracleRepository(string masterConnectionString)
         {
             //判断是链接字符串，还是链接字符串名称
-            ConnectionString = ConfigurationManager.ConnectionStrings[connString]?.ConnectionString?.Trim();
-            if (ConnectionString.IsNullOrEmpty())
-                ConnectionString = ConfigurationManager.AppSettings[connString]?.Trim();
-            if (ConnectionString.IsNullOrEmpty())
-                ConnectionString = connString;
+            MasterConnectionString = ConfigurationManager.ConnectionStrings[masterConnectionString]?.ConnectionString?.Trim();
+            if (MasterConnectionString.IsNullOrEmpty())
+                MasterConnectionString = ConfigurationManager.AppSettings[masterConnectionString]?.Trim();
+            if (MasterConnectionString.IsNullOrEmpty())
+                MasterConnectionString = masterConnectionString;
         }
         #endregion
 

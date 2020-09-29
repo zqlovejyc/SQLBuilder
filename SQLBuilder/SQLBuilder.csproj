@@ -97,6 +97,10 @@
     <Compile Include="Expression\UnaryExpressionResolve.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ISqlBuilder.cs" />
+    <Compile Include="LoadBalancer\ILoadBalancer.cs" />
+    <Compile Include="LoadBalancer\RandomLoadBalancer.cs" />
+    <Compile Include="LoadBalancer\RoundRobinLoadBalancer.cs" />
+    <Compile Include="LoadBalancer\WeightRoundRobinLoadBalancer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\BaseRepository.cs" />
     <Compile Include="Repositories\IRepository.cs" />
