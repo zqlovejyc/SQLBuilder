@@ -18,7 +18,6 @@
 
 using Dapper;
 using Oracle.ManagedDataAccess.Client;
-using SQLBuilder.LoadBalancer;
 using System;
 using System.Collections.Generic;
 using System.Configuration;

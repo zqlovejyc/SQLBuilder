@@ -16,8 +16,7 @@
  */
 #endregion
 
-using MySql.Data.MySqlClient;
-using SQLBuilder.LoadBalancer;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
