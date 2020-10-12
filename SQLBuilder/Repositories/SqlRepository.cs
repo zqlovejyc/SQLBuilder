@@ -65,7 +65,7 @@ namespace SQLBuilder.Repositories
                 {
                     var connectionStrings = SlaveConnectionStrings.Select(x => x.connectionString);
                     var weights = SlaveConnectionStrings.Select(x => x.weight).ToArray();
-                    var connectionString = LoadBalancer.Get(connectionStrings, weights);
+                    var connectionString = LoadBalancer.Get(MasterConnectionString, connectionStrings, weights);
 
                     connection = new SqlConnection(connectionString);
                 }
