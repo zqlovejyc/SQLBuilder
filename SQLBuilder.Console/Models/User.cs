@@ -6,7 +6,7 @@ using System.Text;
 using SysKey = System.ComponentModel.DataAnnotations.KeyAttribute;
 using SysTable = System.ComponentModel.DataAnnotations.Schema.TableAttribute;
 using SysColumn = System.ComponentModel.DataAnnotations.Schema.ColumnAttribute;
-using CusKey = SQLBuilder.KeyAttribute;
+using CusKey = SQLBuilder.Attributes.KeyAttribute;
 
 namespace SQLBuilder
 {

@@ -21,27 +21,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using SQLBuilder.Extensions;
+using SQLBuilder.Enums;
 
 #region Refrence Alias
 //Table
-using CusTableAttribute = SQLBuilder.TableAttribute;
+using CusTableAttribute = SQLBuilder.Attributes.TableAttribute;
 using SysTableAttribute = System.ComponentModel.DataAnnotations.Schema.TableAttribute;
 
 //Column
-using CusColumnAttribute = SQLBuilder.ColumnAttribute;
+using CusColumnAttribute = SQLBuilder.Attributes.ColumnAttribute;
 using SysColumnAttribute = System.ComponentModel.DataAnnotations.Schema.ColumnAttribute;
 
 //Key
-using CusKeyAttribute = SQLBuilder.KeyAttribute;
+using CusKeyAttribute = SQLBuilder.Attributes.KeyAttribute;
 using SysKeyAttribute = System.ComponentModel.DataAnnotations.KeyAttribute;
 #endregion
 
-namespace SQLBuilder
+namespace SQLBuilder.Entry
 {
     /// <summary>
-    /// SqlPack
+    /// SqlWrapper
     /// </summary>
-	public class SqlPack
+	public class SqlWrapper
     {
         #region Private Field
         /// <summary>
@@ -152,9 +154,9 @@ namespace SQLBuilder
 
         #region Constructor
         /// <summary>
-        /// SqlPack
+        /// SqlWrapper
         /// </summary>
-        public SqlPack()
+        public SqlWrapper()
         {
             this.DbParameters = new Dictionary<string, object>();
             this.Sql = new StringBuilder();
@@ -176,13 +178,13 @@ namespace SQLBuilder
         /// <summary>
         /// operator +
         /// </summary>
-        /// <param name="sqlPack">sql打包对象</param>
+        /// <param name="sqlWrapper">sql打包对象</param>
         /// <param name="sql">sql语句</param>
-        /// <returns>SqlPack</returns>
-        public static SqlPack operator +(SqlPack sqlPack, string sql)
+        /// <returns>SqlWrapper</returns>
+        public static SqlWrapper operator +(SqlWrapper sqlWrapper, string sql)
         {
-            sqlPack.Sql.Append(sql);
-            return sqlPack;
+            sqlWrapper.Sql.Append(sql);
+            return sqlWrapper;
         }
         #endregion
 

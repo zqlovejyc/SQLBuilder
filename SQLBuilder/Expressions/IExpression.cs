@@ -16,23 +16,25 @@
  */
 #endregion
 
+using SQLBuilder.Entry;
+using SQLBuilder.Enums;
 using System.Linq.Expressions;
 
-namespace SQLBuilder
+namespace SQLBuilder.Expressions
 {
     /// <summary>
-    /// ISqlBuilder
+    /// IExpression
     /// </summary>
-	public interface ISqlBuilder
+	public interface IExpression
     {
         #region Update
         /// <summary>
         /// Update
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
-        /// <returns>SqlPack</returns>
-        SqlPack Update(Expression expression, SqlPack sqlPack);
+        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <returns>SqlWrapper</returns>
+        SqlWrapper Update(Expression expression, SqlWrapper sqlWrapper);
         #endregion
 
         #region Insert
@@ -40,9 +42,9 @@ namespace SQLBuilder
         /// Insert
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
-        /// <returns>SqlPack</returns>
-        SqlPack Insert(Expression expression, SqlPack sqlPack);
+        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <returns>SqlWrapper</returns>
+        SqlWrapper Insert(Expression expression, SqlWrapper sqlWrapper);
         #endregion
 
         #region Select
@@ -50,9 +52,9 @@ namespace SQLBuilder
         /// Select
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
+        /// <param name="sqlWrapper">sql打包对象</param>
         /// <returns></returns>
-        SqlPack Select(Expression expression, SqlPack sqlPack);
+        SqlWrapper Select(Expression expression, SqlWrapper sqlWrapper);
         #endregion
 
         #region Join
@@ -60,9 +62,9 @@ namespace SQLBuilder
         /// Join
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
+        /// <param name="sqlWrapper">sql打包对象</param>
         /// <returns></returns>
-        SqlPack Join(Expression expression, SqlPack sqlPack);
+        SqlWrapper Join(Expression expression, SqlWrapper sqlWrapper);
         #endregion
 
         #region Where
@@ -70,9 +72,9 @@ namespace SQLBuilder
         /// Where
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
+        /// <param name="sqlWrapper">sql打包对象</param>
         /// <returns></returns>
-        SqlPack Where(Expression expression, SqlPack sqlPack);
+        SqlWrapper Where(Expression expression, SqlWrapper sqlWrapper);
         #endregion
 
         #region In
@@ -80,9 +82,9 @@ namespace SQLBuilder
         /// In
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
+        /// <param name="sqlWrapper">sql打包对象</param>
         /// <returns></returns>
-        SqlPack In(Expression expression, SqlPack sqlPack);
+        SqlWrapper In(Expression expression, SqlWrapper sqlWrapper);
         #endregion
 
         #region GroupBy
@@ -90,9 +92,9 @@ namespace SQLBuilder
         /// GroupBy
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
+        /// <param name="sqlWrapper">sql打包对象</param>
         /// <returns></returns>
-        SqlPack GroupBy(Expression expression, SqlPack sqlPack);
+        SqlWrapper GroupBy(Expression expression, SqlWrapper sqlWrapper);
         #endregion
 
         #region OrderBy
@@ -100,10 +102,10 @@ namespace SQLBuilder
         /// OrderBy
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
+        /// <param name="sqlWrapper">sql打包对象</param>
         /// <param name="orders">排序类型</param>
         /// <returns></returns>
-        SqlPack OrderBy(Expression expression, SqlPack sqlPack, params OrderType[] orders);
+        SqlWrapper OrderBy(Expression expression, SqlWrapper sqlWrapper, params OrderType[] orders);
         #endregion
 
         #region Max
@@ -111,9 +113,9 @@ namespace SQLBuilder
         /// Max
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
-        /// <returns>SqlPack</returns>
-        SqlPack Max(Expression expression, SqlPack sqlPack);
+        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <returns>SqlWrapper</returns>
+        SqlWrapper Max(Expression expression, SqlWrapper sqlWrapper);
         #endregion
 
         #region Min
@@ -121,9 +123,9 @@ namespace SQLBuilder
         /// Min
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
-        /// <returns>SqlPack</returns>
-        SqlPack Min(Expression expression, SqlPack sqlPack);
+        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <returns>SqlWrapper</returns>
+        SqlWrapper Min(Expression expression, SqlWrapper sqlWrapper);
         #endregion
 
         #region Avg
@@ -131,9 +133,9 @@ namespace SQLBuilder
         /// Avg
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
-        /// <returns>SqlPack</returns>
-        SqlPack Avg(Expression expression, SqlPack sqlPack);
+        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <returns>SqlWrapper</returns>
+        SqlWrapper Avg(Expression expression, SqlWrapper sqlWrapper);
         #endregion
 
         #region Count
@@ -141,9 +143,9 @@ namespace SQLBuilder
         /// Count
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
-        /// <returns>SqlPack</returns>
-        SqlPack Count(Expression expression, SqlPack sqlPack);
+        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <returns>SqlWrapper</returns>
+        SqlWrapper Count(Expression expression, SqlWrapper sqlWrapper);
         #endregion
 
         #region Sum
@@ -151,9 +153,9 @@ namespace SQLBuilder
         /// Sum
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
-        /// <returns>SqlPack</returns>
-        SqlPack Sum(Expression expression, SqlPack sqlPack);
+        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <returns>SqlWrapper</returns>
+        SqlWrapper Sum(Expression expression, SqlWrapper sqlWrapper);
         #endregion
     }
 }

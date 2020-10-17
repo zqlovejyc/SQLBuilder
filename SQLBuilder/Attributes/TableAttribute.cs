@@ -16,30 +16,33 @@
  */
 #endregion
 
-using System.Linq.Expressions;
+using System;
 
-namespace SQLBuilder
+namespace SQLBuilder.Attributes
 {
     /// <summary>
-    /// 表示命名参数表达式
+    /// 指定表名
     /// </summary>
-    public class ParameterExpressionResolve : BaseSqlBuilder<ParameterExpression>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false)]
+    public class TableAttribute : Attribute
     {
-        #region Override Base Class Methods
         /// <summary>
-        /// Select
+        /// 构造函数
         /// </summary>
-        /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
-        /// <returns>SqlPack</returns>
-		public override SqlPack Select(ParameterExpression expression, SqlPack sqlPack)
+        /// <param name="name">数据库表名</param>
+        public TableAttribute(string name = null)
         {
-            var tableName = sqlPack.GetTableName(expression.Type);
-            sqlPack.SetTableAlias(tableName);
-            var tableAlias = sqlPack.GetTableAlias(tableName);
-            sqlPack.SelectFields.Add($"{tableAlias}.*");
-            return sqlPack;
+            if (name != null) this.Name = name;
         }
-        #endregion
+
+        /// <summary>
+        /// 数据库表名
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
+        /// 数据库模式
+        /// </summary>
+        public string Schema { get; set; }
     }
 }

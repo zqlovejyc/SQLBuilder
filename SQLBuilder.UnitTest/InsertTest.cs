@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SQLBuilder.Entry;
+using SQLBuilder.Enums;
 using System;
 using System.Collections.Generic;
 

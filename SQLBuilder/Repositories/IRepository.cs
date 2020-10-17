@@ -16,6 +16,7 @@
  */
 #endregion
 
+using SQLBuilder.Enums;
 using SQLBuilder.LoadBalancer;
 using System;
 using System.Collections.Generic;

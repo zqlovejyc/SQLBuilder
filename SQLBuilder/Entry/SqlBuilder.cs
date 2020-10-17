@@ -16,16 +16,17 @@
  */
 #endregion
 
+using SQLBuilder.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace SQLBuilder
+namespace SQLBuilder.Entry
 {
     /// <summary>
     /// SqlBuilder
     /// </summary>
-	public static class SqlBuilder
+    public static class SqlBuilder
     {
         #region Insert
         /// <summary>

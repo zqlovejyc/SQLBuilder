@@ -16,27 +16,28 @@
  */
 #endregion
 
-using System.Linq.Expressions;
+using System;
 
-namespace SQLBuilder
+namespace SQLBuilder.Attributes
 {
     /// <summary>
-    /// 描述一个lambda表达式
+    /// 指定表主键
     /// </summary>
-    public class LambdaExpressionResolve : BaseSqlBuilder<LambdaExpression>
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
+    public class KeyAttribute : Attribute
     {
-        #region Override Base Class Methods
         /// <summary>
-        /// Where
+        /// 构造函数
         /// </summary>
-        /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
-        /// <returns>SqlPack</returns>
-        public override SqlPack Where(LambdaExpression expression, SqlPack sqlPack)
+        /// <param name="name"></param>
+        public KeyAttribute(string name = null)
         {
-            SqlBuilderProvider.Where(expression.Body, sqlPack);
-            return sqlPack;
+            if (name != null) this.Name = name;
         }
-        #endregion
+
+        /// <summary>
+        /// 主键名称
+        /// </summary>
+        public string Name { get; set; }
     }
 }

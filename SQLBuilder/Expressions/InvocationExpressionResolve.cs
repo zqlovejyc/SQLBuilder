@@ -16,26 +16,27 @@
  */
 #endregion
 
+using SQLBuilder.Entry;
 using System.Linq.Expressions;
 
-namespace SQLBuilder
+namespace SQLBuilder.Expressions
 {
     /// <summary>
     /// 表示将委托或lambda表达式应用于参数表达式列表的表达式
     /// </summary>
-    public class InvocationExpressionResolve : BaseSqlBuilder<InvocationExpression>
+    public class InvocationExpressionResolve : BaseExpression<InvocationExpression>
     {
         #region Override Base Class Methods
         /// <summary>
         /// Where
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlPack">sql打包对象</param>
-        /// <returns>SqlPack</returns>
-        public override SqlPack Where(InvocationExpression expression, SqlPack sqlPack)
+        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <returns>SqlWrapper</returns>
+        public override SqlWrapper Where(InvocationExpression expression, SqlWrapper sqlWrapper)
         {
-            SqlBuilderProvider.Where(expression.Expression, sqlPack);
-            return sqlPack;
+            SqlExpressionProvider.Where(expression.Expression, sqlWrapper);
+            return sqlWrapper;
         }
         #endregion
     }

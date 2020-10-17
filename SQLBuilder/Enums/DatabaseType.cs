@@ -16,9 +16,8 @@
  */
 #endregion
 
-namespace SQLBuilder
+namespace SQLBuilder.Enums
 {
-    #region DatabaseType
     /// <summary>
     /// 数据库类型
     /// </summary>
@@ -47,25 +46,6 @@ namespace SQLBuilder
         /// <summary>
         /// PostgreSql数据库类型
         /// </summary>
-        PostgreSql,
+        PostgreSql
     }
-    #endregion
-
-    #region OrderType
-    /// <summary>
-    /// 排序方式
-    /// </summary>
-    public enum OrderType
-    {
-        /// <summary>
-        /// 升序
-        /// </summary>
-        Ascending,
-
-        /// <summary>
-        /// 降序
-        /// </summary>
-        Descending
-    }
-    #endregion
 }
