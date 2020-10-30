@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SQLBuilder.Entry;
 using SQLBuilder.Enums;
 using SQLBuilder.Extensions;
@@ -18,7 +18,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Max()
         {
             var builder = SqlBuilder.Max<UserInfo>(u => u.Id).Where(o => o.Id == 3);
-            Assert.AreEqual("SELECT MAX([Id]) FROM [Base_UserInfo] WHERE [Id] = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT MAX([Id]) FROM [Base_UserInfo] WHERE [Id] = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
         #endregion
@@ -96,7 +96,7 @@ namespace SQLBuilder.UnitTest
             var builder = SqlBuilder.Select<UserInfo>()
                                     .Where(o => o.Name == "张强")
                                     .GroupBy(u => u.Id);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] = @Parameter1 GROUP BY [A].[Id]", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] = @p__1 GROUP BY [t].[Id]", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -109,7 +109,7 @@ namespace SQLBuilder.UnitTest
             var builder = SqlBuilder.Select<UserInfo>()
                                     .Where(o => o.Name == "张强")
                                     .GroupBy(u => new { u.Id, u.Email });
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] = @Parameter1 GROUP BY [A].[Id],[A].[Email]", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] = @p__1 GROUP BY [t].[Id],[t].[Email]", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -122,7 +122,7 @@ namespace SQLBuilder.UnitTest
             var builder = SqlBuilder.Select<UserInfo>()
                                     .Where(o => o.Name == "张强")
                                     .GroupBy(u => new[] { "Id", "Email" });
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] = @Parameter1 GROUP BY [A].[Id],[A].[Email]", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] = @p__1 GROUP BY [t].[Id],[t].[Email]", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -135,7 +135,7 @@ namespace SQLBuilder.UnitTest
             var builder = SqlBuilder.Select<UserInfo>()
                                     .Where(o => o.Name == "张强")
                                     .GroupBy(u => new List<string> { "Id", "Email" });
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] = @Parameter1 GROUP BY [A].[Id],[A].[Email]", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] = @p__1 GROUP BY [t].[Id],[t].[Email]", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -148,7 +148,7 @@ namespace SQLBuilder.UnitTest
             var builder = SqlBuilder.Select<UserInfo>()
                                     .Where(o => o.Name == "张强")
                                     .GroupBy(u => "Id,Email".Split(','));
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] = @Parameter1 GROUP BY [A].[Id],[A].[Email]", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] = @p__1 GROUP BY [t].[Id],[t].[Email]", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -162,7 +162,7 @@ namespace SQLBuilder.UnitTest
             var builder = SqlBuilder.Select<UserInfo>()
                                     .Where(o => o.Name == "张强")
                                     .GroupBy(u => groupFields);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] = @Parameter1 GROUP BY [A].[Id],[A].[Email]", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] = @p__1 GROUP BY [t].[Id],[t].[Email]", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -176,7 +176,7 @@ namespace SQLBuilder.UnitTest
             var builder = SqlBuilder.Select<UserInfo>()
                                     .Where(o => o.Name == "张强")
                                     .GroupBy(u => groupFields);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] = @Parameter1 GROUP BY [A].[Id],[A].[Email]", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] = @p__1 GROUP BY [t].[Id],[t].[Email]", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -194,7 +194,7 @@ namespace SQLBuilder.UnitTest
                                         o => o.Name == "张强")
                                     .GroupBy<Student>(
                                         (x, y) => new { x.Email, y.Name });
-            Assert.AreEqual("SELECT [A].[Email],[B].[Name] FROM [Base_UserInfo] AS [A] INNER JOIN [Base_Student] AS [B] ON [A].[Id] = [B].[UserId] WHERE [A].[Name] = @Parameter1 GROUP BY [A].[Email],[B].[Name]", builder.Sql);
+            Assert.AreEqual("SELECT [x].[Email],[y].[Name] FROM [Base_UserInfo] AS [x] INNER JOIN [Base_Student] AS [y] ON [x].[Id] = [y].[UserId] WHERE [x].[Name] = @p__1 GROUP BY [x].[Email],[y].[Name]", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
         #endregion
@@ -208,7 +208,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => new { u.Id, u.Email }, OrderType.Ascending, OrderType.Descending);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] ASC,[A].[Email] DESC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] ASC,[t].[Email] DESC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -220,7 +220,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => new { u.Id, u.Email }, OrderType.Descending);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] DESC,[A].[Email] ASC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] DESC,[t].[Email] ASC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -232,7 +232,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => new { u.Id, u.Email });
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] ASC,[A].[Email] ASC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] ASC,[t].[Email] ASC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -244,7 +244,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => new[] { "Id", "Email" });
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] ASC,[A].[Email] ASC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] ASC,[t].[Email] ASC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -256,7 +256,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => new List<string> { "[Id]", "Email" });
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] ASC,[A].[Email] ASC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] ASC,[t].[Email] ASC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -269,7 +269,7 @@ namespace SQLBuilder.UnitTest
             var orderFields = "Id,Email";
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => orderFields.Split(',').ToList());
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] ASC,[A].[Email] ASC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] ASC,[t].[Email] ASC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -282,7 +282,7 @@ namespace SQLBuilder.UnitTest
             var orderFields = "Id,Email".Split(',').ToList();
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => orderFields);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] ASC,[A].[Email] ASC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] ASC,[t].[Email] ASC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -295,7 +295,7 @@ namespace SQLBuilder.UnitTest
             var orderField = "Id";
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => orderField);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] ASC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] ASC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -307,7 +307,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => "[Id] DESC");
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] DESC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] DESC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -320,7 +320,7 @@ namespace SQLBuilder.UnitTest
             var orderFields = "Id,Email".Split(',');
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => orderFields);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] ASC,[A].[Email] ASC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] ASC,[t].[Email] ASC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -333,7 +333,7 @@ namespace SQLBuilder.UnitTest
             var orderFields = "Id,Email".Split(',');
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => orderFields.ToList(), OrderType.Descending, OrderType.Descending);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] DESC,[A].[Email] DESC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] DESC,[t].[Email] DESC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -346,7 +346,7 @@ namespace SQLBuilder.UnitTest
             var orderField = "Id";
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => orderField, OrderType.Descending);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] DESC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] DESC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -358,7 +358,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => u.Id, OrderType.Descending);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] DESC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] DESC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -370,7 +370,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => u.Id, OrderType.Ascending);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] ASC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] ASC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -382,7 +382,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => u.Id);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id]", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -394,7 +394,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>()
                                     .OrderBy(u => "[Id] DESC");
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] ORDER BY [A].[Id] DESC", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] ORDER BY [t].[Id] DESC", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -414,7 +414,7 @@ namespace SQLBuilder.UnitTest
                                         (x, y) => new { x.Email, y.Name })
                                     .OrderBy<Student>(
                                         (x, y) => y.Name);
-            Assert.AreEqual("SELECT [A].[Email],[B].[Name] FROM [Base_UserInfo] AS [A] INNER JOIN [Base_Student] AS [B] ON [A].[Id] = [B].[UserId] WHERE [A].[Name] = @Parameter1 GROUP BY [A].[Email],[B].[Name] ORDER BY [B].[Name]", builder.Sql);
+            Assert.AreEqual("SELECT [x].[Email],[y].[Name] FROM [Base_UserInfo] AS [x] INNER JOIN [Base_Student] AS [y] ON [x].[Id] = [y].[UserId] WHERE [x].[Name] = @p__1 GROUP BY [x].[Email],[y].[Name] ORDER BY [y].[Name]", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
         #endregion
@@ -427,7 +427,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_Top_01()
         {
             var builder = SqlBuilder.Select<UserInfo>(u => new { u.Id, u.Name }).Top(100);
-            Assert.AreEqual("SELECT TOP 100 [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A]", builder.Sql);
+            Assert.AreEqual("SELECT TOP 100 [u].[Id],[u].[Name] FROM [Base_UserInfo] AS [u]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -438,7 +438,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_Top_02()
         {
             var builder = SqlBuilder.Select<UserInfo>(u => new { u.Id, u.Name }, DatabaseType.MySql).Top(100);
-            Assert.AreEqual("SELECT `A`.`Id`,`A`.`Name` FROM `Base_UserInfo` AS `A` LIMIT 100 OFFSET 0", builder.Sql);
+            Assert.AreEqual("SELECT `u`.`Id`,`u`.`Name` FROM `Base_UserInfo` AS `u` LIMIT 100 OFFSET 0", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -449,7 +449,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_Top_03()
         {
             var builder = SqlBuilder.Select<UserInfo>(u => new { u.Id, u.Name }, DatabaseType.Oracle).OrderBy(x => x.Name).Top(100);
-            Assert.AreEqual("SELECT * FROM (SELECT \"A\".\"Id\",\"A\".\"Name\" FROM \"Base_UserInfo\" \"A\" ORDER BY \"A\".\"Name\") T WHERE ROWNUM <= 100", builder.Sql);
+            Assert.AreEqual("SELECT * FROM (SELECT \"u\".\"Id\",\"u\".\"Name\" FROM \"Base_UserInfo\" \"u\" ORDER BY \"u\".\"Name\") T WHERE ROWNUM <= 100", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
         #endregion
@@ -462,7 +462,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_Distinct_01()
         {
             var builder = SqlBuilder.Select<UserInfo>(u => new { u.Id, u.Name }).Top(100).Distinct();
-            Assert.AreEqual("SELECT DISTINCT TOP 100 [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A]", builder.Sql);
+            Assert.AreEqual("SELECT DISTINCT TOP 100 [u].[Id],[u].[Name] FROM [Base_UserInfo] AS [u]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -473,7 +473,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_Distinct_02()
         {
             var builder = SqlBuilder.Select<UserInfo>(u => new { u.Id, u.Name }).Distinct().Top(100);
-            Assert.AreEqual("SELECT DISTINCT TOP 100 [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A]", builder.Sql);
+            Assert.AreEqual("SELECT DISTINCT TOP 100 [u].[Id],[u].[Name] FROM [Base_UserInfo] AS [u]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
         #endregion
@@ -486,7 +486,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_01()
         {
             var builder = SqlBuilder.Select<UserInfo>();
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A]", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -497,7 +497,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_02()
         {
             var builder = SqlBuilder.Select<UserInfo>(u => u.Id);
-            Assert.AreEqual("SELECT [A].[Id] FROM [Base_UserInfo] AS [A]", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id] FROM [Base_UserInfo] AS [u]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -508,7 +508,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_03()
         {
             var builder = SqlBuilder.Select<UserInfo>(u => new { u.Id, u.Name });
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A]", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id],[u].[Name] FROM [Base_UserInfo] AS [u]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -519,7 +519,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_04()
         {
             var builder = SqlBuilder.Select<UserInfo>(u => new { u.Id, UserName = u.Name });
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] AS [UserName] FROM [Base_UserInfo] AS [A]", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id],[u].[Name] AS [UserName] FROM [Base_UserInfo] AS [u]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -532,7 +532,7 @@ namespace SQLBuilder.UnitTest
             var entity = new { name = "新用户" };
             var builder = SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name })
                                     .Where(u => u.Name == entity.name);
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[Name] FROM [Base_UserInfo] AS [o] WHERE [o].[Name] = @p__1", builder.Sql);
             Assert.AreEqual("新用户", builder.Parameters.First().Value);
         }
 
@@ -544,7 +544,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>(u => u.Id)
                                     .Where(u => u.Name.Like("张三"));
-            Assert.AreEqual("SELECT [A].[Id] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] LIKE '%' + @Parameter1 + '%'", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id] FROM [Base_UserInfo] AS [u] WHERE [u].[Name] LIKE '%' + @p__1 + '%'", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -557,7 +557,7 @@ namespace SQLBuilder.UnitTest
             var name = "张三";
             var builder = SqlBuilder.Select<UserInfo>(u => u.Id)
                                     .Where(u => u.Name.NotLike(name));
-            Assert.AreEqual("SELECT [A].[Id] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] NOT LIKE '%' + @Parameter1 + '%'", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id] FROM [Base_UserInfo] AS [u] WHERE [u].[Name] NOT LIKE '%' + @p__1 + '%'", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -570,7 +570,7 @@ namespace SQLBuilder.UnitTest
             var name = "张三";
             var builder = SqlBuilder.Select<UserInfo>(u => u.Id)
                                     .Where(u => u.Name.LikeRight(name));
-            Assert.AreEqual("SELECT [A].[Id] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] LIKE @Parameter1 + '%'", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id] FROM [Base_UserInfo] AS [u] WHERE [u].[Name] LIKE @p__1 + '%'", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -582,7 +582,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>(u => u.Name)
                                     .Where(u => u.Id.In(1, 2, 3));
-            Assert.AreEqual("SELECT [A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] IN (@Parameter1,@Parameter2,@Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Name] FROM [Base_UserInfo] AS [u] WHERE [u].[Id] IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -595,7 +595,7 @@ namespace SQLBuilder.UnitTest
             int[] aryId = { 1, 2, 3 };
             var builder = SqlBuilder.Select<UserInfo>(u => u.Name)
                                     .Where(u => u.Id.In(aryId));
-            Assert.AreEqual("SELECT [A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] IN (@Parameter1,@Parameter2,@Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Name] FROM [Base_UserInfo] AS [u] WHERE [u].[Id] IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -607,7 +607,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>(u => u.Name)
                                     .Where(u => u.Name.In(new string[] { "a", "b" }));
-            Assert.AreEqual("SELECT [A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] IN (@Parameter1,@Parameter2)", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Name] FROM [Base_UserInfo] AS [u] WHERE [u].[Name] IN (@p__1,@p__2)", builder.Sql);
             Assert.AreEqual(2, builder.Parameters.Count);
         }
 
@@ -619,7 +619,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>(u => u.Name)
                                     .Where(u => u.Id.NotIn(1, 2, 3));
-            Assert.AreEqual("SELECT [A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] NOT IN (@Parameter1,@Parameter2,@Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Name] FROM [Base_UserInfo] AS [u] WHERE [u].[Id] NOT IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -641,7 +641,7 @@ namespace SQLBuilder.UnitTest
                                         && u.Name.LikeRight("c")
                                         || u.Id == null
                                     );
-            Assert.AreEqual("SELECT [A].[Id] FROM [Base_UserInfo] AS [A] WHERE ((((((([A].[Name] = @Parameter1 AND ([A].[Id] > @Parameter2 AND [A].[Name] IS NOT NULL)) AND [A].[Id] > @Parameter3) AND [A].[Id] < @Parameter4) AND [A].[Id] IN (@Parameter5,@Parameter6,@Parameter7)) AND [A].[Name] LIKE '%' + @Parameter8 + '%') AND [A].[Name] LIKE '%' + @Parameter9) AND [A].[Name] LIKE @Parameter10 + '%') OR [A].[Id] IS NULL", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id] FROM [Base_UserInfo] AS [u] WHERE ((((((([u].[Name] = @p__1 AND ([u].[Id] > @p__2 AND [u].[Name] IS NOT NULL)) AND [u].[Id] > @p__3) AND [u].[Id] < @p__4) AND [u].[Id] IN (@p__5,@p__6,@p__7)) AND [u].[Name] LIKE '%' + @p__8 + '%') AND [u].[Name] LIKE '%' + @p__9) AND [u].[Name] LIKE @p__10 + '%') OR [u].[Id] IS NULL", builder.Sql);
             Assert.AreEqual(10, builder.Parameters.Count);
         }
 
@@ -653,7 +653,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo, Account>((u, a) => new { u.Id, a.Name })
                                     .Join<Account>((u, a) => u.Id == a.UserId && (u.Email == "111" || u.Email == "222"));
-            Assert.AreEqual("SELECT [A].[Id],[B].[Name] FROM [Base_UserInfo] AS [A] JOIN [Base_Account] AS [B] ON [A].[Id] = [B].[UserId] AND ([A].[Email] = @Parameter1 OR [A].[Email] = @Parameter2)", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id],[a].[Name] FROM [Base_UserInfo] AS [u] JOIN [Base_Account] AS [a] ON [u].[Id] = [a].[UserId] AND ([u].[Email] = @p__1 OR [u].[Email] = @p__2)", builder.Sql);
             Assert.AreEqual(2, builder.Parameters.Count);
         }
 
@@ -665,7 +665,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo, Account>((u, a) => new { u.Id, a.Name })
                                     .InnerJoin<Account>((u, a) => u.Id == a.UserId);
-            Assert.AreEqual("SELECT [A].[Id],[B].[Name] FROM [Base_UserInfo] AS [A] INNER JOIN [Base_Account] AS [B] ON [A].[Id] = [B].[UserId]", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id],[a].[Name] FROM [Base_UserInfo] AS [u] INNER JOIN [Base_Account] AS [a] ON [u].[Id] = [a].[UserId]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -677,7 +677,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo, Account>((u, a) => new { u.Id, a.Name })
                                     .LeftJoin<Account>((u, a) => u.Id == a.UserId);
-            Assert.AreEqual("SELECT [A].[Id],[B].[Name] FROM [Base_UserInfo] AS [A] LEFT JOIN [Base_Account] AS [B] ON [A].[Id] = [B].[UserId]", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id],[a].[Name] FROM [Base_UserInfo] AS [u] LEFT JOIN [Base_Account] AS [a] ON [u].[Id] = [a].[UserId]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -689,7 +689,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo, Account>((u, a) => new { u.Id, a.Name })
                                     .RightJoin<Account>((u, a) => u.Id == a.UserId);
-            Assert.AreEqual("SELECT [A].[Id],[B].[Name] FROM [Base_UserInfo] AS [A] RIGHT JOIN [Base_Account] AS [B] ON [A].[Id] = [B].[UserId]", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id],[a].[Name] FROM [Base_UserInfo] AS [u] RIGHT JOIN [Base_Account] AS [a] ON [u].[Id] = [a].[UserId]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -701,7 +701,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo, Account>((u, a) => new { u.Id, a.Name })
                                     .FullJoin<Account>((u, a) => u.Id == a.UserId);
-            Assert.AreEqual("SELECT [A].[Id],[B].[Name] FROM [Base_UserInfo] AS [A] FULL JOIN [Base_Account] AS [B] ON [A].[Id] = [B].[UserId]", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id],[a].[Name] FROM [Base_UserInfo] AS [u] FULL JOIN [Base_Account] AS [a] ON [u].[Id] = [a].[UserId]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -711,14 +711,15 @@ namespace SQLBuilder.UnitTest
         [TestMethod]
         public void Test_Select_19()
         {
-            var builder = SqlBuilder.Select<UserInfo, Account, Student, Class, City, Country>((u, a, s, d, e, f) => new { u.Id, a.Name, StudentName = s.Name, ClassName = d.Name, e.CityName, CountryName = f.Name })
-                                    .Join<Account>((u, a) => u.Id == a.UserId)
-                                    .LeftJoin<Account, Student>((a, s) => a.Id == s.AccountId)
-                                    .RightJoin<Student, Class>((s, c) => s.Id == c.UserId)
-                                    .InnerJoin<Class, City>((c, d) => c.CityId == d.Id)
-                                    .FullJoin<City, Country>((c, d) => c.CountryId == d.Id)
-                                    .Where(u => u.Id != null);
-            Assert.AreEqual("SELECT [A].[Id],[B].[Name],[C].[Name] AS [StudentName],[D].[Name] AS [ClassName],[E].[City_Name],[F].[Name] AS [CountryName] FROM [Base_UserInfo] AS [A] JOIN [Base_Account] AS [B] ON [A].[Id] = [B].[UserId] LEFT JOIN [Base_Student] AS [C] ON [B].[Id] = [C].[AccountId] RIGHT JOIN [Base_Class] AS [D] ON [C].[Id] = [D].[UserId] INNER JOIN [Base_City] AS [E] ON [D].[CityId] = [E].[Id] FULL JOIN [Base_Country] AS [F] ON [E].[CountryId] = [F].[Country_Id] WHERE [A].[Id] IS NOT NULL", builder.Sql);
+            var builder = SqlBuilder.Select<UserInfo, UserInfo, Account, Student, Class, City, Country>((u, t, a, s, d, e, f) => new { u.Id, UId = t.Id, a.Name, StudentName = s.Name, ClassName = d.Name, e.CityName, CountryName = f.Name })
+                                    .Join<UserInfo>((x, t) => x.Id == t.Id) //注意此处单表多次Join所以要指明具体表别名，否则都会读取第一个表别名
+                                    .Join<Account>((x, y) => x.Id == y.UserId)
+                                    .LeftJoin<Account, Student>((x, y) => x.Id == y.AccountId)
+                                    .RightJoin<Student, Class>((x, y) => x.Id == y.UserId)
+                                    .InnerJoin<Class, City>((x, y) => x.CityId == y.Id)
+                                    .FullJoin<City, Country>((x, y) => x.CountryId == y.Id)
+                                    .Where(x => x.Id != null);
+            Assert.AreEqual("SELECT [u].[Id],[t].[Id] AS [UId],[a].[Name],[s].[Name] AS [StudentName],[d].[Name] AS [ClassName],[e].[City_Name],[f].[Name] AS [CountryName] FROM [Base_UserInfo] AS [u] JOIN [Base_UserInfo] AS [t] ON [u].[Id] = [t].[Id] JOIN [Base_Account] AS [a] ON [u].[Id] = [a].[UserId] LEFT JOIN [Base_Student] AS [s] ON [a].[Id] = [s].[AccountId] RIGHT JOIN [Base_Class] AS [d] ON [s].[Id] = [d].[UserId] INNER JOIN [Base_City] AS [e] ON [d].[CityId] = [e].[Id] FULL JOIN [Base_Country] AS [f] ON [e].[CountryId] = [f].[Country_Id] WHERE [u].[Id] IS NOT NULL", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -731,7 +732,7 @@ namespace SQLBuilder.UnitTest
             var builder = SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name }, DatabaseType.MySql)
                                     .Where(u => 1 == 1)
                                     .AndWhere(u => u.Name == "");
-            Assert.AreEqual("SELECT `A`.`Id`,`A`.`Name` FROM `Base_UserInfo` AS `A` WHERE (`A`.`Name` = ?Parameter1)", builder.Sql);
+            Assert.AreEqual("SELECT `o`.`Id`,`o`.`Name` FROM `Base_UserInfo` AS `o` WHERE (`o`.`Name` = ?p__1)", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -745,7 +746,7 @@ namespace SQLBuilder.UnitTest
                                     .Where(u => u.Name.Contains("11"))
                                     .AndWhere(u => !string.IsNullOrEmpty(u.Name))
                                     .AndWhere(u => string.IsNullOrEmpty(u.Email));
-            Assert.AreEqual("SELECT [A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] LIKE '%' + @Parameter1 + '%' AND (([A].[Name] IS NOT NULL AND [A].[Name] <> '')) AND (([A].[Email] IS NULL OR [A].[Email] = ''))", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Name] FROM [Base_UserInfo] AS [u] WHERE [u].[Name] LIKE '%' + @p__1 + '%' AND (([u].[Name] IS NOT NULL AND [u].[Name] <> '')) AND (([u].[Email] IS NULL OR [u].[Email] = ''))", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -759,7 +760,7 @@ namespace SQLBuilder.UnitTest
             expr = expr.And(o => o.Id > 0);
             expr = expr.Or(o => o.Email != "");
             var builder = SqlBuilder.Select<UserInfo>().Where(expr);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Id] > @Parameter1 OR [A].[Email] <> @Parameter2", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Id] > @p__1 OR [t].[Email] <> @p__2", builder.Sql);
             Assert.AreEqual(2, builder.Parameters.Count);
         }
 
@@ -770,7 +771,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_23()
         {
             var builder = SqlBuilder.Select<UserInfo>().WithKey(2);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Id] = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Id] = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -782,7 +783,7 @@ namespace SQLBuilder.UnitTest
         {
             var expr = LinqExtensions.True<UserInfo>();
             var builder = SqlBuilder.Select<UserInfo>().Where(expr);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A]", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t]", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -794,7 +795,7 @@ namespace SQLBuilder.UnitTest
         {
             var expr = LinqExtensions.False<UserInfo>();
             var builder = SqlBuilder.Select<UserInfo>().Where(expr);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE  1 = 0 ", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE  1 = 0 ", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -807,7 +808,7 @@ namespace SQLBuilder.UnitTest
             var entity = new UserInfo { Name = "新用户" };
             var builder = SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name })
                                     .Where(u => u.Name == entity.Name);
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[Name] FROM [Base_UserInfo] AS [o] WHERE [o].[Name] = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -824,7 +825,7 @@ namespace SQLBuilder.UnitTest
                 builder = SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name })
                                     .Where(u => u.Name == _.Name);
             });
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[Name] FROM [Base_UserInfo] AS [o] WHERE [o].[Name] = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -841,7 +842,7 @@ namespace SQLBuilder.UnitTest
                 builder = SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name })
                                     .Where(u => u.Id.Equals(_.Id));
             });
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[Name] FROM [Base_UserInfo] AS [o] WHERE [o].[Id] = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -853,7 +854,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name })
                                     .Where(u => !u.Name.Equals(null));
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] IS NOT NULL", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[Name] FROM [Base_UserInfo] AS [o] WHERE [o].[Name] IS NOT NULL", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -865,7 +866,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name })
                                     .Where(u => !u.Name.Equals(null) == true);
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] IS NOT NULL", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[Name] FROM [Base_UserInfo] AS [o] WHERE [o].[Name] IS NOT NULL", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -877,7 +878,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name })
                                     .Where(u => u.Name.Equals(null) == false);
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] IS NOT NULL", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[Name] FROM [Base_UserInfo] AS [o] WHERE [o].[Name] IS NOT NULL", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -889,7 +890,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name })
                                     .Where(u => u.Name.Equals(null) == true);
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] IS NULL", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[Name] FROM [Base_UserInfo] AS [o] WHERE [o].[Name] IS NULL", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -903,7 +904,7 @@ namespace SQLBuilder.UnitTest
                                     .Where(u => u.Name.Contains("11"))
                                     .AndWhere(u => !string.IsNullOrEmpty(u.Name) == false)
                                     .AndWhere(u => string.IsNullOrEmpty(u.Email) == true);
-            Assert.AreEqual("SELECT [A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] LIKE '%' + @Parameter1 + '%' AND (([A].[Name] IS NULL OR [A].[Name] = '')) AND (([A].[Email] IS NULL OR [A].[Email] = ''))", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Name] FROM [Base_UserInfo] AS [u] WHERE [u].[Name] LIKE '%' + @p__1 + '%' AND (([u].[Name] IS NULL OR [u].[Name] = '')) AND (([u].[Email] IS NULL OR [u].[Email] = ''))", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -920,7 +921,7 @@ namespace SQLBuilder.UnitTest
                 builder = SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name })
                                     .Where(u => u.Id.Equals(_.Id) == false);
             });
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] <> @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[Name] FROM [Base_UserInfo] AS [o] WHERE [o].[Id] <> @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -937,7 +938,7 @@ namespace SQLBuilder.UnitTest
                 builder = SqlBuilder.Select<UserInfo>(o => new { o.Id, o.Name })
                                     .Where(u => !u.Id.Equals(_.Id) == false);
             });
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[Name] FROM [Base_UserInfo] AS [o] WHERE [o].[Id] = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -950,7 +951,7 @@ namespace SQLBuilder.UnitTest
             var expr = LinqExtensions.True<UserInfo>();
             expr = expr.And(o => o.Id > 0 == false);
             var builder = SqlBuilder.Select<UserInfo>().Where(expr);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Id] <= @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Id] <= @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -963,7 +964,7 @@ namespace SQLBuilder.UnitTest
             var expr = LinqExtensions.True<UserInfo>();
             expr = expr.And(o => o.Id >= 0 == false);
             var builder = SqlBuilder.Select<UserInfo>().Where(expr);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Id] < @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Id] < @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -976,7 +977,7 @@ namespace SQLBuilder.UnitTest
             var expr = LinqExtensions.True<UserInfo>();
             expr = expr.And(o => o.Id == null == false);
             var builder = SqlBuilder.Select<UserInfo>().Where(expr);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Id] IS NOT NULL", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Id] IS NOT NULL", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -989,7 +990,7 @@ namespace SQLBuilder.UnitTest
             var expr = LinqExtensions.True<UserInfo>();
             expr = expr.And(o => !(o.Id > 0 && o.Id < 5));
             var builder = SqlBuilder.Select<UserInfo>().Where(expr);
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Id] <= @Parameter1 OR [A].[Id] >= @Parameter2", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Id] <= @p__1 OR [t].[Id] >= @p__2", builder.Sql);
             Assert.AreEqual(2, builder.Parameters.Count);
         }
 
@@ -1000,7 +1001,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_40()
         {
             var builder = SqlBuilder.Select<City3>().Select(o => new { o.Id, o.CityName, o.Age, o.Address }).Where(o => o.Id > 0);
-            Assert.AreEqual("SELECT [A].[Id],[A].[City_Name],[A].[Age],[A].[Address] FROM [Base_City3] AS [A] WHERE [A].[Id] > @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[City_Name],[o].[Age],[o].[Address] FROM [Base_City3] AS [o] WHERE [o].[Id] > @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1011,7 +1012,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_41()
         {
             var builder = SqlBuilder.Select<City3>().Select(o => new { o.Id, o.CityName, o.Age, o.Address }).Where(o => o.CityName.ToUpper() == "郑州");
-            Assert.AreEqual("SELECT [A].[Id],[A].[City_Name],[A].[Age],[A].[Address] FROM [Base_City3] AS [A] WHERE UPPER([A].[City_Name]) = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[City_Name],[o].[Age],[o].[Address] FROM [Base_City3] AS [o] WHERE UPPER([o].[City_Name]) = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1022,7 +1023,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_42()
         {
             var builder = SqlBuilder.Select<City3>().Select(o => new { o.Id, o.CityName, o.Age, o.Address }).Where(o => o.CityName.ToLower() == "郑州");
-            Assert.AreEqual("SELECT [A].[Id],[A].[City_Name],[A].[Age],[A].[Address] FROM [Base_City3] AS [A] WHERE LOWER([A].[City_Name]) = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[City_Name],[o].[Age],[o].[Address] FROM [Base_City3] AS [o] WHERE LOWER([o].[City_Name]) = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1033,7 +1034,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_43()
         {
             var builder = SqlBuilder.Select<City3>().Select(o => new { o.Id, o.CityName, o.Age, o.Address }).Where(o => o.CityName.Trim() == "郑州");
-            Assert.AreEqual("SELECT [A].[Id],[A].[City_Name],[A].[Age],[A].[Address] FROM [Base_City3] AS [A] WHERE LTRIM(RTRIM([A].[City_Name])) = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[City_Name],[o].[Age],[o].[Address] FROM [Base_City3] AS [o] WHERE LTRIM(RTRIM([o].[City_Name])) = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1044,7 +1045,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_44()
         {
             var builder = SqlBuilder.Select<City3>().Select(o => new { o.Id, o.CityName, o.Age, o.Address }).Where(o => o.CityName.TrimStart() == "郑州");
-            Assert.AreEqual("SELECT [A].[Id],[A].[City_Name],[A].[Age],[A].[Address] FROM [Base_City3] AS [A] WHERE LTRIM([A].[City_Name]) = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[City_Name],[o].[Age],[o].[Address] FROM [Base_City3] AS [o] WHERE LTRIM([o].[City_Name]) = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1055,7 +1056,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_45()
         {
             var builder = SqlBuilder.Select<City3>().Select(o => new { o.Id, o.CityName, o.Age, o.Address }).Where(o => o.CityName.TrimEnd() == "郑州");
-            Assert.AreEqual("SELECT [A].[Id],[A].[City_Name],[A].[Age],[A].[Address] FROM [Base_City3] AS [A] WHERE RTRIM([A].[City_Name]) = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [o].[Id],[o].[City_Name],[o].[Age],[o].[Address] FROM [Base_City3] AS [o] WHERE RTRIM([o].[City_Name]) = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1066,7 +1067,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_46()
         {
             var builder = SqlBuilder.Select<City3>(databaseType: DatabaseType.MySql).Select(o => new { o.Id, o.CityName, o.Age, o.Address }).Where(o => !string.IsNullOrEmpty(o.CityName) && o.CityName.Trim() == "郑州".Trim());
-            Assert.AreEqual("SELECT `A`.`Id`,`A`.`City_Name`,`A`.`Age`,`A`.`Address` FROM `Base_City3` AS `A` WHERE (`A`.`City_Name` IS NOT NULL AND `A`.`City_Name` <> '') AND TRIM(`A`.`City_Name`) = TRIM(?Parameter1)", builder.Sql);
+            Assert.AreEqual("SELECT `o`.`Id`,`o`.`City_Name`,`o`.`Age`,`o`.`Address` FROM `Base_City3` AS `o` WHERE (`o`.`City_Name` IS NOT NULL AND `o`.`City_Name` <> '') AND TRIM(`o`.`City_Name`) = TRIM(?p__1)", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1077,7 +1078,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_47()
         {
             var builder = SqlBuilder.Select<City3>(databaseType: DatabaseType.MySql).Select(o => new { o.Id, o.CityName, o.Age, o.Address }).Where(o => o.CityName.Trim().Contains("郑州".Trim()));
-            Assert.AreEqual("SELECT `A`.`Id`,`A`.`City_Name`,`A`.`Age`,`A`.`Address` FROM `Base_City3` AS `A` WHERE TRIM(`A`.`City_Name`) LIKE CONCAT('%',TRIM(?Parameter1),'%')", builder.Sql);
+            Assert.AreEqual("SELECT `o`.`Id`,`o`.`City_Name`,`o`.`Age`,`o`.`Address` FROM `Base_City3` AS `o` WHERE TRIM(`o`.`City_Name`) LIKE CONCAT('%',TRIM(?p__1),'%')", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1088,7 +1089,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_48()
         {
             var builder = SqlBuilder.Select<City3>(databaseType: DatabaseType.Sqlite).Select(o => new { o.Id, o.CityName, o.Age, o.Address }).Where(o => o.CityName.Trim().Contains("郑州".Trim()));
-            Assert.AreEqual("SELECT \"A\".\"Id\",\"A\".\"City_Name\",\"A\".\"Age\",\"A\".\"Address\" FROM \"Base_City3\" AS \"A\" WHERE TRIM(\"A\".\"City_Name\") LIKE '%' || TRIM(@Parameter1) || '%'", builder.Sql);
+            Assert.AreEqual("SELECT \"o\".\"Id\",\"o\".\"City_Name\",\"o\".\"Age\",\"o\".\"Address\" FROM \"Base_City3\" AS \"o\" WHERE TRIM(\"o\".\"City_Name\") LIKE '%' || TRIM(@p__1) || '%'", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1099,7 +1100,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_49()
         {
             var builder = SqlBuilder.Select<UserInfo>().Where(x => new[] { "a", "b", "c" }.Contains(x.Name));
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] IN (@Parameter1,@Parameter2,@Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1110,7 +1111,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_50()
         {
             var builder = SqlBuilder.Select<UserInfo>().Where(x => !new[] { "a", "b", "c" }.Contains(x.Name));
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] NOT IN (@Parameter1,@Parameter2,@Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] NOT IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1122,7 +1123,7 @@ namespace SQLBuilder.UnitTest
         {
             var array = new[] { "a", "b", "c" };
             var builder = SqlBuilder.Select<UserInfo>().Where(x => !array.Contains(x.Name));
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] NOT IN (@Parameter1,@Parameter2,@Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] NOT IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1134,7 +1135,7 @@ namespace SQLBuilder.UnitTest
         {
             var array = new[] { "a", "b", "c" };
             var builder = SqlBuilder.Select<UserInfo>().Where(x => !x.Name.In(array));
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] NOT IN (@Parameter1,@Parameter2,@Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] NOT IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1146,7 +1147,7 @@ namespace SQLBuilder.UnitTest
         {
             var array = new[] { "a", "b", "c" };
             var builder = SqlBuilder.Select<UserInfo>().Where(x => !x.Name.NotIn(array));
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] IN (@Parameter1,@Parameter2,@Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1158,7 +1159,7 @@ namespace SQLBuilder.UnitTest
         {
             var array = new[] { "a", "b", "c" };
             var builder = SqlBuilder.Select<UserInfo>().Where(x => !!array.Contains(x.Name));
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] IN (@Parameter1,@Parameter2,@Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1169,7 +1170,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_55()
         {
             var builder = SqlBuilder.Select<MyStudent>().Where(x => x.IsEffective.Value);
-            Assert.AreEqual("SELECT * FROM [student] AS [A] WHERE [A].[IsEffective] = 1", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [student] AS [t] WHERE [t].[IsEffective] = 1", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -1180,7 +1181,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_56()
         {
             var builder = SqlBuilder.Select<MyStudent>().Where(x => x.IsEffective == true);
-            Assert.AreEqual("SELECT * FROM [student] AS [A] WHERE [A].[IsEffective] = 1", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [student] AS [t] WHERE [t].[IsEffective] = 1", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -1191,7 +1192,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_57()
         {
             var builder = SqlBuilder.Select<MyStudent>().Where(x => x.IsEffective == false);
-            Assert.AreEqual("SELECT * FROM [student] AS [A] WHERE [A].[IsEffective] <> 1", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [student] AS [t] WHERE [t].[IsEffective] <> 1", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -1202,7 +1203,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_58()
         {
             var builder = SqlBuilder.Select<MyStudent>().Where(x => x.IsEffective == true && x.IsOnLine);
-            Assert.AreEqual("SELECT * FROM [student] AS [A] WHERE [A].[IsEffective] = 1 AND [A].[IsOnLine] = 1", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [student] AS [t] WHERE [t].[IsEffective] = 1 AND [t].[IsOnLine] = 1", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -1213,7 +1214,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_59()
         {
             var builder = SqlBuilder.Select<MyStudent>().Where(x => x.IsEffective == true && x.IsOnLine == true);
-            Assert.AreEqual("SELECT * FROM [student] AS [A] WHERE [A].[IsEffective] = 1 AND [A].[IsOnLine] = 1", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [student] AS [t] WHERE [t].[IsEffective] = 1 AND [t].[IsOnLine] = 1", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -1224,7 +1225,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_60()
         {
             var builder = SqlBuilder.Select<MyStudent>().Where(x => !x.IsEffective.Value && !x.IsOnLine);
-            Assert.AreEqual("SELECT * FROM [student] AS [A] WHERE [A].[IsEffective] <> 1 AND [A].[IsOnLine] <> 1", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [student] AS [t] WHERE [t].[IsEffective] <> 1 AND [t].[IsOnLine] <> 1", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -1235,7 +1236,7 @@ namespace SQLBuilder.UnitTest
         public void Test_Select_61()
         {
             var builder = SqlBuilder.Select<MyStudent>().Where(x => !x.IsEffective == true && !x.IsOnLine == true);
-            Assert.AreEqual("SELECT * FROM [student] AS [A] WHERE [A].[IsEffective] <> 1 AND [A].[IsOnLine] <> 1", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [student] AS [t] WHERE [t].[IsEffective] <> 1 AND [t].[IsOnLine] <> 1", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -1247,13 +1248,13 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder
                                 .Select<UserInfo, Account, Student, Class, City, Country>((u, a, s, d, e, f) => new { u, a.Name, StudentName = s.Name, ClassName = d.Name, e.CityName, CountryName = f.Name })
-                                .Join<Account>((u, a) => u.Id == a.UserId)
-                                .LeftJoin<Account, Student>((a, s) => a.Id == s.AccountId)
-                                .RightJoin<Student, Class>((s, c) => s.Id == c.UserId)
-                                .InnerJoin<Class, City>((c, d) => c.CityId == d.Id)
-                                .FullJoin<City, Country>((c, d) => c.CountryId == d.Id)
+                                .Join<Account>((x, y) => x.Id == y.UserId)
+                                .LeftJoin<Account, Student>((x, y) => x.Id == y.AccountId)
+                                .RightJoin<Student, Class>((x, y) => x.Id == y.UserId)
+                                .InnerJoin<Class, City>((x, y) => x.CityId == y.Id)
+                                .FullJoin<City, Country>((x, y) => x.CountryId == y.Id)
                                 .Where(u => u.Id != null);
-            Assert.AreEqual("SELECT [A].*,[B].[Name],[C].[Name] AS [StudentName],[D].[Name] AS [ClassName],[E].[City_Name],[F].[Name] AS [CountryName] FROM [Base_UserInfo] AS [A] JOIN [Base_Account] AS [B] ON [A].[Id] = [B].[UserId] LEFT JOIN [Base_Student] AS [C] ON [B].[Id] = [C].[AccountId] RIGHT JOIN [Base_Class] AS [D] ON [C].[Id] = [D].[UserId] INNER JOIN [Base_City] AS [E] ON [D].[CityId] = [E].[Id] FULL JOIN [Base_Country] AS [F] ON [E].[CountryId] = [F].[Country_Id] WHERE [A].[Id] IS NOT NULL", builder.Sql);
+            Assert.AreEqual("SELECT [u].*,[a].[Name],[s].[Name] AS [StudentName],[d].[Name] AS [ClassName],[e].[City_Name],[f].[Name] AS [CountryName] FROM [Base_UserInfo] AS [u] JOIN [Base_Account] AS [a] ON [u].[Id] = [a].[UserId] LEFT JOIN [Base_Student] AS [s] ON [a].[Id] = [s].[AccountId] RIGHT JOIN [Base_Class] AS [d] ON [s].[Id] = [d].[UserId] INNER JOIN [Base_City] AS [e] ON [d].[CityId] = [e].[Id] FULL JOIN [Base_Country] AS [f] ON [e].[CountryId] = [f].[Country_Id] WHERE [u].[Id] IS NOT NULL", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
         }
 
@@ -1266,7 +1267,7 @@ namespace SQLBuilder.UnitTest
             var builder = SqlBuilder.Select<UserInfo>(o => o, DatabaseType.MySql)
                                     .Where(u => 1 == 1)
                                     .AndWhere(u => u.Name == "");
-            Assert.AreEqual("SELECT `A`.* FROM `Base_UserInfo` AS `A` WHERE (`A`.`Name` = ?Parameter1)", builder.Sql);
+            Assert.AreEqual("SELECT `o`.* FROM `Base_UserInfo` AS `o` WHERE (`o`.`Name` = ?p__1)", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1279,7 +1280,7 @@ namespace SQLBuilder.UnitTest
             var builder = SqlBuilder.Select<UserInfo>(o => new { o }, DatabaseType.MySql)
                                     .Where(u => 1 == 1)
                                     .AndWhere(u => u.Name == "");
-            Assert.AreEqual("SELECT `A`.* FROM `Base_UserInfo` AS `A` WHERE (`A`.`Name` = ?Parameter1)", builder.Sql);
+            Assert.AreEqual("SELECT `o`.* FROM `Base_UserInfo` AS `o` WHERE (`o`.`Name` = ?p__1)", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1292,7 +1293,7 @@ namespace SQLBuilder.UnitTest
             var builder = SqlBuilder.Select<UserInfo>(o => null, DatabaseType.MySql)
                                     .Where(u => 1 == 1)
                                     .AndWhere(u => u.Name == "");
-            Assert.AreEqual("SELECT `A`.* FROM `Base_UserInfo` AS `A` WHERE (`A`.`Name` = ?Parameter1)", builder.Sql);
+            Assert.AreEqual("SELECT `o`.* FROM `Base_UserInfo` AS `o` WHERE (`o`.`Name` = ?p__1)", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1302,11 +1303,12 @@ namespace SQLBuilder.UnitTest
         [TestMethod]
         public void Test_Select_66()
         {
-            var builder = SqlBuilder.Select<UserInfo>(o => "`A`.*", DatabaseType.MySql)
-                                    .Where(u => 1 == 1)
-                                    .AndWhere(u => u.Name == "");
-            Assert.AreEqual("SELECT `A`.* FROM `Base_UserInfo` AS `A` WHERE (`A`.`Name` = ?Parameter1)", builder.Sql);
+            var builder = SqlBuilder.Select<UserInfo>(o => "`o`.*", DatabaseType.MySql)
+                                   .Where(u => 1 == 1)
+                                   .AndWhere(u => u.Name == "");
+            Assert.AreEqual("SELECT `o`.* FROM `Base_UserInfo` AS `o` WHERE (`o`.`Name` = ?p__1)", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
+
         }
 
         /// <summary>
@@ -1315,9 +1317,9 @@ namespace SQLBuilder.UnitTest
         [TestMethod]
         public void Test_Select_67()
         {
-            var builder = SqlBuilder.Select<UserInfo, Account>((u, a) => null)
+            var builder = SqlBuilder.Select<UserInfo, Account>((u, a) => new { u })
                                     .Join<Account>((u, a) => u.Id == a.UserId && (u.Email == "111" || u.Email == "222"));
-            Assert.AreEqual("SELECT [A].* FROM [Base_UserInfo] AS [A] JOIN [Base_Account] AS [B] ON [A].[Id] = [B].[UserId] AND ([A].[Email] = @Parameter1 OR [A].[Email] = @Parameter2)", builder.Sql);
+            Assert.AreEqual("SELECT [u].* FROM [Base_UserInfo] AS [u] JOIN [Base_Account] AS [a] ON [u].[Id] = [a].[UserId] AND ([u].[Email] = @p__1 OR [u].[Email] = @p__2)", builder.Sql);
             Assert.AreEqual(2, builder.Parameters.Count);
         }
 
@@ -1327,9 +1329,9 @@ namespace SQLBuilder.UnitTest
         [TestMethod]
         public void Test_Select_68()
         {
-            var builder = SqlBuilder.Select<UserInfo, Account>((u, a) => "[B].*")
+            var builder = SqlBuilder.Select<UserInfo, Account>((u, a) => "[u].*")
                                     .Join<Account>((u, a) => u.Id == a.UserId && (u.Email == "111" || u.Email == "222"));
-            Assert.AreEqual("SELECT [B].* FROM [Base_UserInfo] AS [A] JOIN [Base_Account] AS [B] ON [A].[Id] = [B].[UserId] AND ([A].[Email] = @Parameter1 OR [A].[Email] = @Parameter2)", builder.Sql);
+            Assert.AreEqual("SELECT [u].* FROM [Base_UserInfo] AS [u] JOIN [Base_Account] AS [a] ON [u].[Id] = [a].[UserId] AND ([u].[Email] = @p__1 OR [u].[Email] = @p__2)", builder.Sql);
             Assert.AreEqual(2, builder.Parameters.Count);
         }
 
@@ -1341,7 +1343,7 @@ namespace SQLBuilder.UnitTest
         {
             var list = new[] { "a", "b", "c" }.ToList();
             var builder = SqlBuilder.Select<UserInfo>().Where(x => list.Contains(x.Name));
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] IN (@Parameter1,@Parameter2,@Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1353,7 +1355,7 @@ namespace SQLBuilder.UnitTest
         {
             var list = new[] { "a", "b", "c" }.Distinct();
             var builder = SqlBuilder.Select<UserInfo>().Where(x => list.Contains(x.Name));
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] IN (@Parameter1,@Parameter2,@Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1365,7 +1367,7 @@ namespace SQLBuilder.UnitTest
         {
             var name = "test";
             var builder = SqlBuilder.Select<UserInfo>().Where(x => x.Name.Contains(name));
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Name] LIKE '%' + @Parameter1 + '%'", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Name] LIKE '%' + @p__1 + '%'", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1377,7 +1379,7 @@ namespace SQLBuilder.UnitTest
         {
             var list = new[] { 1, 2, 3 }.ToList();
             var builder = SqlBuilder.Select<UserInfo>().Where(x => list.Contains(x.Id.Value));
-            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [A] WHERE [A].[Id] IN (@Parameter1,@Parameter2,@Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT * FROM [Base_UserInfo] AS [t] WHERE [t].[Id] IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1389,7 +1391,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>(u => u.Name)
                                     .Where(u => u.Id > 1000 || (u.Id < 10 && u.Name.Equals("张三")));
-            Assert.AreEqual("SELECT [A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] > @Parameter1 OR ([A].[Id] < @Parameter2 AND [A].[Name] = @Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Name] FROM [Base_UserInfo] AS [u] WHERE [u].[Id] > @p__1 OR ([u].[Id] < @p__2 AND [u].[Name] = @p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1401,7 +1403,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>(u => u.Name)
                                     .Where(u => (u.Id < 10 && u.Name.Equals("张三")) || u.Id > 1000);
-            Assert.AreEqual("SELECT [A].[Name] FROM [Base_UserInfo] AS [A] WHERE ([A].[Id] < @Parameter1 AND [A].[Name] = @Parameter2) OR [A].[Id] > @Parameter3", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Name] FROM [Base_UserInfo] AS [u] WHERE ([u].[Id] < @p__1 AND [u].[Name] = @p__2) OR [u].[Id] > @p__3", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1413,7 +1415,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder.Select<UserInfo>(u => u.Name)
                                     .Where(u => u.Id.Equals(1000) || (u.Id < 10 && u.Name.Equals("张三")));
-            Assert.AreEqual("SELECT [A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] = @Parameter1 OR ([A].[Id] < @Parameter2 AND [A].[Name] = @Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Name] FROM [Base_UserInfo] AS [u] WHERE [u].[Id] = @p__1 OR ([u].[Id] < @p__2 AND [u].[Name] = @p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1426,7 +1428,7 @@ namespace SQLBuilder.UnitTest
             var id = "100";
             var builder = SqlBuilder.Select<UserInfo>(u => u.Name)
                                     .Where(u => u.Id == int.Parse(id) || (u.Id < 10 && u.Name.Equals("张三")));
-            Assert.AreEqual("SELECT [A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] = @Parameter1 OR ([A].[Id] < @Parameter2 AND [A].[Name] = @Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Name] FROM [Base_UserInfo] AS [u] WHERE [u].[Id] = @p__1 OR ([u].[Id] < @p__2 AND [u].[Name] = @p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1439,7 +1441,7 @@ namespace SQLBuilder.UnitTest
             var id = "100";
             var builder = SqlBuilder.Select<UserInfo>(u => u.Name)
                                     .Where(u => u.Id == int.Parse(id) || (u.Id < 10 && u.Name.Equals(Const.Name)));
-            Assert.AreEqual("SELECT [A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] = @Parameter1 OR ([A].[Id] < @Parameter2 AND [A].[Name] = @Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Name] FROM [Base_UserInfo] AS [u] WHERE [u].[Id] = @p__1 OR ([u].[Id] < @p__2 AND [u].[Name] = @p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1452,7 +1454,7 @@ namespace SQLBuilder.UnitTest
             var id = "100";
             var builder = SqlBuilder.Select<UserInfo>(u => u.Name)
                                     .Where(u => u.Id == int.Parse(id) || (u.Id < 10 && u.Name == Const.Name));
-            Assert.AreEqual("SELECT [A].[Name] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] = @Parameter1 OR ([A].[Id] < @Parameter2 AND [A].[Name] = @Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Name] FROM [Base_UserInfo] AS [u] WHERE [u].[Id] = @p__1 OR ([u].[Id] < @p__2 AND [u].[Name] = @p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1478,7 +1480,7 @@ namespace SQLBuilder.UnitTest
                             .InnerJoin<Account>(joinCondition)
                             .Where(whereCondition);
 
-            Assert.AreEqual("SELECT [A].[Id],[B].[Name] FROM [Base_UserInfo] AS [A] INNER JOIN [Base_Account] AS [B] ON ([B].[Name] IS NOT NULL AND [B].[Name] <> '') AND [A].[Id] = [B].[UserId] AND [A].[Id] = @Parameter1 AND [B].[UserId] <> @Parameter2 AND [B].[Id] = @Parameter3 WHERE [A].[Email] = @Parameter4", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id],[a].[Name] FROM [Base_UserInfo] AS [u] INNER JOIN [Base_Account] AS [a] ON ([a].[Name] IS NOT NULL AND [a].[Name] <> '') AND [u].[Id] = [a].[UserId] AND [u].[Id] = @p__1 AND [a].[UserId] <> @p__2 AND [a].[Id] = @p__3 WHERE [u].[Email] = @p__4", builder.Sql);
             Assert.AreEqual(4, builder.Parameters.Count);
         }
 
@@ -1504,7 +1506,7 @@ namespace SQLBuilder.UnitTest
                             .InnerJoin<Account>(joinCondition)
                             .Where(whereCondition);
 
-            Assert.AreEqual("SELECT [A].[Id],[B].[Name] FROM [Base_UserInfo] AS [A] INNER JOIN [Base_Account] AS [B] ON [A].[Id] = [B].[UserId] WHERE [A].[Email] = @Parameter1", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id],[a].[Name] FROM [Base_UserInfo] AS [u] INNER JOIN [Base_Account] AS [a] ON [u].[Id] = [a].[UserId] WHERE [u].[Email] = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
         }
 
@@ -1538,7 +1540,7 @@ namespace SQLBuilder.UnitTest
                                 ref hasWhere);
 
 
-            Assert.AreEqual("SELECT [A].[Id],[B].[Name] FROM [Base_UserInfo] AS [A] INNER JOIN [Base_Account] AS [B] ON [A].[Id] = [B].[UserId] AND [A].[Name] LIKE '%' + @Parameter1 + '%' WHERE ([A].[Name] LIKE '%' + @Parameter2 + '%') AND ([A].[Email] = @Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id],[a].[Name] FROM [Base_UserInfo] AS [u] INNER JOIN [Base_Account] AS [a] ON [u].[Id] = [a].[UserId] AND [u].[Name] LIKE '%' + @p__1 + '%' WHERE ([u].[Name] LIKE '%' + @p__2 + '%') AND ([u].[Email] = @p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1559,7 +1561,7 @@ namespace SQLBuilder.UnitTest
             var email = "123@qq.com";
             var builder = SqlBuilder
                             .Select<UserInfo, Account>(
-                                (u, a) => new { u.Id, UserName = "[A].[Name]" })
+                                (u, a) => new { u.Id, UserName = "[u].[Name]" })
                             .InnerJoin<Account>(
                                 joinCondition)
                             .WhereIf(
@@ -1572,7 +1574,7 @@ namespace SQLBuilder.UnitTest
                                 ref hasWhere);
 
 
-            Assert.AreEqual("SELECT [A].[Id],[A].[Name] AS [UserName] FROM [Base_UserInfo] AS [A] INNER JOIN [Base_Account] AS [B] ON [A].[Id] = [B].[UserId] AND [A].[Name] LIKE '%' + @Parameter1 + '%' WHERE ([A].[Name] LIKE '%' + @Parameter2 + '%') AND ([A].[Email] = @Parameter3)", builder.Sql);
+            Assert.AreEqual("SELECT [u].[Id],[u].[Name] AS [UserName] FROM [Base_UserInfo] AS [u] INNER JOIN [Base_Account] AS [a] ON [u].[Id] = [a].[UserId] AND [u].[Name] LIKE '%' + @p__1 + '%' WHERE ([u].[Name] LIKE '%' + @p__2 + '%') AND ([u].[Email] = @p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
 
@@ -1591,7 +1593,7 @@ namespace SQLBuilder.UnitTest
                             Address = a.Email
                         };
 
-            Assert.AreEqual("SELECT [A].[Name],[A].[Email] AS [Address] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] = @Parameter1 ORDER BY [A].[Id] ASC,[A].[Email] ASC", query.Sql);
+            Assert.AreEqual("SELECT [a].[Name],[a].[Email] AS [Address] FROM [Base_UserInfo] AS [a] WHERE [a].[Id] = @p__1 ORDER BY [a].[Id] ASC,[a].[Email] ASC", query.Sql);
             Assert.AreEqual(1, query.Parameters.Count);
         }
 
@@ -1610,7 +1612,7 @@ namespace SQLBuilder.UnitTest
                             Address = a.Email
                         };
 
-            Assert.AreEqual("SELECT [A].[Name],[A].[Email] AS [Address] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] = @Parameter1 ORDER BY [A].[Id] DESC,[A].[Email] DESC", query.Sql);
+            Assert.AreEqual("SELECT [a].[Name],[a].[Email] AS [Address] FROM [Base_UserInfo] AS [a] WHERE [a].[Id] = @p__1 ORDER BY [a].[Id] DESC,[a].[Email] DESC", query.Sql);
             Assert.AreEqual(1, query.Parameters.Count);
         }
 
@@ -1629,7 +1631,7 @@ namespace SQLBuilder.UnitTest
                             g.Id
                         };
 
-            Assert.AreEqual("SELECT [A].[Id] FROM [Base_UserInfo] AS [A] WHERE [A].[Id] IS NOT NULL AND [A].[Name] LIKE '%' + @Parameter1 + '%' ORDER BY [A].[Id] DESC GROUP BY [A].[Id]", query.Sql);
+            Assert.AreEqual("SELECT [g].[Id] FROM [Base_UserInfo] AS [g] WHERE [g].[Id] IS NOT NULL AND [g].[Name] LIKE '%' + @p__1 + '%' ORDER BY [g].[Id] DESC GROUP BY [g].[Id]", query.Sql);
             Assert.AreEqual(1, query.Parameters.Count);
         }
         #endregion
@@ -1661,7 +1663,7 @@ namespace SQLBuilder.UnitTest
                                   .AndWhere(o => o.Name == "")
                                   .OrWhere(o => o.Subject == "")
                                   .Page(3, 2, "`Id`");
-            Assert.AreEqual(@"SELECT COUNT(*)  AS `TOTAL` FROM (SELECT * FROM `student` AS `A` WHERE `A`.`Score` IS NOT NULL AND (`A`.`Name` = ?Parameter1) OR (`A`.`Subject` = ?Parameter2)) AS T;SELECT * FROM (SELECT * FROM `student` AS `A` WHERE `A`.`Score` IS NOT NULL AND (`A`.`Name` = ?Parameter1) OR (`A`.`Subject` = ?Parameter2)) AS T ORDER BY `Id` ASC LIMIT 3 OFFSET 3;", builder.Sql);
+            Assert.AreEqual(@"SELECT COUNT(*)  AS `TOTAL` FROM (SELECT * FROM `student` AS `t` WHERE `t`.`Score` IS NOT NULL AND (`t`.`Name` = ?p__1) OR (`t`.`Subject` = ?p__2)) AS T;SELECT * FROM (SELECT * FROM `student` AS `t` WHERE `t`.`Score` IS NOT NULL AND (`t`.`Name` = ?p__1) OR (`t`.`Subject` = ?p__2)) AS T ORDER BY `Id` ASC LIMIT 3 OFFSET 3;", builder.Sql);
             Assert.AreEqual(2, builder.Parameters.Count);
         }
 
@@ -1674,7 +1676,7 @@ namespace SQLBuilder.UnitTest
             var builder = SqlBuilder.Select<UserInfo>(u => u.Id)
                                   .Where(u => u.Name == "b" && (u.Id > 2 && u.Name != null && (u.Email == "11" || u.Email == "22" && u.Email == "ee")))
                                   .Page(10, 1, "[Id]");
-            Assert.AreEqual(@"SELECT COUNT(*) AS [TOTAL] FROM (SELECT [A].[Id] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] = @Parameter1 AND (([A].[Id] > @Parameter2 AND [A].[Name] IS NOT NULL) AND ([A].[Email] = @Parameter3 OR ([A].[Email] = @Parameter4 AND [A].[Email] = @Parameter5)))) AS T;SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY [Id] ASC) AS [ROWNUMBER], * FROM (SELECT [A].[Id] FROM [Base_UserInfo] AS [A] WHERE [A].[Name] = @Parameter1 AND (([A].[Id] > @Parameter2 AND [A].[Name] IS NOT NULL) AND ([A].[Email] = @Parameter3 OR ([A].[Email] = @Parameter4 AND [A].[Email] = @Parameter5)))) AS T) AS N WHERE [ROWNUMBER] BETWEEN 1 AND 10;", builder.Sql);
+            Assert.AreEqual(@"SELECT COUNT(*) AS [TOTAL] FROM (SELECT [u].[Id] FROM [Base_UserInfo] AS [u] WHERE [u].[Name] = @p__1 AND (([u].[Id] > @p__2 AND [u].[Name] IS NOT NULL) AND ([u].[Email] = @p__3 OR ([u].[Email] = @p__4 AND [u].[Email] = @p__5)))) AS T;SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY [Id] ASC) AS [ROWNUMBER], * FROM (SELECT [u].[Id] FROM [Base_UserInfo] AS [u] WHERE [u].[Name] = @p__1 AND (([u].[Id] > @p__2 AND [u].[Name] IS NOT NULL) AND ([u].[Email] = @p__3 OR ([u].[Email] = @p__4 AND [u].[Email] = @p__5)))) AS T) AS N WHERE [ROWNUMBER] BETWEEN 1 AND 10;", builder.Sql);
             Assert.AreEqual(5, builder.Parameters.Count);
         }
 

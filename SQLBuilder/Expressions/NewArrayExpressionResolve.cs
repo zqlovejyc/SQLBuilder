@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 /***
  * Copyright © 2018-2020, 张强 (943620963@qq.com).
  *
@@ -64,10 +64,13 @@ namespace SQLBuilder.Expressions
                 else
                     sqlWrapper += ",";
             }
+
             if (sqlWrapper.Sql[sqlWrapper.Sql.Length - 1] == ',')
                 sqlWrapper.Sql.Remove(sqlWrapper.Sql.Length - 1, 1);
+
             if (sqlWrapper.Sql.ToString().LastIndexOf(" UNION ALL SELECT ") > -1)
                 sqlWrapper.Sql.Remove(sqlWrapper.Sql.Length - 18, 18);
+
             return sqlWrapper;
         }
 

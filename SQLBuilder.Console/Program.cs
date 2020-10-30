@@ -283,19 +283,21 @@ namespace SQLBuilder
 
             Print(
                 SqlBuilder
-                    .Select<UserInfo, Account, Student, Class, City, Country>((u, a, s, d, e, f) =>
-                        new { u.Id, a.Name, StudentName = s.Name, ClassName = d.Name, e.CityName, CountryName = f.Name })
-                    .Join<Account>((u, a) =>
-                        u.Id == a.UserId)
-                    .LeftJoin<Account, Student>((a, s) =>
-                        a.Id == s.AccountId)
-                    .RightJoin<Student, Class>((s, c) =>
-                        s.Id == c.UserId)
-                    .InnerJoin<Class, City>((c, d) =>
-                        c.CityId == d.Id)
-                    .FullJoin<City, Country>((c, d) =>
-                        c.CountryId == d.Id)
-                    .Where(u => u.Id != null),
+                    .Select<UserInfo, UserInfo, Account, Student, Class, City, Country>((u, t, a, s, d, e, f) =>
+                         new { u.Id, UId = t.Id, a.Name, StudentName = s.Name, ClassName = d.Name, e.CityName, CountryName = f.Name })
+                    .Join<UserInfo>((x, t) =>
+                        x.Id == t.Id)
+                    .Join<Account>((x, y) =>
+                        x.Id == y.UserId)
+                    .LeftJoin<Account, Student>((x, y) =>
+                        x.Id == y.AccountId)
+                    .RightJoin<Student, Class>((x, y) =>
+                        x.Id == y.UserId)
+                    .InnerJoin<Class, City>((x, y) =>
+                        x.CityId == y.Id)
+                    .FullJoin<City, Country>((x, y) =>
+                        x.CountryId == y.Id)
+                    .Where(x => x.Id != null),
                 "多表复杂关联查询"
             );
             #endregion
@@ -741,7 +743,7 @@ namespace SQLBuilder
                 {
                     Console.WriteLine($"执行sql日志：{sql}");
                     //修改原sql
-                    return sql.Replace(" AS A", "");
+                    return sql.Replace(" AS [t]", "");
                 }),
                 "查询单表所有字段",
                 "Select"
