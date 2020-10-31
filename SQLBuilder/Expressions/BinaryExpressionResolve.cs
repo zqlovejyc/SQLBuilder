@@ -88,7 +88,7 @@ namespace SQLBuilder.Expressions
                     sqlWrapper.Sql.Insert(operatorIndex, " % ");
                     break;
                 default:
-                    throw new NotImplementedException("未实现的节点类型" + expressionNodeType);
+                    throw new NotImplementedException("NotImplemented ExpressionType " + expressionNodeType);
             }
         }
         #endregion
@@ -318,6 +318,7 @@ namespace SQLBuilder.Expressions
                         OperatorParser(expression.NodeType, signIndex, sqlWrapper);
                 }
             }
+
             return sqlWrapper;
         }
         #endregion
