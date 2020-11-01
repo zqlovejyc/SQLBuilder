@@ -60,7 +60,7 @@ namespace SQLBuilder.Expressions
             }
 
             if (sqlWrapper[sqlWrapper.Length - 1] == ',')
-                sqlWrapper.Sql.Remove(sqlWrapper.Length - 1, 1);
+                sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
 
             return sqlWrapper;
         }
@@ -74,7 +74,7 @@ namespace SQLBuilder.Expressions
         public override SqlWrapper Insert(NewExpression expression, SqlWrapper sqlWrapper)
         {
             if (sqlWrapper.DatabaseType != DatabaseType.Oracle)
-                sqlWrapper.Sql.Append("(");
+                sqlWrapper.Append("(");
 
             var fields = new List<string>();
             for (int i = 0; i < expression.Members?.Count; i++)
@@ -100,14 +100,14 @@ namespace SQLBuilder.Expressions
 
             if (sqlWrapper[sqlWrapper.Length - 1] == ',')
             {
-                sqlWrapper.Sql.Remove(sqlWrapper.Length - 1, 1);
+                sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
                 if (sqlWrapper.DatabaseType != DatabaseType.Oracle)
-                    sqlWrapper.Sql.Append(")");
+                    sqlWrapper.Append(")");
                 else
-                    sqlWrapper.Sql.Append(" FROM DUAL");
+                    sqlWrapper.Append(" FROM DUAL");
             }
 
-            sqlWrapper.Sql = new StringBuilder(string.Format(sqlWrapper.ToString(), string.Join(",", fields).TrimEnd(',')));
+            sqlWrapper.Reset(string.Format(sqlWrapper.ToString(), string.Join(",", fields).TrimEnd(',')));
 
             return sqlWrapper;
         }
@@ -128,9 +128,9 @@ namespace SQLBuilder.Expressions
 
                 //添加字段别名
                 if (argument is MemberExpression memberExpression && memberExpression.Member.Name != member.Name)
-                    sqlWrapper.SelectFields[sqlWrapper.SelectFields.Count - 1] += $" AS {sqlWrapper.GetFormatName(member.Name)}";
+                    sqlWrapper.SelectFields[sqlWrapper.FieldCount - 1] += $" AS {sqlWrapper.GetFormatName(member.Name)}";
                 else if (argument is ConstantExpression constantExpression && constantExpression.Value?.ToString() != member.Name)
-                    sqlWrapper.SelectFields[sqlWrapper.SelectFields.Count - 1] += $" AS {sqlWrapper.GetFormatName(member.Name)}";
+                    sqlWrapper.SelectFields[sqlWrapper.FieldCount - 1] += $" AS {sqlWrapper.GetFormatName(member.Name)}";
             }
 
             return sqlWrapper;
@@ -150,7 +150,7 @@ namespace SQLBuilder.Expressions
                 sqlWrapper += ",";
             }
 
-            sqlWrapper.Sql.Remove(sqlWrapper.Length - 1, 1);
+            sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
 
             return sqlWrapper;
         }
@@ -174,7 +174,7 @@ namespace SQLBuilder.Expressions
                     sqlWrapper += " ASC,";
             }
 
-            sqlWrapper.Sql.Remove(sqlWrapper.Length - 1, 1);
+            sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
 
             return sqlWrapper;
         }

@@ -44,7 +44,7 @@ namespace SQLBuilder.Expressions
             }
 
             if (sqlWrapper[sqlWrapper.Length - 1] == ',')
-                sqlWrapper.Sql.Remove(sqlWrapper.Sql.Length - 1, 1);
+                sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
 
             sqlWrapper += ")";
 
@@ -69,10 +69,10 @@ namespace SQLBuilder.Expressions
             }
 
             if (sqlWrapper[sqlWrapper.Length - 1] == ',')
-                sqlWrapper.Sql.Remove(sqlWrapper.Sql.Length - 1, 1);
+                sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
 
-            if (sqlWrapper.Sql.ToString().LastIndexOf(" UNION ALL SELECT ") > -1)
-                sqlWrapper.Sql.Remove(sqlWrapper.Sql.Length - 18, 18);
+            if (sqlWrapper.LastIndexOf(" UNION ALL SELECT ") > -1)
+                sqlWrapper.Remove(sqlWrapper.Length - 18, 18);
 
             return sqlWrapper;
         }
@@ -90,7 +90,7 @@ namespace SQLBuilder.Expressions
                 SqlExpressionProvider.GroupBy(expression.Expressions[i], sqlWrapper);
             }
 
-            sqlWrapper.Sql.Remove(sqlWrapper.Length - 1, 1);
+            sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
 
             return sqlWrapper;
         }
@@ -121,7 +121,7 @@ namespace SQLBuilder.Expressions
                     sqlWrapper += " ASC,";
             }
 
-            sqlWrapper.Sql.Remove(sqlWrapper.Length - 1, 1);
+            sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
 
             return sqlWrapper;
         }
