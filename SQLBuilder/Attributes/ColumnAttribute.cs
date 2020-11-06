@@ -32,7 +32,8 @@ namespace SQLBuilder.Attributes
         /// <param name="name">列名</param>    
         public ColumnAttribute(string name = null)
         {
-            if (name != null) this.Name = name;
+            if (name != null) 
+                this.Name = name;
         }
 
         /// <summary>
