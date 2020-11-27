@@ -100,6 +100,7 @@
     <Compile Include="Enums\OrderType.cs" />
     <Compile Include="Expressions\BaseExpression.cs" />
     <Compile Include="Expressions\BinaryExpressionResolve.cs" />
+    <Compile Include="Expressions\ConditionalExpressionReslove.cs" />
     <Compile Include="Expressions\ConstantExpressionResolve.cs" />
     <Compile Include="Expressions\IExpression.cs" />
     <Compile Include="Expressions\InvocationExpressionResolve.cs" />
