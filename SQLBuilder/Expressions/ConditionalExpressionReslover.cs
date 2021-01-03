@@ -17,28 +17,30 @@
 #endregion
 
 using SQLBuilder.Entry;
+using SQLBuilder.Extensions;
 using System.Linq.Expressions;
 
 namespace SQLBuilder.Expressions
 {
     /// <summary>
-    /// 表示命名参数表达式
+    /// 表示具有条件运算符的表达式
     /// </summary>
-    public class ParameterExpressionResolve : BaseExpression<ParameterExpression>
+    public class ConditionalExpressionReslover : BaseExpression<ConditionalExpression>
     {
         #region Override Base Class Methods
         /// <summary>
-        /// Select
+        /// Where
         /// </summary>
         /// <param name="expression">表达式树</param>
         /// <param name="sqlWrapper">sql打包对象</param>
         /// <returns>SqlWrapper</returns>
-		public override SqlWrapper Select(ParameterExpression expression, SqlWrapper sqlWrapper)
+        public override SqlWrapper Where(ConditionalExpression expression, SqlWrapper sqlWrapper)
         {
-            var tableName = sqlWrapper.GetTableName(expression.Type);
-            var tableAlias = sqlWrapper.GetTableAlias(tableName, expression.Name);
-
-            sqlWrapper.AddField($"{tableAlias}.*");
+            var res = (bool)expression.Test.ToObject();
+            if (res)
+                SqlExpressionProvider.Where(expression.IfTrue, sqlWrapper);
+            else
+                SqlExpressionProvider.Where(expression.IfFalse, sqlWrapper);
 
             return sqlWrapper;
         }

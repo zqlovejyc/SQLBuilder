@@ -28,7 +28,7 @@ namespace SQLBuilder.Expressions
     /// <summary>
     /// 表示包含集合初始值设定项的构造函数调用
     /// </summary>
-    public class ListInitExpressionResolve : BaseExpression<ListInitExpression>
+    public class ListInitExpressionResolver : BaseExpression<ListInitExpression>
     {
         #region Override Base Class Methods
         /// <summary>
