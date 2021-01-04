@@ -52,6 +52,19 @@ namespace SQLBuilder.Expressions
 
             return sqlWrapper;
         }
+
+        /// <summary>
+        /// Having
+        /// </summary>
+        /// <param name="expression">表达式树</param>
+        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <returns>SqlWrapper</returns>
+        public override SqlWrapper Having(LambdaExpression expression, SqlWrapper sqlWrapper)
+        {
+            SqlExpressionProvider.Having(expression.Body, sqlWrapper);
+
+            return sqlWrapper;
+        }
         #endregion
     }
 }
