@@ -17,9 +17,12 @@
 #endregion
 
 using FastExpressionCompiler;
+using SQLBuilder.Repositories;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace SQLBuilder.Extensions
 {
@@ -1266,6 +1269,96 @@ namespace SQLBuilder.Extensions
               .MakeGenericMethod(typeof(T), type)
               .Invoke(null, new object[] { source, lambda });
             return (IOrderedQueryable<T>)result;
+        }
+        #endregion
+
+        #region ToEntity
+        /// <summary>
+        /// 查询单个实体
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="repository"></param>
+        /// <returns></returns>
+        public static TEntity ToEntity<TEntity>(this Expression<Func<TEntity, bool>> @this, IRepository repository) where TEntity : class
+        {
+            return repository.FindEntity(@this);
+        }
+
+        /// <summary>
+        /// 查询单个实体
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="repository"></param>
+        /// <returns></returns>
+        public static async Task<TEntity> ToEntityAsync<TEntity>(this Expression<Func<TEntity, bool>> @this, IRepository repository) where TEntity : class
+        {
+            return await repository.FindEntityAsync(@this);
+        }
+        #endregion
+
+        #region ToList
+        /// <summary>
+        /// 查询集合
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="repository"></param>
+        /// <returns></returns>
+        public static List<TEntity> ToList<TEntity>(this Expression<Func<TEntity, bool>> @this, IRepository repository) where TEntity : class
+        {
+            return repository.FindList(@this)?.ToList();
+        }
+
+        /// <summary>
+        /// 查询集合
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="repository"></param>
+        /// <returns></returns>
+        public static async Task<List<TEntity>> ToListAsync<TEntity>(this Expression<Func<TEntity, bool>> @this, IRepository repository) where TEntity : class
+        {
+            return (await repository.FindListAsync(@this))?.ToList();
+        }
+        #endregion
+
+        #region ToPage
+        /// <summary>
+        /// 分页
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="repository"></param>
+        /// <param name="orderField"></param>
+        /// <param name="isAscending"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="pageIndex"></param>
+        /// <returns></returns>
+        public static (List<TEntity> list, long total) ToPage<TEntity>(this Expression<Func<TEntity, bool>> @this, IRepository repository, string orderField, bool isAscending, int pageSize, int pageIndex) where TEntity : class
+        {
+            var (list, total) = repository.FindList(@this, orderField, isAscending, pageSize, pageIndex);
+
+            return (list?.ToList(), total);
+        }
+
+        /// <summary>
+        /// 分页
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="repository"></param>
+        /// <param name="orderField"></param>
+        /// <param name="isAscending"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="pageIndex"></param>
+        /// <returns></returns>
+        public static async Task<(List<TEntity> list, long total)> ToPageAsync<TEntity>(this Expression<Func<TEntity, bool>> @this, IRepository repository, string orderField, bool isAscending, int pageSize, int pageIndex) where TEntity : class
+        {
+            var (list, total) = await repository.FindListAsync(@this, orderField, isAscending, pageSize, pageIndex);
+
+            return (list?.ToList(), total);
         }
         #endregion
     }
