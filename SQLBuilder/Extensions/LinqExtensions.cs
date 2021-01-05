@@ -1276,11 +1276,11 @@ namespace SQLBuilder.Extensions
         /// <summary>
         /// 查询单个实体
         /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <param name="this"></param>
         /// <param name="repository"></param>
         /// <returns></returns>
-        public static TEntity ToEntity<TEntity>(this Expression<Func<TEntity, bool>> @this, IRepository repository) where TEntity : class
+        public static T ToEntity<T>(this Expression<Func<T, bool>> @this, IRepository repository) where T : class
         {
             return repository.FindEntity(@this);
         }
@@ -1288,11 +1288,11 @@ namespace SQLBuilder.Extensions
         /// <summary>
         /// 查询单个实体
         /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <param name="this"></param>
         /// <param name="repository"></param>
         /// <returns></returns>
-        public static async Task<TEntity> ToEntityAsync<TEntity>(this Expression<Func<TEntity, bool>> @this, IRepository repository) where TEntity : class
+        public static async Task<T> ToEntityAsync<T>(this Expression<Func<T, bool>> @this, IRepository repository) where T : class
         {
             return await repository.FindEntityAsync(@this);
         }
@@ -1302,11 +1302,11 @@ namespace SQLBuilder.Extensions
         /// <summary>
         /// 查询集合
         /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <param name="this"></param>
         /// <param name="repository"></param>
         /// <returns></returns>
-        public static List<TEntity> ToList<TEntity>(this Expression<Func<TEntity, bool>> @this, IRepository repository) where TEntity : class
+        public static List<T> ToList<T>(this Expression<Func<T, bool>> @this, IRepository repository) where T : class
         {
             return repository.FindList(@this)?.ToList();
         }
@@ -1314,11 +1314,11 @@ namespace SQLBuilder.Extensions
         /// <summary>
         /// 查询集合
         /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <param name="this"></param>
         /// <param name="repository"></param>
         /// <returns></returns>
-        public static async Task<List<TEntity>> ToListAsync<TEntity>(this Expression<Func<TEntity, bool>> @this, IRepository repository) where TEntity : class
+        public static async Task<List<T>> ToListAsync<T>(this Expression<Func<T, bool>> @this, IRepository repository) where T : class
         {
             return (await repository.FindListAsync(@this))?.ToList();
         }
@@ -1328,7 +1328,7 @@ namespace SQLBuilder.Extensions
         /// <summary>
         /// 分页
         /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <param name="this"></param>
         /// <param name="repository"></param>
         /// <param name="orderField"></param>
@@ -1336,7 +1336,7 @@ namespace SQLBuilder.Extensions
         /// <param name="pageSize"></param>
         /// <param name="pageIndex"></param>
         /// <returns></returns>
-        public static (List<TEntity> list, long total) ToPage<TEntity>(this Expression<Func<TEntity, bool>> @this, IRepository repository, string orderField, bool isAscending, int pageSize, int pageIndex) where TEntity : class
+        public static (List<T> list, long total) ToPage<T>(this Expression<Func<T, bool>> @this, IRepository repository, string orderField, bool isAscending, int pageSize, int pageIndex) where T : class
         {
             var (list, total) = repository.FindList(@this, orderField, isAscending, pageSize, pageIndex);
 
@@ -1346,7 +1346,7 @@ namespace SQLBuilder.Extensions
         /// <summary>
         /// 分页
         /// </summary>
-        /// <typeparam name="TEntity"></typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <param name="this"></param>
         /// <param name="repository"></param>
         /// <param name="orderField"></param>
@@ -1354,7 +1354,7 @@ namespace SQLBuilder.Extensions
         /// <param name="pageSize"></param>
         /// <param name="pageIndex"></param>
         /// <returns></returns>
-        public static async Task<(List<TEntity> list, long total)> ToPageAsync<TEntity>(this Expression<Func<TEntity, bool>> @this, IRepository repository, string orderField, bool isAscending, int pageSize, int pageIndex) where TEntity : class
+        public static async Task<(List<T> list, long total)> ToPageAsync<T>(this Expression<Func<T, bool>> @this, IRepository repository, string orderField, bool isAscending, int pageSize, int pageIndex) where T : class
         {
             var (list, total) = await repository.FindListAsync(@this, orderField, isAscending, pageSize, pageIndex);
 
