@@ -146,10 +146,8 @@ namespace SQLBuilder.Expressions
                        expression.Member.DeclaringType;
 
             var tableName = sqlWrapper.GetTableName(type);
-
             var parameter = expression.Expression as ParameterExpression;
-            sqlWrapper.SetTableAlias(tableName, parameter?.Name);
-            string tableAlias = sqlWrapper.GetTableAlias(tableName, parameter?.Name);
+            var tableAlias = sqlWrapper.GetTableAlias(tableName, parameter?.Name);
 
             if (!tableAlias.IsNullOrEmpty())
                 tableAlias += ".";
@@ -171,10 +169,10 @@ namespace SQLBuilder.Expressions
                        expression.Expression.Type :
                        expression.Member.DeclaringType;
 
-            var parameter = expression.Expression as ParameterExpression;
-
             var tableName = sqlWrapper.GetTableName(type);
-            string tableAlias = sqlWrapper.GetTableAlias(tableName, parameter?.Name);
+            var parameter = expression.Expression as ParameterExpression;
+            var tableAlias = sqlWrapper.GetTableAlias(tableName, parameter?.Name);
+
             if (!tableAlias.IsNullOrEmpty())
                 tableAlias += ".";
 
