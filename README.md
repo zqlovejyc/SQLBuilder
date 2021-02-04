@@ -28,7 +28,8 @@ Expression表达式转换为SQL语句，支持SqlServer、MySql、Oracle、Sqlit
 
 - Gitee：[https://gitee.com/zqlovejyc/SQLBuilder](https://gitee.com/zqlovejyc/SQLBuilder)
 - GitHub：[https://github.com/zqlovejyc/SQLBuilder](https://github.com/zqlovejyc/SQLBuilder)
-- Nuget：[https://www.nuget.org/packages/Zq.SQLBuilder/](https://www.nuget.org/packages/Zq.SQLBuilder/)
+- Nuget：[https://www.nuget.org/packages/Zq.SQLBuilder](https://www.nuget.org/packages/Zq.SQLBuilder)
+- Myget：[https://www.myget.org/feed/zq-myget/package/nuget/Zq.SQLBuilder](https://www.myget.org/feed/zq-myget/package/nuget/Zq.SQLBuilder)
 
 ## 🍻 贡献代码
 
