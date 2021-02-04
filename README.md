@@ -19,7 +19,7 @@ Expression表达式转换为SQL语句，支持SqlServer、MySql、Oracle、Sqlit
 
 ## 🍟 文档地址
 
-- 单元测试：[https://gitee.com/zqlovejyc/SQLBuilder/tree/master/SQLBuilder.UnitTest](https://gitee.com/zqlovejyc/SQLBuilder/tree/master/SQLBuilder.UnitTest)
+- 单元测试：[https://github.com/zqlovejyc/SQLBuilder/tree/master/SQLBuilder.UnitTest](https://github.com/zqlovejyc/SQLBuilder/tree/master/SQLBuilder.UnitTest)
 
 
 **目前文档正在逐步完善中。**
