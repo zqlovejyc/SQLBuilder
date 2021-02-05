@@ -92,7 +92,7 @@ namespace SQLBuilder.Expressions
             var fields = new List<string>();
             foreach (MemberAssignment m in expression.Bindings)
             {
-                var type = m.Member.DeclaringType.ToString().Contains("AnonymousType") ?
+                var type = m.Member.DeclaringType.IsAnonymousType() ?
                     sqlWrapper.DefaultType :
                     m.Member.DeclaringType;
 
@@ -133,7 +133,7 @@ namespace SQLBuilder.Expressions
         {
             foreach (MemberAssignment m in expression.Bindings)
             {
-                var type = m.Member.DeclaringType.ToString().Contains("AnonymousType") ?
+                var type = m.Member.DeclaringType.IsAnonymousType() ?
                     sqlWrapper.DefaultType :
                     m.Member.DeclaringType;
 
