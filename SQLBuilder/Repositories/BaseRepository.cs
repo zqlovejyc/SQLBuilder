@@ -39,6 +39,164 @@ namespace SQLBuilder.Repositories
     /// </summary>
     public abstract class BaseRepository
     {
+        #region Queue
+        #region Sync
+        /// <summary>
+        /// 预提交队列
+        /// </summary>
+        public virtual Queue<Action<IRepository>> PreCommitQueue { get; } =
+            new Queue<Action<IRepository>>();
+
+        /// <summary>
+        /// 预提交队列
+        /// </summary>
+        public virtual Queue<Func<IRepository, int>> PreCommitResultQueue { get; } =
+            new Queue<Func<IRepository, int>>();
+
+        /// <summary>
+        /// 提交队列
+        /// </summary>
+        /// <param name="trans">是否开启事务</param>
+        /// <returns></returns>
+        public virtual void CommitQueue(bool trans = false)
+        {
+            try
+            {
+                if (trans)
+                    BeginTrans();
+
+                while (PreCommitQueue.Count > 0)
+                {
+                    var action = PreCommitQueue.Dequeue();
+                    action(Repository);
+                }
+
+                if (trans)
+                    Commit();
+            }
+            catch (Exception)
+            {
+                if (trans)
+                    Rollback();
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 提交队列
+        /// </summary>
+        /// <param name="trans">是否开启事务</param>
+        /// <returns></returns>
+        public virtual int CommitResultQueue(bool trans = false)
+        {
+            try
+            {
+                if (trans)
+                    BeginTrans();
+
+                var res = 0;
+
+                while (PreCommitResultQueue.Count > 0)
+                {
+                    var func = PreCommitResultQueue.Dequeue();
+                    res += func(Repository);
+                }
+
+                if (trans)
+                    Commit();
+
+                return res;
+            }
+            catch (Exception)
+            {
+                if (trans)
+                    Rollback();
+
+                throw;
+            }
+        }
+        #endregion
+
+        #region Async
+        /// <summary>
+        /// 预提交队列
+        /// </summary>
+        public virtual Queue<Func<IRepository, Task>> PreCommitAsyncQueue { get; } =
+            new Queue<Func<IRepository, Task>>();
+
+        /// <summary>
+        /// 预提交队列
+        /// </summary>
+        public virtual Queue<Func<IRepository, Task<int>>> PreCommitResultAsyncQueue { get; } =
+            new Queue<Func<IRepository, Task<int>>>();
+
+        /// <summary>
+        /// 提交队列
+        /// </summary>
+        /// <param name="trans">是否开启事务</param>
+        /// <returns></returns>
+        public virtual async Task CommitQueueAsync(bool trans = false)
+        {
+            try
+            {
+                if (trans)
+                    BeginTrans();
+
+                while (PreCommitAsyncQueue.Count > 0)
+                {
+                    var action = PreCommitAsyncQueue.Dequeue();
+                    await action(Repository);
+                }
+
+                if (trans)
+                    Commit();
+            }
+            catch (Exception)
+            {
+                if (trans)
+                    Rollback();
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 提交队列
+        /// </summary>
+        /// <param name="trans">是否开启事务</param>
+        /// <returns></returns>
+        public virtual async Task<int> CommitResultQueueAsync(bool trans = false)
+        {
+            try
+            {
+                if (trans)
+                    BeginTrans();
+
+                var res = 0;
+
+                while (PreCommitResultAsyncQueue.Count > 0)
+                {
+                    var func = PreCommitResultAsyncQueue.Dequeue();
+                    res += await func(Repository);
+                }
+
+                if (trans)
+                    Commit();
+
+                return res;
+            }
+            catch (Exception)
+            {
+                if (trans)
+                    Rollback();
+
+                throw;
+            }
+        }
+        #endregion
+        #endregion
+
         #region Field
         /// <summary>
         /// 诊断日志
@@ -107,6 +265,11 @@ namespace SQLBuilder.Repositories
         /// 数据库类型
         /// </summary>
         public virtual DatabaseType DatabaseType { get; }
+
+        /// <summary>
+        /// 仓储接口
+        /// </summary>
+        public virtual IRepository Repository { get; }
         #endregion
 
         #region Transaction
