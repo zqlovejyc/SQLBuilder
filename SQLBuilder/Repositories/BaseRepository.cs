@@ -3652,7 +3652,8 @@ namespace SQLBuilder.Repositories
                     Parameters = parameter,
                     DataSource = dataSource,
                     Timestamp = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds,
-                    Operation = DiagnosticStrings.BeforeExecute
+                    Operation = DiagnosticStrings.BeforeExecute,
+                    DatabaseType = DatabaseType
                 };
 
                 _diagnosticListener.Write(DiagnosticStrings.BeforeExecute, message);
