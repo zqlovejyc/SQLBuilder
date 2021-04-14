@@ -23,6 +23,7 @@ using SQLBuilder.Enums;
 using SQLBuilder.Extensions;
 using SQLBuilder.LoadBalancer;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -44,14 +45,14 @@ namespace SQLBuilder.Repositories
         /// <summary>
         /// 预提交队列
         /// </summary>
-        public virtual Queue<Action<IRepository>> PreCommitQueue { get; } =
-            new Queue<Action<IRepository>>();
+        public virtual ConcurrentQueue<Action<IRepository>> PreCommitQueue { get; } =
+            new ConcurrentQueue<Action<IRepository>>();
 
         /// <summary>
         /// 预提交队列
         /// </summary>
-        public virtual Queue<Func<IRepository, bool>> PreCommitResultQueue { get; } =
-            new Queue<Func<IRepository, bool>>();
+        public virtual ConcurrentQueue<Func<IRepository, bool>> PreCommitResultQueue { get; } =
+            new ConcurrentQueue<Func<IRepository, bool>>();
 
         /// <summary>
         /// 提交队列
@@ -65,11 +66,8 @@ namespace SQLBuilder.Repositories
                 if (trans)
                     BeginTrans();
 
-                while (PreCommitQueue.Count > 0)
-                {
-                    var action = PreCommitQueue.Dequeue();
+                while (PreCommitQueue.Count > 0 && PreCommitQueue.TryDequeue(out var action))
                     action(Repository);
-                }
 
                 if (trans)
                     Commit();
@@ -97,11 +95,8 @@ namespace SQLBuilder.Repositories
 
                 var res = true;
 
-                while (PreCommitResultQueue.Count > 0)
-                {
-                    var func = PreCommitResultQueue.Dequeue();
+                while (PreCommitResultQueue.Count > 0 && PreCommitResultQueue.TryDequeue(out var func))
                     res = res && func(Repository);
-                }
 
                 if (trans)
                     Commit();
@@ -122,14 +117,14 @@ namespace SQLBuilder.Repositories
         /// <summary>
         /// 预提交队列
         /// </summary>
-        public virtual Queue<Func<IRepository, Task>> PreCommitAsyncQueue { get; } =
-            new Queue<Func<IRepository, Task>>();
+        public virtual ConcurrentQueue<Func<IRepository, Task>> PreCommitAsyncQueue { get; } =
+            new ConcurrentQueue<Func<IRepository, Task>>();
 
         /// <summary>
         /// 预提交队列
         /// </summary>
-        public virtual Queue<Func<IRepository, Task<bool>>> PreCommitResultAsyncQueue { get; } =
-            new Queue<Func<IRepository, Task<bool>>>();
+        public virtual ConcurrentQueue<Func<IRepository, Task<bool>>> PreCommitResultAsyncQueue { get; } =
+            new ConcurrentQueue<Func<IRepository, Task<bool>>>();
 
         /// <summary>
         /// 提交队列
@@ -143,11 +138,8 @@ namespace SQLBuilder.Repositories
                 if (trans)
                     BeginTrans();
 
-                while (PreCommitAsyncQueue.Count > 0)
-                {
-                    var action = PreCommitAsyncQueue.Dequeue();
+                while (PreCommitAsyncQueue.Count > 0 && PreCommitAsyncQueue.TryDequeue(out var action))
                     await action(Repository);
-                }
 
                 if (trans)
                     Commit();
@@ -175,11 +167,8 @@ namespace SQLBuilder.Repositories
 
                 var res = true;
 
-                while (PreCommitResultAsyncQueue.Count > 0)
-                {
-                    var func = PreCommitResultAsyncQueue.Dequeue();
+                while (PreCommitResultAsyncQueue.Count > 0 && PreCommitResultAsyncQueue.TryDequeue(out var func))
                     res = res && await func(Repository);
-                }
 
                 if (trans)
                     Commit();
