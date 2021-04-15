@@ -3644,24 +3644,22 @@ namespace SQLBuilder.Repositories
         /// <returns></returns>
         public DiagnosticsMessage ExecuteBefore(string sql, object parameter, string dataSource)
         {
-            if (_diagnosticListener.IsEnabled(DiagnosticStrings.BeforeExecute))
+            if (!_diagnosticListener.IsEnabled(DiagnosticStrings.BeforeExecute))
+                return null;
+
+            var message = new DiagnosticsMessage
             {
-                var message = new DiagnosticsMessage
-                {
-                    Sql = sql,
-                    Parameters = parameter,
-                    DataSource = dataSource,
-                    Timestamp = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds,
-                    Operation = DiagnosticStrings.BeforeExecute,
-                    DatabaseType = DatabaseType
-                };
+                Sql = sql,
+                Parameters = parameter,
+                DataSource = dataSource,
+                Timestamp = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds,
+                Operation = DiagnosticStrings.BeforeExecute,
+                DatabaseType = DatabaseType
+            };
 
-                _diagnosticListener.Write(DiagnosticStrings.BeforeExecute, message);
+            _diagnosticListener.Write(DiagnosticStrings.BeforeExecute, message);
 
-                return message;
-            }
-
-            return null;
+            return message;
         }
 
         /// <summary>
