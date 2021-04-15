@@ -40,12 +40,10 @@ namespace SQLBuilder.Extensions
         {
             var table = new DataTable();
             if (@this?.IsClosed == false)
-            {
                 using (@this)
                 {
                     table.Load(@this);
                 }
-            }
             return table;
         }
 
@@ -57,43 +55,46 @@ namespace SQLBuilder.Extensions
         /// <returns>DataTable</returns>
         public static DataTable ToDataTable<T>(this List<T> @this)
         {
-            DataTable dt = null;
-            if (@this?.Count > 0)
+            if (@this == null || @this.Count == 0)
+                return default;
+
+            var dt = new DataTable(typeof(T).Name);
+            var type = typeof(T);
+            var first = @this.First();
+            var firstType = first.GetType();
+
+            if (type.IsDictionaryType() || (type.IsDynamicOrObjectType() && firstType.IsDictionaryType()))
             {
-                dt = new DataTable(typeof(T).Name);
-                var type = typeof(T);
-                var first = @this.First();
-                var firstType = first.GetType();
-                if (type.IsDictionaryType() || (type.IsDynamicOrObjectType() && firstType.IsDictionaryType()))
+                var dic = first as IDictionary<string, object>;
+                dt.Columns.AddRange(dic.Select(o => new DataColumn(o.Key, o.Value?.GetType().GetCoreType() ?? typeof(object))).ToArray());
+                var dics = @this.Select(o => o as IDictionary<string, object>);
+                foreach (var item in dics)
+                    dt.Rows.Add(item.Select(o => o.Value).ToArray());
+            }
+            else
+            {
+                var props = type.IsDynamicOrObjectType()
+                    ? firstType.GetProperties()
+                    : typeof(T).GetProperties(BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.Instance);
+
+                foreach (var prop in props)
+                    dt.Columns.Add(prop.Name, prop?.PropertyType.GetCoreType() ?? typeof(object));
+
+                foreach (var item in @this)
                 {
-                    var dic = first as IDictionary<string, object>;
-                    dt.Columns.AddRange(dic.Select(o => new DataColumn(o.Key, o.Value?.GetType().GetCoreType() ?? typeof(object))).ToArray());
-                    var dics = @this.Select(o => o as IDictionary<string, object>);
-                    foreach (var item in dics)
+                    var values = new object[props.Length];
+                    for (var i = 0; i < props.Length; i++)
                     {
-                        dt.Rows.Add(item.Select(o => o.Value).ToArray());
+                        if (!props[i].CanRead)
+                            continue;
+
+                        values[i] = props[i].GetValue(item, null);
                     }
-                }
-                else
-                {
-                    var props = type.IsDynamicOrObjectType() ? firstType.GetProperties() : typeof(T).GetProperties(BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.Instance);
-                    foreach (var prop in props)
-                    {
-                        dt.Columns.Add(prop.Name, prop?.PropertyType.GetCoreType() ?? typeof(object));
-                    }
-                    foreach (var item in @this)
-                    {
-                        var values = new object[props.Length];
-                        for (var i = 0; i < props.Length; i++)
-                        {
-                            if (!props[i].CanRead) continue;
-                            values[i] = props[i].GetValue(item, null);
-                        }
-                        dt.Rows.Add(values);
-                    }
+                    dt.Rows.Add(values);
                 }
             }
-            return dt;
+
+            return default;
         }
         #endregion
 
@@ -107,7 +108,6 @@ namespace SQLBuilder.Extensions
         {
             var ds = new DataSet();
             if (@this?.IsClosed == false)
-            {
                 using (@this)
                 {
                     do
@@ -123,16 +123,13 @@ namespace SQLBuilder.Extensions
                         {
                             var dataRow = dt.NewRow();
                             for (var i = 0; i < @this.FieldCount; i++)
-                            {
                                 dataRow[i] = @this.GetValue(i);
-                            }
                             dt.Rows.Add(dataRow);
                         }
                         ds.Tables.Add(dt);
                     }
                     while (@this.NextResult());
                 }
-            }
             return ds;
         }
         #endregion
@@ -194,20 +191,17 @@ namespace SQLBuilder.Extensions
         public static IEnumerable<Dictionary<string, object>> ToDictionaries(this IDataReader @this)
         {
             if (@this?.IsClosed == false)
-            {
                 using (@this)
                 {
                     while (@this.Read())
                     {
                         var dic = new Dictionary<string, object>();
                         for (var i = 0; i < @this.FieldCount; i++)
-                        {
                             dic[@this.GetName(i)] = @this.GetValue(i);
-                        }
+
                         yield return dic;
                     }
                 }
-            }
         }
         #endregion
 
@@ -221,9 +215,8 @@ namespace SQLBuilder.Extensions
         {
             var result = @this.ToEntities<T>();
             if (result != null)
-            {
                 return result.FirstOrDefault();
-            }
+
             return default;
         }
 
@@ -235,32 +228,30 @@ namespace SQLBuilder.Extensions
         public static IEnumerable<T> ToEntities<T>(this IDataReader @this)
         {
             if (@this?.IsClosed == false)
-            {
                 using (@this)
                 {
                     var fields = new List<string>();
                     for (int i = 0; i < @this.FieldCount; i++)
-                    {
                         fields.Add(@this.GetName(i));
-                    }
+
                     while (@this.Read())
                     {
                         var instance = Activator.CreateInstance<T>();
                         var props = instance.GetType().GetProperties(BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.Instance);
+
                         foreach (var p in props)
                         {
                             if (!p.CanWrite)
                                 continue;
+
                             var field = fields.Where(o => o.ToLower() == p.Name.ToLower()).FirstOrDefault();
                             if (!field.IsNullOrEmpty() && !@this[field].IsNull())
-                            {
                                 p.SetValue(instance, @this[field].ToSafeValue(p.PropertyType), null);
-                            }
                         }
+
                         yield return instance;
                     }
                 }
-            }
         }
         #endregion
 
@@ -278,17 +269,14 @@ namespace SQLBuilder.Extensions
             {
                 var type = typeof(T);
                 if (type.AssignableTo(typeof(Dictionary<,>)))
-                {
                     list = @this.ToDictionaries()?.ToList() as List<T>;
-                }
+
                 else if (type.AssignableTo(typeof(IDictionary<,>)))
-                {
                     list = @this.ToDictionaries()?.Select(o => o as IDictionary<string, object>).ToList() as List<T>;
-                }
+
                 else if (type.IsClass && !type.IsDynamicOrObjectType() && !type.IsStringType())
-                {
                     list = @this.ToEntities<T>()?.ToList() as List<T>;
-                }
+
                 else
                 {
                     var result = @this.ToDynamics();
@@ -296,10 +284,8 @@ namespace SQLBuilder.Extensions
                     {
                         list = result.ToList() as List<T>;
                         if (list == null && (type.IsStringType() || type.IsValueType))
-                        {
                             //适合查询单个字段的结果集
                             list = result.Select(o => (T)(o as IDictionary<string, object>).Select(x => x.Value).FirstOrDefault()).ToList();
-                        }
                     }
                 }
             }
@@ -316,7 +302,6 @@ namespace SQLBuilder.Extensions
         {
             var result = new List<List<T>>();
             if (@this?.IsClosed == false)
-            {
                 using (@this)
                 {
                     var type = typeof(T);
@@ -330,19 +315,15 @@ namespace SQLBuilder.Extensions
                             {
                                 var dic = new Dictionary<string, object>();
                                 for (var i = 0; i < @this.FieldCount; i++)
-                                {
                                     dic[@this.GetName(i)] = @this.GetValue(i);
-                                }
+
                                 list.Add(dic);
                             }
+
                             if (!type.AssignableTo(typeof(Dictionary<,>)))
-                            {
                                 result.Add(list.Select(o => o as IDictionary<string, object>).ToList() as List<T>);
-                            }
                             else
-                            {
                                 result.Add(list as List<T>);
-                            }
                         }
                         #endregion
 
@@ -352,21 +333,20 @@ namespace SQLBuilder.Extensions
                             var list = new List<T>();
                             var fields = new List<string>();
                             for (int i = 0; i < @this.FieldCount; i++)
-                            {
                                 fields.Add(@this.GetName(i));
-                            }
+
                             while (@this.Read())
                             {
                                 var instance = Activator.CreateInstance<T>();
                                 var props = instance.GetType().GetProperties(BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.Instance);
                                 foreach (var p in props)
                                 {
-                                    if (!p.CanWrite) continue;
+                                    if (!p.CanWrite)
+                                        continue;
+
                                     var field = fields.Where(o => o.ToLower() == p.Name.ToLower()).FirstOrDefault();
                                     if (!field.IsNullOrEmpty() && !@this[field].IsNull())
-                                    {
                                         p.SetValue(instance, @this[field].ToSafeValue(p.PropertyType), null);
-                                    }
                                 }
                                 list.Add(instance);
                             }
@@ -382,23 +362,22 @@ namespace SQLBuilder.Extensions
                             {
                                 var row = new ExpandoObject() as IDictionary<string, object>;
                                 for (var i = 0; i < @this.FieldCount; i++)
-                                {
                                     row.Add(@this.GetName(i), @this.GetValue(i));
-                                }
+
                                 list.Add(row);
                             }
+
                             var item = list as List<T>;
                             if (item == null && (type.IsStringType() || type.IsValueType))
-                            {
                                 //适合查询单个字段的结果集
                                 item = list.Select(o => (T)(o as IDictionary<string, object>).Select(x => x.Value).FirstOrDefault()).ToList();
-                            }
+
                             result.Add(item);
                         }
                         #endregion
                     } while (@this.NextResult());
                 }
-            }
+
             return result;
         }
         #endregion
@@ -414,10 +393,9 @@ namespace SQLBuilder.Extensions
         {
             var list = @this.ToList<T>();
             if (list != null)
-            {
                 return list.FirstOrDefault();
-            }
-            return default(T);
+
+            return default;
         }
         #endregion
     }

@@ -42,13 +42,12 @@ namespace SQLBuilder.Extensions
         /// <returns></returns>
         public static DynamicParameters ToDynamicParameters(this DbParameter[] @this)
         {
-            if (@this?.Length > 0)
-            {
-                var args = new DynamicParameters();
-                @this.ToList().ForEach(p => args.Add(p.ParameterName, p.Value, p.DbType, p.Direction, p.Size));
-                return args;
-            }
-            return null;
+            if (@this == null || @this.Length == 0)
+                return null;
+
+            var args = new DynamicParameters();
+            @this.ToList().ForEach(p => args.Add(p.ParameterName, p.Value, p.DbType, p.Direction, p.Size));
+            return args;
         }
 
         /// <summary>
@@ -58,13 +57,12 @@ namespace SQLBuilder.Extensions
         /// <returns></returns>
         public static DynamicParameters ToDynamicParameters(this List<DbParameter> @this)
         {
-            if (@this?.Count > 0)
-            {
-                var args = new DynamicParameters();
-                @this.ForEach(p => args.Add(p.ParameterName, p.Value, p.DbType, p.Direction, p.Size));
-                return args;
-            }
-            return null;
+            if (@this == null || @this.Count == 0)
+                return null;
+
+            var args = new DynamicParameters();
+            @this.ForEach(p => args.Add(p.ParameterName, p.Value, p.DbType, p.Direction, p.Size));
+            return args;
         }
 
         /// <summary>
@@ -74,13 +72,12 @@ namespace SQLBuilder.Extensions
         /// <returns></returns>
         public static DynamicParameters ToDynamicParameters(this DbParameter @this)
         {
-            if (@this != null)
-            {
-                var args = new DynamicParameters();
-                args.Add(@this.ParameterName, @this.Value, @this.DbType, @this.Direction, @this.Size);
-                return args;
-            }
-            return null;
+            if (@this == null)
+                return null;
+
+            var args = new DynamicParameters();
+            args.Add(@this.ParameterName, @this.Value, @this.DbType, @this.Direction, @this.Size);
+            return args;
         }
 
         /// <summary>
@@ -90,16 +87,14 @@ namespace SQLBuilder.Extensions
         /// <returns></returns>
         public static DynamicParameters ToDynamicParameters(this IDictionary<string, object> @this)
         {
-            if (@this?.Count > 0)
-            {
-                var args = new DynamicParameters();
-                foreach (var item in @this)
-                {
-                    args.Add(item.Key, item.Value);
-                }
-                return args;
-            }
-            return null;
+            if (@this == null || @this.Count == 0)
+                return null;
+
+            var args = new DynamicParameters();
+            foreach (var item in @this)
+                args.Add(item.Key, item.Value);
+
+            return args;
         }
         #endregion
 
@@ -112,17 +107,16 @@ namespace SQLBuilder.Extensions
         /// <returns>The given data converted to a DbParameter[].</returns>
         public static DbParameter[] ToDbParameters(this IDictionary<string, object> @this, DbCommand command)
         {
-            if (@this?.Count > 0)
+            if (@this == null || @this.Count == 0)
+                return null;
+
+            return @this.Select(x =>
             {
-                return @this.Select(x =>
-                {
-                    var parameter = command.CreateParameter();
-                    parameter.ParameterName = x.Key;
-                    parameter.Value = x.Value;
-                    return parameter;
-                }).ToArray();
-            }
-            return null;
+                var parameter = command.CreateParameter();
+                parameter.ParameterName = x.Key;
+                parameter.Value = x.Value;
+                return parameter;
+            }).ToArray();
         }
 
         /// <summary>
@@ -133,18 +127,17 @@ namespace SQLBuilder.Extensions
         /// <returns>The given data converted to a DbParameter[].</returns>
         public static DbParameter[] ToDbParameters(this IDictionary<string, object> @this, DbConnection connection)
         {
-            if (@this?.Count > 0)
+            if (@this == null || @this.Count == 0)
+                return null;
+
+            var command = connection.CreateCommand();
+            return @this.Select(x =>
             {
-                var command = connection.CreateCommand();
-                return @this.Select(x =>
-                {
-                    var parameter = command.CreateParameter();
-                    parameter.ParameterName = x.Key;
-                    parameter.Value = x.Value;
-                    return parameter;
-                }).ToArray();
-            }
-            return null;
+                var parameter = command.CreateParameter();
+                parameter.ParameterName = x.Key;
+                parameter.Value = x.Value;
+                return parameter;
+            }).ToArray();
         }
         #endregion
 
@@ -156,11 +149,10 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a SqlParameter[].</returns>
         public static SqlParameter[] ToSqlParameters(this IDictionary<string, object> @this)
         {
-            if (@this?.Count > 0)
-            {
-                return @this.Select(x => new SqlParameter(x.Key.Replace("?", "@").Replace(":", "@"), x.Value)).ToArray();
-            }
-            return null;
+            if (@this == null || @this.Count == 0)
+                return null;
+
+            return @this.Select(x => new SqlParameter(x.Key.Replace("?", "@").Replace(":", "@"), x.Value)).ToArray();
         }
         #endregion
 
@@ -172,11 +164,10 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a MySqlParameter[].</returns>
         public static MySqlParameter[] ToMySqlParameters(this IDictionary<string, object> @this)
         {
-            if (@this?.Count > 0)
-            {
-                return @this.Select(x => new MySqlParameter(x.Key.Replace("@", "?").Replace(":", "?"), x.Value)).ToArray();
-            }
-            return null;
+            if (@this == null || @this.Count == 0)
+                return null;
+
+            return @this.Select(x => new MySqlParameter(x.Key.Replace("@", "?").Replace(":", "?"), x.Value)).ToArray();
         }
         #endregion
 
@@ -188,11 +179,10 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a SQLiteParameter[].</returns>
         public static SQLiteParameter[] ToSqliteParameters(this IDictionary<string, object> @this)
         {
-            if (@this?.Count > 0)
-            {
-                return @this.Select(x => new SQLiteParameter(x.Key.Replace("?", "@").Replace(":", "@"), x.Value)).ToArray();
-            }
-            return null;
+            if (@this == null || @this.Count == 0)
+                return null;
+
+            return @this.Select(x => new SQLiteParameter(x.Key.Replace("?", "@").Replace(":", "@"), x.Value)).ToArray();
         }
         #endregion
 
@@ -204,11 +194,10 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a OracleParameter[].</returns>
         public static OracleParameter[] ToOracleParameters(this IDictionary<string, object> @this)
         {
-            if (@this?.Count > 0)
-            {
-                return @this.Select(x => new OracleParameter(x.Key.Replace("?", ":").Replace("@", ":"), x.Value)).ToArray();
-            }
-            return null;
+            if (@this == null || @this.Count == 0)
+                return null;
+
+            return @this.Select(x => new OracleParameter(x.Key.Replace("?", ":").Replace("@", ":"), x.Value)).ToArray();
         }
         #endregion
 
@@ -220,11 +209,10 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a NpgsqlParameter[].</returns>
         public static NpgsqlParameter[] ToNpgsqlParameters(this IDictionary<string, object> @this)
         {
-            if (@this?.Count > 0)
-            {
-                return @this.Select(x => new NpgsqlParameter(x.Key.Replace("?", ":").Replace("@", ":"), x.Value)).ToArray();
-            }
-            return null;
+            if (@this == null || @this.Count == 0)
+                return null;
+
+            return @this.Select(x => new NpgsqlParameter(x.Key.Replace("?", ":").Replace("@", ":"), x.Value)).ToArray();
         }
         #endregion
     }
