@@ -122,7 +122,7 @@ namespace SQLBuilder.Repositories
         /// 开启事务
         /// </summary>
         /// <returns>IRepository</returns>
-        public override IRepository BeginTrans()
+        public override IRepository BeginTransaction()
         {
             if (Transaction?.Connection == null)
             {

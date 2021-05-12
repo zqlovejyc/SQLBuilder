@@ -71,7 +71,7 @@ namespace SQLBuilder.Repositories
                     return false;
 
                 if (trans)
-                    BeginTrans();
+                    BeginTransaction();
 
                 var res = true;
 
@@ -123,7 +123,7 @@ namespace SQLBuilder.Repositories
                     return false;
 
                 if (trans)
-                    BeginTrans();
+                    BeginTransaction();
 
                 var res = true;
 
@@ -226,7 +226,7 @@ namespace SQLBuilder.Repositories
         /// 开启事务
         /// </summary>
         /// <returns>IRepository</returns>
-        public abstract IRepository BeginTrans();
+        public abstract IRepository BeginTransaction();
 
         /// <summary>
         /// 关闭连接
@@ -258,14 +258,14 @@ namespace SQLBuilder.Repositories
         /// </summary>
         /// <param name="handler">自定义委托</param>
         /// <param name="rollback">事务回滚处理委托</param>
-        public virtual void ExecuteTrans(Action<IRepository> handler, Action<Exception> rollback = null)
+        public virtual void ExecuteTransaction(Action<IRepository> handler, Action<Exception> rollback = null)
         {
             IRepository repository = null;
             try
             {
                 if (handler != null)
                 {
-                    repository = BeginTrans();
+                    repository = BeginTransaction();
                     handler(repository);
                     repository.Commit();
                 }
@@ -286,14 +286,14 @@ namespace SQLBuilder.Repositories
         /// </summary>
         /// <param name="handler">自定义委托</param>
         /// <param name="rollback">事务回滚处理委托，注意：自定义委托返回false时，rollback委托的异常参数为null</param>
-        public virtual bool ExecuteTrans(Func<IRepository, bool> handler, Action<Exception> rollback = null)
+        public virtual bool ExecuteTransaction(Func<IRepository, bool> handler, Action<Exception> rollback = null)
         {
             IRepository repository = null;
             try
             {
                 if (handler != null)
                 {
-                    repository = BeginTrans();
+                    repository = BeginTransaction();
                     var res = handler(repository);
                     if (res)
                         repository.Commit();
@@ -326,14 +326,14 @@ namespace SQLBuilder.Repositories
         /// </summary>
         /// <param name="handler">自定义委托</param>
         /// <param name="rollback">事务回滚处理委托</param>
-        public virtual async Task ExecuteTransAsync(Func<IRepository, Task> handler, Func<Exception, Task> rollback = null)
+        public virtual async Task ExecuteTransactionAsync(Func<IRepository, Task> handler, Func<Exception, Task> rollback = null)
         {
             IRepository repository = null;
             try
             {
                 if (handler != null)
                 {
-                    repository = BeginTrans();
+                    repository = BeginTransaction();
                     await handler(repository);
                     repository.Commit();
                 }
@@ -354,14 +354,14 @@ namespace SQLBuilder.Repositories
         /// </summary>
         /// <param name="handler">自定义委托</param>
         /// <param name="rollback">事务回滚处理委托，注意：自定义委托返回false时，rollback委托的异常参数为null</param>
-        public virtual async Task<bool> ExecuteTransAsync(Func<IRepository, Task<bool>> handler, Func<Exception, Task> rollback = null)
+        public virtual async Task<bool> ExecuteTransactionAsync(Func<IRepository, Task<bool>> handler, Func<Exception, Task> rollback = null)
         {
             IRepository repository = null;
             try
             {
                 if (handler != null)
                 {
-                    repository = BeginTrans();
+                    repository = BeginTransaction();
                     var res = await handler(repository);
                     if (res)
                         repository.Commit();
@@ -2150,7 +2150,7 @@ namespace SQLBuilder.Repositories
             {
                 try
                 {
-                    BeginTrans();
+                    BeginTransaction();
                     foreach (var item in entities)
                     {
                         result += Insert(item);
@@ -2211,7 +2211,7 @@ namespace SQLBuilder.Repositories
             {
                 try
                 {
-                    BeginTrans();
+                    BeginTransaction();
                     foreach (var item in entities)
                     {
                         result += await InsertAsync(item);
@@ -2285,7 +2285,7 @@ namespace SQLBuilder.Repositories
             {
                 try
                 {
-                    BeginTrans();
+                    BeginTransaction();
                     foreach (var item in entities)
                     {
                         result += Delete(item);
@@ -2353,7 +2353,7 @@ namespace SQLBuilder.Repositories
                 {
                     try
                     {
-                        BeginTrans();
+                        BeginTransaction();
                         foreach (var key in keyValues)
                         {
                             result += Delete<T>(key);
@@ -2430,7 +2430,7 @@ namespace SQLBuilder.Repositories
             {
                 try
                 {
-                    BeginTrans();
+                    BeginTransaction();
                     foreach (var item in entities)
                     {
                         result += await DeleteAsync(item);
@@ -2498,7 +2498,7 @@ namespace SQLBuilder.Repositories
                 {
                     try
                     {
-                        BeginTrans();
+                        BeginTransaction();
                         foreach (var key in keyValues)
                         {
                             result += await DeleteAsync<T>(key);
@@ -2566,7 +2566,7 @@ namespace SQLBuilder.Repositories
             {
                 try
                 {
-                    BeginTrans();
+                    BeginTransaction();
                     foreach (var item in entities)
                     {
                         result += Update(item);
@@ -2640,7 +2640,7 @@ namespace SQLBuilder.Repositories
             {
                 try
                 {
-                    BeginTrans();
+                    BeginTransaction();
                     foreach (var item in entities)
                     {
                         result += await UpdateAsync(item);
