@@ -40,6 +40,81 @@ namespace SQLBuilder.Repositories
     /// </summary>
     public abstract class BaseRepository
     {
+        #region Field
+        /// <summary>
+        /// 诊断日志
+        /// </summary>
+        private static readonly DiagnosticListener _diagnosticListener =
+            new DiagnosticListener(DiagnosticStrings.DiagnosticListenerName);
+        #endregion
+
+        #region Property
+        /// <summary>
+        /// 超时时长，默认240s
+        /// </summary>
+        public virtual int CommandTimeout { get; set; } = 240;
+
+        /// <summary>
+        /// 是否主库操作
+        /// </summary>
+        public virtual bool Master { get; set; } = true;
+
+        /// <summary>
+        /// 主库数据库连接字符串
+        /// </summary>
+        public virtual string MasterConnectionString { get; set; }
+
+        /// <summary>
+        /// 从库数据库连接字符串及权重集合
+        /// </summary>
+        public virtual (string connectionString, int weight)[] SlaveConnectionStrings { get; set; }
+
+        /// <summary>
+        /// 数据库连接对象
+        /// </summary>
+        public virtual DbConnection Connection { get; }
+
+        /// <summary>
+        /// 事务对象
+        /// </summary>
+        public virtual DbTransaction Transaction { get; set; }
+
+        /// <summary>
+        /// 是否启用对表名和列名格式化，默认不启用，注意：只针对Lambda表达式解析生成的sql，默认false
+        /// </summary>
+        public virtual bool IsEnableFormat { get; set; } = false;
+
+        /// <summary>
+        /// 是否启用null实体属性值insert、update，默认false
+        /// </summary>
+        public virtual bool IsEnableNullValue { get; set; } = false;
+
+        /// <summary>
+        /// 分页计数语法，默认COUNT(*)
+        /// </summary>
+        public virtual string CountSyntax { get; set; } = "COUNT(*)";
+
+        /// <summary>
+        /// sql拦截委托
+        /// </summary>
+        public virtual Func<string, object, string> SqlIntercept { get; set; }
+
+        /// <summary>
+        /// 从库负载均衡接口
+        /// </summary>
+        public virtual ILoadBalancer LoadBalancer { get; set; }
+
+        /// <summary>
+        /// 数据库类型
+        /// </summary>
+        public virtual DatabaseType DatabaseType { get; }
+
+        /// <summary>
+        /// 仓储接口
+        /// </summary>
+        public virtual IRepository Repository { get; }
+        #endregion
+
         #region Queue
         #region Sync
         /// <summary>
@@ -146,81 +221,6 @@ namespace SQLBuilder.Repositories
         #endregion
         #endregion
 
-        #region Field
-        /// <summary>
-        /// 诊断日志
-        /// </summary>
-        private static readonly DiagnosticListener _diagnosticListener =
-            new DiagnosticListener(DiagnosticStrings.DiagnosticListenerName);
-        #endregion
-
-        #region Property
-        /// <summary>
-        /// 超时时长，默认240s
-        /// </summary>
-        public virtual int CommandTimeout { get; set; } = 240;
-
-        /// <summary>
-        /// 是否主库操作
-        /// </summary>
-        public virtual bool Master { get; set; } = true;
-
-        /// <summary>
-        /// 主库数据库连接字符串
-        /// </summary>
-        public virtual string MasterConnectionString { get; set; }
-
-        /// <summary>
-        /// 从库数据库连接字符串及权重集合
-        /// </summary>
-        public virtual (string connectionString, int weight)[] SlaveConnectionStrings { get; set; }
-
-        /// <summary>
-        /// 数据库连接对象
-        /// </summary>
-        public virtual DbConnection Connection { get; }
-
-        /// <summary>
-        /// 事务对象
-        /// </summary>
-        public virtual DbTransaction Transaction { get; set; }
-
-        /// <summary>
-        /// 是否启用对表名和列名格式化，默认不启用，注意：只针对Lambda表达式解析生成的sql，默认false
-        /// </summary>
-        public virtual bool IsEnableFormat { get; set; } = false;
-
-        /// <summary>
-        /// 是否启用null实体属性值insert、update，默认false
-        /// </summary>
-        public virtual bool IsEnableNullValue { get; set; } = false;
-
-        /// <summary>
-        /// 分页计数语法，默认COUNT(*)
-        /// </summary>
-        public virtual string CountSyntax { get; set; } = "COUNT(*)";
-
-        /// <summary>
-        /// sql拦截委托
-        /// </summary>
-        public virtual Func<string, object, string> SqlIntercept { get; set; }
-
-        /// <summary>
-        /// 从库负载均衡接口
-        /// </summary>
-        public virtual ILoadBalancer LoadBalancer { get; set; }
-
-        /// <summary>
-        /// 数据库类型
-        /// </summary>
-        public virtual DatabaseType DatabaseType { get; }
-
-        /// <summary>
-        /// 仓储接口
-        /// </summary>
-        public virtual IRepository Repository { get; }
-        #endregion
-
         #region Transaction
         /// <summary>
         /// 开启事务
@@ -301,8 +301,7 @@ namespace SQLBuilder.Repositories
                     {
                         repository.Rollback();
 
-                        if (rollback != null)
-                            rollback(null);
+                        rollback?.Invoke(null);
                     }
 
                     return res;
@@ -3602,7 +3601,7 @@ namespace SQLBuilder.Repositories
         /// <param name="parameter">sql参数</param>
         /// <param name="dataSource">数据源</param>
         /// <returns></returns>
-        public DiagnosticsMessage ExecuteBefore(string sql, object parameter, string dataSource)
+        public virtual DiagnosticsMessage ExecuteBefore(string sql, object parameter, string dataSource)
         {
             if (!_diagnosticListener.IsEnabled(DiagnosticStrings.BeforeExecute))
                 return null;
@@ -3627,7 +3626,7 @@ namespace SQLBuilder.Repositories
         /// </summary>
         /// <param name="message">诊断消息</param>
         /// <returns></returns>
-        public void ExecuteAfter(DiagnosticsMessage message)
+        public virtual void ExecuteAfter(DiagnosticsMessage message)
         {
             if (message?.Timestamp != null && _diagnosticListener.IsEnabled(DiagnosticStrings.AfterExecute))
             {
@@ -3643,7 +3642,7 @@ namespace SQLBuilder.Repositories
         /// </summary>
         /// <param name="message">诊断消息</param>
         /// <param name="exception">异常</param>
-        public void ExecuteError(DiagnosticsMessage message, Exception exception)
+        public virtual void ExecuteError(DiagnosticsMessage message, Exception exception)
         {
             if (exception != null && message?.Timestamp != null && _diagnosticListener.IsEnabled(DiagnosticStrings.ErrorExecute))
             {

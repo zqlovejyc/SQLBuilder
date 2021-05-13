@@ -41,7 +41,7 @@ namespace SQLBuilder.Repositories
         /// <summary>
         /// 事务数据库连接对象
         /// </summary>
-        private DbConnection tranConnection;
+        private DbConnection _tranConnection;
         #endregion
 
         #region Property
@@ -53,7 +53,7 @@ namespace SQLBuilder.Repositories
             get
             {
                 OracleConnection connection;
-                if (!Master && SlaveConnectionStrings?.Count() > 0 && LoadBalancer != null)
+                if (!Master && SlaveConnectionStrings?.Length > 0 && LoadBalancer != null)
                 {
                     var connectionStrings = SlaveConnectionStrings.Select(x => x.connectionString);
                     var weights = SlaveConnectionStrings.Select(x => x.weight).ToArray();
@@ -121,8 +121,8 @@ namespace SQLBuilder.Repositories
         {
             if (Transaction?.Connection == null)
             {
-                tranConnection = Connection;
-                Transaction = tranConnection.BeginTransaction();
+                _tranConnection = Connection;
+                Transaction = _tranConnection.BeginTransaction();
             }
             return this;
         }
@@ -132,8 +132,8 @@ namespace SQLBuilder.Repositories
         /// </summary>
         public override void Close()
         {
-            tranConnection?.Close();
-            tranConnection?.Dispose();
+            _tranConnection?.Close();
+            _tranConnection?.Dispose();
             Transaction = null;
         }
         #endregion
