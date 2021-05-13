@@ -226,7 +226,7 @@ try
     trans = _repository.BeginTransaction();
 
     //数据库写操作
-    await _repository.InsertAsync(entity);
+    await trans.InsertAsync(entity);
 
     //提交事务
     trans.Commit();
