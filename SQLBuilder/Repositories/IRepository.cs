@@ -23,7 +23,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -151,6 +150,7 @@ namespace SQLBuilder.Repositories
         #endregion
 
         #region Transaction
+        #region Sync
         /// <summary>
         /// 开启事务
         /// </summary>
@@ -169,11 +169,6 @@ namespace SQLBuilder.Repositories
         void Rollback();
 
         /// <summary>
-        /// 关闭连接
-        /// </summary>
-        void Close();
-
-        /// <summary>
         /// 执行事务，内部自动开启事务、提交和回滚事务
         /// </summary>
         /// <param name="handler">自定义委托</param>
@@ -186,7 +181,9 @@ namespace SQLBuilder.Repositories
         /// <param name="handler">自定义委托</param>
         /// <param name="rollback">事务回滚处理委托，注意：自定义委托返回false时，rollback委托的异常参数为null</param>
         bool ExecuteTransaction(Func<IRepository, bool> handler, Action<Exception> rollback = null);
+        #endregion
 
+        #region Async
         /// <summary>
         /// 执行事务，内部自动开启事务、提交和回滚事务
         /// </summary>
@@ -200,6 +197,7 @@ namespace SQLBuilder.Repositories
         /// <param name="handler">自定义委托</param>
         /// <param name="rollback">事务回滚处理委托，注意：自定义委托返回false时，rollback委托的异常参数为null</param>
         Task<bool> ExecuteTransactionAsync(Func<IRepository, Task<bool>> handler, Func<Exception, Task> rollback = null);
+        #endregion
         #endregion
 
         #region ExecuteBySql
@@ -1421,6 +1419,13 @@ namespace SQLBuilder.Repositories
         /// <returns>返回查询结果集</returns>
         Task<List<IEnumerable<dynamic>>> FindMultipleAsync(string sql, params DbParameter[] dbParameter);
         #endregion
+        #endregion
+
+        #region Close
+        /// <summary>
+        /// 关闭连接
+        /// </summary>
+        void Close();
         #endregion
     }
 }

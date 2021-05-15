@@ -37,13 +37,6 @@ namespace SQLBuilder.Repositories
     /// </summary>
     public class OracleRepository : BaseRepository
     {
-        #region Field
-        /// <summary>
-        /// 事务数据库连接对象
-        /// </summary>
-        private DbConnection _tranConnection;
-        #endregion
-
         #region Property
         /// <summary>
         /// 数据库连接对象
@@ -95,32 +88,6 @@ namespace SQLBuilder.Repositories
                 MasterConnectionString = ConfigurationManager.AppSettings[masterConnectionString]?.Trim();
             if (MasterConnectionString.IsNullOrEmpty())
                 MasterConnectionString = masterConnectionString;
-        }
-        #endregion
-
-        #region Transaction
-        /// <summary>
-        /// 开启事务
-        /// </summary>
-        /// <returns>IRepository</returns>
-        public override IRepository BeginTransaction()
-        {
-            if (Transaction?.Connection == null)
-            {
-                _tranConnection = Connection;
-                Transaction = _tranConnection.BeginTransaction();
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// 关闭连接
-        /// </summary>
-        public override void Close()
-        {
-            _tranConnection?.Close();
-            _tranConnection?.Dispose();
-            Transaction = null;
         }
         #endregion
 

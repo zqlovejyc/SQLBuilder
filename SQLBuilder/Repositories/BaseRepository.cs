@@ -46,6 +46,11 @@ namespace SQLBuilder.Repositories
         /// </summary>
         private static readonly DiagnosticListener _diagnosticListener =
             new DiagnosticListener(DiagnosticStrings.DiagnosticListenerName);
+
+        /// <summary>
+        /// 事务数据库连接对象
+        /// </summary>
+        private DbConnection _tranConnection;
         #endregion
 
         #region Property
@@ -236,16 +241,21 @@ namespace SQLBuilder.Repositories
         #endregion
 
         #region Transaction
+        #region Sync
         /// <summary>
         /// 开启事务
         /// </summary>
         /// <returns>IRepository</returns>
-        public abstract IRepository BeginTransaction();
+        public virtual IRepository BeginTransaction()
+        {
+            if (Transaction?.Connection == null)
+            {
+                _tranConnection = Connection;
+                Transaction = _tranConnection.BeginTransaction();
+            }
 
-        /// <summary>
-        /// 关闭连接
-        /// </summary>
-        public abstract void Close();
+            return Repository;
+        }
 
         /// <summary>
         /// 提交事务
@@ -254,6 +264,7 @@ namespace SQLBuilder.Repositories
         {
             Transaction?.Commit();
             Transaction?.Dispose();
+
             Close();
         }
 
@@ -264,6 +275,7 @@ namespace SQLBuilder.Repositories
         {
             Transaction?.Rollback();
             Transaction?.Dispose();
+
             Close();
         }
 
@@ -333,7 +345,9 @@ namespace SQLBuilder.Repositories
 
             return false;
         }
+        #endregion
 
+        #region Async
         /// <summary>
         /// 执行事务，内部自动开启事务、提交和回滚事务
         /// </summary>
@@ -401,6 +415,7 @@ namespace SQLBuilder.Repositories
 
             return false;
         }
+        #endregion
         #endregion
 
         #region Page
@@ -3444,6 +3459,19 @@ namespace SQLBuilder.Repositories
         public virtual void Dispose()
         {
             Close();
+        }
+        #endregion
+
+        #region Close
+        /// <summary>
+        /// 关闭连接
+        /// </summary>
+        public virtual void Close()
+        {
+            _tranConnection?.Close();
+            _tranConnection?.Dispose();
+
+            Transaction = null;
         }
         #endregion
 
