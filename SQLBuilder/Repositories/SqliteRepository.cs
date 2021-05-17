@@ -19,10 +19,6 @@
 using SQLBuilder.Enums;
 using SQLBuilder.Extensions;
 using System;
-using System.Configuration;
-using System.Data;
-using System.Data.Common;
-using System.Data.SQLite;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -35,56 +31,17 @@ namespace SQLBuilder.Repositories
     {
         #region Property
         /// <summary>
-        /// 数据库连接对象
-        /// </summary>
-        public override DbConnection Connection
-        {
-            get
-            {
-                SQLiteConnection connection;
-                if (!Master && SlaveConnectionStrings?.Length > 0 && LoadBalancer != null)
-                {
-                    var connectionStrings = SlaveConnectionStrings.Select(x => x.connectionString);
-                    var weights = SlaveConnectionStrings.Select(x => x.weight).ToArray();
-                    var connectionString = LoadBalancer.Get(MasterConnectionString, connectionStrings, weights);
-
-                    connection = new SQLiteConnection(connectionString);
-                }
-                else
-                    connection = new SQLiteConnection(MasterConnectionString);
-
-                if (connection.State != ConnectionState.Open)
-                    connection.Open();
-
-                return connection;
-            }
-        }
-
-        /// <summary>
         /// 数据库类型
         /// </summary>
         public override DatabaseType DatabaseType => DatabaseType.Sqlite;
-
-        /// <summary>
-        /// 仓储接口
-        /// </summary>
-        public override IRepository Repository => this;
         #endregion
 
         #region Constructor
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="masterConnectionString">主库连接字符串，或者链接字符串名称</param>
-        public SqliteRepository(string masterConnectionString)
-        {
-            //判断是链接字符串，还是链接字符串名称
-            MasterConnectionString = ConfigurationManager.ConnectionStrings[masterConnectionString]?.ConnectionString?.Trim();
-            if (MasterConnectionString.IsNullOrEmpty())
-                MasterConnectionString = ConfigurationManager.AppSettings[masterConnectionString]?.Trim();
-            if (MasterConnectionString.IsNullOrEmpty())
-                MasterConnectionString = masterConnectionString;
-        }
+        /// <param name="connectionString">主库连接字符串，或者链接字符串名称</param>
+        public SqliteRepository(string connectionString) : base(connectionString) { }
         #endregion
 
         #region Page

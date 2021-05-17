@@ -17,13 +17,11 @@
 #endregion
 
 using Dapper;
-using Oracle.ManagedDataAccess.Client;
 using SQLBuilder.Diagnostics;
 using SQLBuilder.Enums;
 using SQLBuilder.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
@@ -39,56 +37,17 @@ namespace SQLBuilder.Repositories
     {
         #region Property
         /// <summary>
-        /// 数据库连接对象
-        /// </summary>
-        public override DbConnection Connection
-        {
-            get
-            {
-                OracleConnection connection;
-                if (!Master && SlaveConnectionStrings?.Length > 0 && LoadBalancer != null)
-                {
-                    var connectionStrings = SlaveConnectionStrings.Select(x => x.connectionString);
-                    var weights = SlaveConnectionStrings.Select(x => x.weight).ToArray();
-                    var connectionString = LoadBalancer.Get(MasterConnectionString, connectionStrings, weights);
-
-                    connection = new OracleConnection(connectionString);
-                }
-                else
-                    connection = new OracleConnection(MasterConnectionString);
-
-                if (connection.State != ConnectionState.Open)
-                    connection.Open();
-
-                return connection;
-            }
-        }
-
-        /// <summary>
         /// 数据库类型
         /// </summary>
         public override DatabaseType DatabaseType => DatabaseType.Oracle;
-
-        /// <summary>
-        /// 仓储接口
-        /// </summary>
-        public override IRepository Repository => this;
         #endregion
 
         #region Constructor
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="masterConnectionString">主库连接字符串，或者链接字符串名称</param>
-        public OracleRepository(string masterConnectionString)
-        {
-            //判断是链接字符串，还是链接字符串名称
-            MasterConnectionString = ConfigurationManager.ConnectionStrings[masterConnectionString]?.ConnectionString?.Trim();
-            if (MasterConnectionString.IsNullOrEmpty())
-                MasterConnectionString = ConfigurationManager.AppSettings[masterConnectionString]?.Trim();
-            if (MasterConnectionString.IsNullOrEmpty())
-                MasterConnectionString = masterConnectionString;
-        }
+        /// <param name="connectionString">主库连接字符串，或者链接字符串名称</param>
+        public OracleRepository(string connectionString) : base(connectionString) { }
         #endregion
 
         #region Page

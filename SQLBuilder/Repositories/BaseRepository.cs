@@ -17,6 +17,9 @@
 #endregion
 
 using Dapper;
+using MySqlConnector;
+using Npgsql;
+using Oracle.ManagedDataAccess.Client;
 using SQLBuilder.Diagnostics;
 using SQLBuilder.Entry;
 using SQLBuilder.Enums;
@@ -25,8 +28,11 @@ using SQLBuilder.LoadBalancer;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.Common;
+using System.Data.SqlClient;
+using System.Data.SQLite;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
@@ -77,7 +83,31 @@ namespace SQLBuilder.Repositories
         /// <summary>
         /// 数据库连接对象
         /// </summary>
-        public virtual DbConnection Connection { get; }
+        public virtual DbConnection Connection
+        {
+            get
+            {
+                DbConnection connection;
+
+                if (!Master && SlaveConnectionStrings?.Length > 0 && LoadBalancer != null)
+                {
+                    var connectionStrings = SlaveConnectionStrings.Select(x => x.connectionString);
+                    var weights = SlaveConnectionStrings.Select(x => x.weight).ToArray();
+                    var connectionString = LoadBalancer.Get(MasterConnectionString, connectionStrings, weights);
+
+                    connection = GetDbConnection(connectionString);
+                }
+                else
+                {
+                    connection = GetDbConnection(MasterConnectionString);
+                }
+
+                if (connection.State != ConnectionState.Open)
+                    connection.Open();
+
+                return connection;
+            }
+        }
 
         /// <summary>
         /// 事务对象
@@ -113,11 +143,24 @@ namespace SQLBuilder.Repositories
         /// 数据库类型
         /// </summary>
         public virtual DatabaseType DatabaseType { get; }
+        #endregion
 
+        #region Constructor
         /// <summary>
-        /// 仓储接口
+        /// 构造函数
         /// </summary>
-        public virtual IRepository Repository { get; }
+        /// <param name="connectionString">主库连接字符串，或者链接字符串名称</param>
+        public BaseRepository(string connectionString)
+        {
+            //判断是链接字符串，还是链接字符串名称
+            MasterConnectionString = ConfigurationManager.ConnectionStrings[connectionString]?.ConnectionString?.Trim();
+
+            if (MasterConnectionString.IsNullOrEmpty())
+                MasterConnectionString = ConfigurationManager.AppSettings[connectionString]?.Trim();
+
+            if (MasterConnectionString.IsNullOrEmpty())
+                MasterConnectionString = connectionString;
+        }
         #endregion
 
         #region Queue
@@ -156,7 +199,7 @@ namespace SQLBuilder.Repositories
                 var res = true;
 
                 while (!Queue.IsEmpty && Queue.TryDequeue(out var func))
-                    res = res && func(Repository);
+                    res = res && func(this);
 
                 if (transaction)
                     Commit();
@@ -208,7 +251,7 @@ namespace SQLBuilder.Repositories
                 var res = true;
 
                 while (!AsyncQueue.IsEmpty && AsyncQueue.TryDequeue(out var func))
-                    res = res && await func(Repository);
+                    res = res && await func(this);
 
                 if (transaction)
                     Commit();
@@ -236,7 +279,7 @@ namespace SQLBuilder.Repositories
         public virtual IRepository UseMasterOrSlave(bool master = true)
         {
             Master = master;
-            return Repository;
+            return this;
         }
         #endregion
 
@@ -254,7 +297,7 @@ namespace SQLBuilder.Repositories
                 Transaction = _tranConnection.BeginTransaction();
             }
 
-            return Repository;
+            return this;
         }
 
         /// <summary>
@@ -3535,6 +3578,24 @@ namespace SQLBuilder.Repositories
                 _diagnosticListener.Write(DiagnosticStrings.ErrorExecute, message);
             }
         }
+        #endregion
+
+        #region GetDbConnection
+        /// <summary>
+        /// 根据数据库类型获取DbConnection
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <returns></returns>
+        public virtual DbConnection GetDbConnection(string connectionString) =>
+            DatabaseType switch
+            {
+                DatabaseType.Sqlite => new SQLiteConnection(connectionString),
+                DatabaseType.SqlServer => new SqlConnection(connectionString),
+                DatabaseType.MySql => new MySqlConnection(connectionString),
+                DatabaseType.Oracle => new OracleConnection(connectionString),
+                DatabaseType.PostgreSql => new NpgsqlConnection(connectionString),
+                _ => new SqlConnection(connectionString),
+            };
         #endregion
     }
 }
