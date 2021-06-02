@@ -18,6 +18,7 @@
 
 using SQLBuilder.Entry;
 using SQLBuilder.Enums;
+using SQLBuilder.Extensions;
 using System.Linq.Expressions;
 
 namespace SQLBuilder.Expressions
@@ -112,7 +113,7 @@ namespace SQLBuilder.Expressions
                     sqlWrapper += $" { (orders[i] == OrderType.Descending ? "DESC" : "ASC")},";
                 else if (expression.Expressions[i] is ConstantExpression order)
                 {
-                    if (!order.Value.ToString().ToUpper().Contains("ASC") && !order.Value.ToString().ToUpper().Contains("DESC"))
+                    if (!order.Value.ToString().ContainsIgnoreCase("ASC") && !order.Value.ToString().ContainsIgnoreCase("DESC"))
                         sqlWrapper += " ASC,";
                     else
                         sqlWrapper += ",";
