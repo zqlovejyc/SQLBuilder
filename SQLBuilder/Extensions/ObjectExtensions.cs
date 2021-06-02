@@ -156,5 +156,17 @@ namespace SQLBuilder.Extensions
             return @this == null || @this == DBNull.Value;
         }
         #endregion
+
+        #region IsNotNull
+        /// <summary>
+        /// 是否为空
+        /// </summary>
+        /// <param name="this">object对象</param>
+        /// <returns>bool</returns>
+        public static bool IsNotNull(this object @this)
+        {
+            return !@this.IsNull();
+        }
+        #endregion
     }
 }

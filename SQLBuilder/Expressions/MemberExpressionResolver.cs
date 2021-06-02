@@ -150,7 +150,7 @@ namespace SQLBuilder.Expressions
             var parameter = expression.Expression as ParameterExpression;
             var tableAlias = sqlWrapper.GetTableAlias(tableName, parameter?.Name);
 
-            if (!tableAlias.IsNullOrEmpty())
+            if (tableAlias.IsNotNullOrEmpty())
                 tableAlias += ".";
 
             sqlWrapper.AddField(tableAlias + sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).columnName);
@@ -174,7 +174,7 @@ namespace SQLBuilder.Expressions
             var parameter = expression.Expression as ParameterExpression;
             var tableAlias = sqlWrapper.GetTableAlias(tableName, parameter?.Name);
 
-            if (!tableAlias.IsNullOrEmpty())
+            if (tableAlias.IsNotNullOrEmpty())
                 tableAlias += ".";
 
             sqlWrapper += tableAlias + sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).columnName;
@@ -291,7 +291,7 @@ namespace SQLBuilder.Expressions
                     var tableAlias = (expression.Expression as ParameterExpression)?.Name;
                     tableAlias = sqlWrapper.GetTableAlias(tableName, tableAlias);
 
-                    if (!tableAlias.IsNullOrEmpty())
+                    if (tableAlias.IsNotNullOrEmpty())
                         tableAlias += ".";
 
                     sqlWrapper += tableAlias + sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).columnName;
@@ -359,7 +359,7 @@ namespace SQLBuilder.Expressions
 
             tableAlias = sqlWrapper.GetTableAlias(tableName, tableAlias);
 
-            if (!tableAlias.IsNullOrEmpty())
+            if (tableAlias.IsNotNullOrEmpty())
                 tableAlias += ".";
 
             if (expression.Expression.NodeType == ExpressionType.Parameter)
@@ -425,7 +425,7 @@ namespace SQLBuilder.Expressions
                     var tableAlias = (expression.Expression as ParameterExpression)?.Name;
                     tableAlias = sqlWrapper.GetTableAlias(tableName, tableAlias);
 
-                    if (!tableAlias.IsNullOrEmpty())
+                    if (tableAlias.IsNotNullOrEmpty())
                         tableAlias += ".";
 
                     sqlWrapper += tableAlias + sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).columnName;
@@ -466,7 +466,7 @@ namespace SQLBuilder.Expressions
 
             tableAlias = sqlWrapper.GetTableAlias(tableName, tableAlias);
 
-            if (!tableAlias.IsNullOrEmpty())
+            if (tableAlias.IsNotNullOrEmpty())
                 tableAlias += ".";
 
             if (expression.Expression.NodeType == ExpressionType.Parameter)
@@ -491,7 +491,7 @@ namespace SQLBuilder.Expressions
 
                             if (i <= orders.Length - 1)
                                 sqlWrapper += $" { (orders[i] == OrderType.Descending ? "DESC" : "ASC")},";
-                            else if (!array[i].ContainsIgnoreCase("ASC") && !array[i].ContainsIgnoreCase("DESC"))
+                            else if (!array[i].ContainsIgnoreCase("ASC", "DESC"))
                                 sqlWrapper += " ASC,";
                             else
                                 sqlWrapper += ",";
@@ -507,7 +507,7 @@ namespace SQLBuilder.Expressions
 
                             if (i <= orders.Length - 1)
                                 sqlWrapper += $" { (orders[i] == OrderType.Descending ? "DESC" : "ASC")},";
-                            else if (!list[i].ContainsIgnoreCase("ASC") && !list[i].ContainsIgnoreCase("DESC"))
+                            else if (!list[i].ContainsIgnoreCase("ASC", "DESC"))
                                 sqlWrapper += " ASC,";
                             else
                                 sqlWrapper += ",";
@@ -518,7 +518,7 @@ namespace SQLBuilder.Expressions
                     if (typeof(string) == type && obj is string str)
                     {
                         SqlExpressionProvider.OrderBy(Expression.Constant(str, str.GetType()), sqlWrapper);
-                        if (!str.ContainsIgnoreCase("ASC") && !str.ContainsIgnoreCase("DESC"))
+                        if (!str.ContainsIgnoreCase("ASC", "DESC"))
                         {
                             if (orders.Length >= 1)
                                 sqlWrapper += $" { (orders[0] == OrderType.Descending ? "DESC" : "ASC")},";

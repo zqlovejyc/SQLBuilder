@@ -401,7 +401,7 @@ namespace SQLBuilder.Expressions
                 if (hasArguments)
                 {
                     var trimString = expression.Object.ToObject()?.ToString();
-                    if (!trimString.IsNullOrEmpty())
+                    if (trimString.IsNotNullOrEmpty())
                     {
                         string constant;
                         var argument = expression.Arguments[0].ToObject();
@@ -446,7 +446,7 @@ namespace SQLBuilder.Expressions
                 if (hasArguments)
                 {
                     var trimString = expression.Object.ToObject()?.ToString();
-                    if (!trimString.IsNullOrEmpty())
+                    if (trimString.IsNotNullOrEmpty())
                     {
                         string constant;
                         var argument = expression.Arguments[0].ToObject();
@@ -483,7 +483,7 @@ namespace SQLBuilder.Expressions
                 if (hasArguments)
                 {
                     var trimString = expression.Object.ToObject()?.ToString();
-                    if (!trimString.IsNullOrEmpty())
+                    if (trimString.IsNotNullOrEmpty())
                     {
                         string constant;
                         var argument = expression.Arguments[0].ToObject();
@@ -626,7 +626,7 @@ namespace SQLBuilder.Expressions
         public override SqlWrapper Select(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             var field = expression.ToObject()?.ToString();
-            if (!field.IsNullOrEmpty())
+            if (field.IsNotNullOrEmpty())
                 sqlWrapper.AddField(field);
 
             return sqlWrapper;
@@ -795,7 +795,7 @@ namespace SQLBuilder.Expressions
 
                     if (i <= orders.Length - 1)
                         sqlWrapper += $" { (orders[i] == OrderType.Descending ? "DESC" : "ASC")},";
-                    else if (!array[i].ToString().ContainsIgnoreCase("ASC") && !array[i].ToString().ContainsIgnoreCase("DESC"))
+                    else if (!array[i].ToString().ContainsIgnoreCase("ASC", "DESC"))
                         sqlWrapper += " ASC,";
                     else
                         sqlWrapper += ",";
