@@ -107,6 +107,8 @@ namespace SQLBuilder.Entry
                 DefaultType = typeof(T),
                 IsEnableFormat = isEnableFormat
             };
+
+            this.sqlWrapper.AddJoinType(typeof(T));
         }
 
         /// <summary>
@@ -125,6 +127,7 @@ namespace SQLBuilder.Entry
             };
 
             this.SqlIntercept = sqlIntercept;
+            this.sqlWrapper.AddJoinType(typeof(T));
         }
         #endregion
 
@@ -532,6 +535,8 @@ namespace SQLBuilder.Entry
 
                     continue;
                 }
+
+                break;
             }
 
             return type;

@@ -58,6 +58,7 @@
     <Compile Include="Models\Country.cs" />
     <Compile Include="Models\MyStudent.cs" />
     <Compile Include="Models\Student.cs" />
+    <Compile Include="Models\Teacher.cs" />
     <Compile Include="Models\UnitInfoEntity.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="SelectTest.cs" />
