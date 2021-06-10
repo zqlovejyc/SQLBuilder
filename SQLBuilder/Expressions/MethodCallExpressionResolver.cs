@@ -505,6 +505,34 @@ namespace SQLBuilder.Expressions
         }
 
         /// <summary>
+        /// SqlSelect
+        /// </summary>
+        /// <param name="expression">表达式树</param>
+        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="methodFormat">sql方法</param>
+        private static void SqlSelect(MethodCallExpression expression, SqlWrapper sqlWrapper, string methodFormat)
+        {
+            var expr = expression.Arguments[0];
+            if (expr is MemberExpression memberExpr)
+            {
+                var type = memberExpr.Expression.Type != memberExpr.Member.DeclaringType ?
+                           memberExpr.Expression.Type :
+                           memberExpr.Member.DeclaringType;
+
+                var tableName = sqlWrapper.GetTableName(type);
+                var parameter = memberExpr.Expression as ParameterExpression;
+                var tableAlias = sqlWrapper.GetTableAlias(tableName, parameter?.Name);
+
+                if (tableAlias.IsNotNullOrEmpty())
+                    tableAlias += ".";
+
+                var field = string.Format(methodFormat, tableAlias + sqlWrapper.GetColumnInfo(memberExpr.Member.DeclaringType, memberExpr.Member).columnName);
+
+                SqlExpressionProvider.Select(Expression.Constant(field), sqlWrapper);
+            }
+        }
+
+        /// <summary>
         /// Count
         /// </summary>
         /// <param name="expression">表达式树</param>
@@ -513,9 +541,16 @@ namespace SQLBuilder.Expressions
         {
             if (expression.Arguments?.Count > 0)
             {
-                sqlWrapper += "COUNT(";
-                SqlExpressionProvider.Having(expression.Arguments[0], sqlWrapper);
-                sqlWrapper += ")";
+                if (sqlWrapper.IsHavingSyntax)
+                {
+                    sqlWrapper += "COUNT(";
+                    SqlExpressionProvider.Having(expression.Arguments[0], sqlWrapper);
+                    sqlWrapper += ")";
+                }
+                else
+                {
+                    SqlSelect(expression, sqlWrapper, "COUNT({0})");
+                }
             }
         }
 
@@ -528,9 +563,16 @@ namespace SQLBuilder.Expressions
         {
             if (expression.Arguments?.Count > 0)
             {
-                sqlWrapper += "SUM(";
-                SqlExpressionProvider.Having(expression.Arguments[0], sqlWrapper);
-                sqlWrapper += ")";
+                if (sqlWrapper.IsHavingSyntax)
+                {
+                    sqlWrapper += "SUM(";
+                    SqlExpressionProvider.Having(expression.Arguments[0], sqlWrapper);
+                    sqlWrapper += ")";
+                }
+                else
+                {
+                    SqlSelect(expression, sqlWrapper, "SUM({0})");
+                }
             }
         }
 
@@ -543,9 +585,16 @@ namespace SQLBuilder.Expressions
         {
             if (expression.Arguments?.Count > 0)
             {
-                sqlWrapper += "AVG(";
-                SqlExpressionProvider.Having(expression.Arguments[0], sqlWrapper);
-                sqlWrapper += ")";
+                if (sqlWrapper.IsHavingSyntax)
+                {
+                    sqlWrapper += "AVG(";
+                    SqlExpressionProvider.Having(expression.Arguments[0], sqlWrapper);
+                    sqlWrapper += ")";
+                }
+                else
+                {
+                    SqlSelect(expression, sqlWrapper, "AVG({0})");
+                }
             }
         }
 
@@ -558,9 +607,16 @@ namespace SQLBuilder.Expressions
         {
             if (expression.Arguments?.Count > 0)
             {
-                sqlWrapper += "MAX(";
-                SqlExpressionProvider.Having(expression.Arguments[0], sqlWrapper);
-                sqlWrapper += ")";
+                if (sqlWrapper.IsHavingSyntax)
+                {
+                    sqlWrapper += "MAX(";
+                    SqlExpressionProvider.Having(expression.Arguments[0], sqlWrapper);
+                    sqlWrapper += ")";
+                }
+                else
+                {
+                    SqlSelect(expression, sqlWrapper, "MAX({0})");
+                }
             }
         }
 
@@ -573,9 +629,16 @@ namespace SQLBuilder.Expressions
         {
             if (expression.Arguments?.Count > 0)
             {
-                sqlWrapper += "MIN(";
-                SqlExpressionProvider.Having(expression.Arguments[0], sqlWrapper);
-                sqlWrapper += ")";
+                if (sqlWrapper.IsHavingSyntax)
+                {
+                    sqlWrapper += "MIN(";
+                    SqlExpressionProvider.Having(expression.Arguments[0], sqlWrapper);
+                    sqlWrapper += ")";
+                }
+                else
+                {
+                    SqlSelect(expression, sqlWrapper, "MIN({0})");
+                }
             }
         }
         #endregion
@@ -625,9 +688,25 @@ namespace SQLBuilder.Expressions
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Select(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
-            var field = expression.ToObject()?.ToString();
-            if (field.IsNotNullOrEmpty())
-                sqlWrapper.AddField(field);
+            try
+            {
+                var field = expression.ToObject()?.ToString();
+                if (field.IsNotNullOrEmpty())
+                    sqlWrapper.AddField(field);
+            }
+            catch
+            {
+                var key = expression.Method;
+                if (key.IsGenericMethod)
+                    key = key.GetGenericMethodDefinition();
+
+                //匹配到方法
+                if (methods.TryGetValue(key.Name, out Action<MethodCallExpression, SqlWrapper> handler))
+                {
+                    sqlWrapper.IsHavingSyntax = false;
+                    handler(expression, sqlWrapper);
+                }
+            }
 
             return sqlWrapper;
         }
@@ -758,6 +837,7 @@ namespace SQLBuilder.Expressions
             //匹配到方法
             if (methods.TryGetValue(key.Name, out Action<MethodCallExpression, SqlWrapper> handler))
             {
+                sqlWrapper.IsHavingSyntax = true;
                 handler(expression, sqlWrapper);
 
                 return sqlWrapper;

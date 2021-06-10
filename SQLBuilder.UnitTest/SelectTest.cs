@@ -403,7 +403,7 @@ namespace SQLBuilder.UnitTest
         {
             var builder = SqlBuilder
                             .Select<UserInfo>(x =>
-                                x.Name)
+                                new { x.Name, NameCount = x.Name.Count<int>() })
                             .Where(o =>
                                 o.Id > 1)
                             .GroupBy(u =>
@@ -413,7 +413,7 @@ namespace SQLBuilder.UnitTest
                             .OrderBy(x =>
                                 x.Name);
 
-            Assert.AreEqual("SELECT x.Name FROM Base_UserInfo AS x WHERE x.Id > @p__1 GROUP BY x.Name HAVING COUNT(x.Name) > @p__2 ORDER BY x.Name", builder.Sql);
+            Assert.AreEqual("SELECT x.Name,COUNT(x.Name) AS NameCount FROM Base_UserInfo AS x WHERE x.Id > @p__1 GROUP BY x.Name HAVING COUNT(x.Name) > @p__2 ORDER BY x.Name", builder.Sql);
             Assert.AreEqual(2, builder.Parameters.Count);
         }
         #endregion
