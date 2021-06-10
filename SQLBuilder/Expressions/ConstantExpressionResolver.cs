@@ -33,7 +33,7 @@ namespace SQLBuilder.Expressions
         /// Select
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Select(ConstantExpression expression, SqlWrapper sqlWrapper)
         {
@@ -49,7 +49,7 @@ namespace SQLBuilder.Expressions
         /// Count
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Count(ConstantExpression expression, SqlWrapper sqlWrapper)
         {
@@ -65,7 +65,7 @@ namespace SQLBuilder.Expressions
         /// Sum
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Sum(ConstantExpression expression, SqlWrapper sqlWrapper)
         {
@@ -79,7 +79,7 @@ namespace SQLBuilder.Expressions
         /// Max
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Max(ConstantExpression expression, SqlWrapper sqlWrapper)
         {
@@ -93,7 +93,7 @@ namespace SQLBuilder.Expressions
         /// Min
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Min(ConstantExpression expression, SqlWrapper sqlWrapper)
         {
@@ -107,7 +107,7 @@ namespace SQLBuilder.Expressions
         /// Avg
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Avg(ConstantExpression expression, SqlWrapper sqlWrapper)
         {
@@ -121,7 +121,7 @@ namespace SQLBuilder.Expressions
         /// Where
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Where(ConstantExpression expression, SqlWrapper sqlWrapper)
         {
@@ -142,7 +142,7 @@ namespace SQLBuilder.Expressions
         /// Join
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Join(ConstantExpression expression, SqlWrapper sqlWrapper)
         {
@@ -163,7 +163,7 @@ namespace SQLBuilder.Expressions
         /// In
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
 		public override SqlWrapper In(ConstantExpression expression, SqlWrapper sqlWrapper)
         {
@@ -176,7 +176,7 @@ namespace SQLBuilder.Expressions
         /// GroupBy
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
 		public override SqlWrapper GroupBy(ConstantExpression expression, SqlWrapper sqlWrapper)
         {
@@ -194,7 +194,7 @@ namespace SQLBuilder.Expressions
         /// Having
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Having(ConstantExpression expression, SqlWrapper sqlWrapper)
         {
@@ -207,7 +207,7 @@ namespace SQLBuilder.Expressions
         /// OrderBy
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <param name="orders">排序方式</param>
         /// <returns>SqlWrapper</returns>
 		public override SqlWrapper OrderBy(ConstantExpression expression, SqlWrapper sqlWrapper, params OrderType[] orders)

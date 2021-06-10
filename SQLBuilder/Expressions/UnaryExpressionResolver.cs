@@ -32,7 +32,7 @@ namespace SQLBuilder.Expressions
         /// Select
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Select(UnaryExpression expression, SqlWrapper sqlWrapper)
         {
@@ -45,7 +45,7 @@ namespace SQLBuilder.Expressions
         /// Insert
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Insert(UnaryExpression expression, SqlWrapper sqlWrapper)
         {
@@ -58,7 +58,7 @@ namespace SQLBuilder.Expressions
         /// Update
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Update(UnaryExpression expression, SqlWrapper sqlWrapper)
         {
@@ -71,7 +71,7 @@ namespace SQLBuilder.Expressions
         /// Where
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Where(UnaryExpression expression, SqlWrapper sqlWrapper)
         {
@@ -189,7 +189,7 @@ namespace SQLBuilder.Expressions
         /// GroupBy
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper GroupBy(UnaryExpression expression, SqlWrapper sqlWrapper)
         {
@@ -202,7 +202,7 @@ namespace SQLBuilder.Expressions
         /// Having
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Having(UnaryExpression expression, SqlWrapper sqlWrapper)
         {
@@ -215,7 +215,7 @@ namespace SQLBuilder.Expressions
         /// OrderBy
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <param name="orders">排序方式</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper OrderBy(UnaryExpression expression, SqlWrapper sqlWrapper, params OrderType[] orders)
@@ -229,7 +229,7 @@ namespace SQLBuilder.Expressions
         /// Max
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Max(UnaryExpression expression, SqlWrapper sqlWrapper)
         {
@@ -242,7 +242,7 @@ namespace SQLBuilder.Expressions
         /// Min
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Min(UnaryExpression expression, SqlWrapper sqlWrapper)
         {
@@ -255,7 +255,7 @@ namespace SQLBuilder.Expressions
         /// Avg
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Avg(UnaryExpression expression, SqlWrapper sqlWrapper)
         {
@@ -268,7 +268,7 @@ namespace SQLBuilder.Expressions
         /// Count
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Count(UnaryExpression expression, SqlWrapper sqlWrapper)
         {
@@ -281,7 +281,7 @@ namespace SQLBuilder.Expressions
         /// Sum
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Sum(UnaryExpression expression, SqlWrapper sqlWrapper)
         {
@@ -294,7 +294,7 @@ namespace SQLBuilder.Expressions
         /// Join
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Join(UnaryExpression expression, SqlWrapper sqlWrapper)
         {

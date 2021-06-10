@@ -64,7 +64,7 @@ namespace SQLBuilder.Expressions
         /// In
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void SqlIn(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             SqlExpressionProvider.Where(expression.Arguments[0], sqlWrapper);
@@ -76,7 +76,7 @@ namespace SQLBuilder.Expressions
         /// Not In
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void NotIn(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             SqlExpressionProvider.Where(expression.Arguments[0], sqlWrapper);
@@ -88,7 +88,7 @@ namespace SQLBuilder.Expressions
         /// Like
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void Like(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Object != null)
@@ -135,7 +135,7 @@ namespace SQLBuilder.Expressions
         /// LikeLeft
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void LikeLeft(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Object != null)
@@ -174,7 +174,7 @@ namespace SQLBuilder.Expressions
         /// LikeRight
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void LikeRight(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Object != null)
@@ -219,7 +219,7 @@ namespace SQLBuilder.Expressions
         /// NotLike
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void NotLike(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Object != null)
@@ -265,7 +265,7 @@ namespace SQLBuilder.Expressions
         /// Contains
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void Contains(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Object != null)
@@ -326,7 +326,7 @@ namespace SQLBuilder.Expressions
         /// IsNullOrEmpty
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void IsNullOrEmpty(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             sqlWrapper += "(";
@@ -341,7 +341,7 @@ namespace SQLBuilder.Expressions
         /// Equals
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void Equals(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Object != null)
@@ -360,7 +360,7 @@ namespace SQLBuilder.Expressions
         /// ToUpper
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void ToUpper(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Object != null)
@@ -375,7 +375,7 @@ namespace SQLBuilder.Expressions
         /// ToLower
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void ToLower(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Object != null)
@@ -390,7 +390,7 @@ namespace SQLBuilder.Expressions
         /// Trim
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void Trim(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Object != null)
@@ -435,7 +435,7 @@ namespace SQLBuilder.Expressions
         /// TrimStart
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void TrimStart(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Object != null)
@@ -472,7 +472,7 @@ namespace SQLBuilder.Expressions
         /// TrimEnd
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void TrimEnd(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Object != null)
@@ -509,7 +509,7 @@ namespace SQLBuilder.Expressions
         /// Count
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void SqlCount(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Arguments?.Count > 0)
@@ -531,7 +531,7 @@ namespace SQLBuilder.Expressions
         /// Sum
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void SqlSum(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Arguments?.Count > 0)
@@ -553,7 +553,7 @@ namespace SQLBuilder.Expressions
         /// Avg
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void SqlAvg(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Arguments?.Count > 0)
@@ -575,7 +575,7 @@ namespace SQLBuilder.Expressions
         /// Max
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void SqlMax(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Arguments?.Count > 0)
@@ -597,7 +597,7 @@ namespace SQLBuilder.Expressions
         /// Min
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         private static void SqlMin(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.Arguments?.Count > 0)
@@ -619,7 +619,7 @@ namespace SQLBuilder.Expressions
         /// SqlSelect
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <param name="methodFormat">sql方法</param>
         private static void SqlSelect(MethodCallExpression expression, SqlWrapper sqlWrapper, string methodFormat)
         {
@@ -685,18 +685,18 @@ namespace SQLBuilder.Expressions
         /// In
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper In(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
-            var obj = expression?.ToObject();
-            if (obj != null)
+            var convertRes = expression?.ToObject();
+            if (convertRes != null)
             {
                 sqlWrapper += "(";
 
-                if (obj is IEnumerable array)
+                if (convertRes is IEnumerable collection)
                 {
-                    foreach (var item in array)
+                    foreach (var item in collection)
                     {
                         SqlExpressionProvider.In(Expression.Constant(item), sqlWrapper);
                         sqlWrapper += ",";
@@ -704,7 +704,7 @@ namespace SQLBuilder.Expressions
                 }
                 else
                 {
-                    SqlExpressionProvider.In(Expression.Constant(obj), sqlWrapper);
+                    SqlExpressionProvider.In(Expression.Constant(convertRes), sqlWrapper);
                 }
 
                 if (sqlWrapper[sqlWrapper.Length - 1] == ',')
@@ -720,7 +720,7 @@ namespace SQLBuilder.Expressions
         /// Select
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Select(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
@@ -747,7 +747,7 @@ namespace SQLBuilder.Expressions
         /// Where
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Where(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
@@ -777,50 +777,57 @@ namespace SQLBuilder.Expressions
         /// <returns></returns>
         public override SqlWrapper Insert(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
-            var fields = new List<string>();
-            var array = expression.ToObject() as object[];
-            for (var i = 0; i < array.Length; i++)
+            if (expression.ToObject() is IEnumerable collection)
             {
-                if (sqlWrapper.DatabaseType != DatabaseType.Oracle)
-                    sqlWrapper.Append("(");
+                var i = 0;
+                var fields = new List<string>();
 
-                if (i > 0 && sqlWrapper.DatabaseType == DatabaseType.Oracle)
-                    sqlWrapper.Append(" UNION ALL SELECT ");
-
-                var properties = array[i]?.GetType().GetProperties();
-                foreach (var p in properties)
+                foreach (var item in collection)
                 {
-                    var type = p.DeclaringType.IsAnonymousType() ?
-                        sqlWrapper.DefaultType :
-                        p.DeclaringType;
+                    if (sqlWrapper.DatabaseType != DatabaseType.Oracle)
+                        sqlWrapper.Append("(");
 
-                    var (columnName, isInsert, isUpdate) = sqlWrapper.GetColumnInfo(type, p);
-                    if (isInsert)
+                    if (i > 0 && sqlWrapper.DatabaseType == DatabaseType.Oracle)
+                        sqlWrapper.Append(" UNION ALL SELECT ");
+
+                    var properties = item?.GetType().GetProperties();
+                    foreach (var p in properties)
                     {
-                        var value = p.GetValue(array[i], null);
-                        if (value != null || (sqlWrapper.IsEnableNullValue && value == null))
+                        var type = p.DeclaringType.IsAnonymousType() ?
+                            sqlWrapper.DefaultType :
+                            p.DeclaringType;
+
+                        var (columnName, isInsert, isUpdate) = sqlWrapper.GetColumnInfo(type, p);
+                        if (isInsert)
                         {
-                            sqlWrapper.AddDbParameter(value);
-                            if (!fields.Contains(columnName))
-                                fields.Add(columnName);
-                            sqlWrapper += ",";
+                            var value = p.GetValue(item, null);
+                            if (value != null || (sqlWrapper.IsEnableNullValue && value == null))
+                            {
+                                sqlWrapper.AddDbParameter(value);
+                                if (!fields.Contains(columnName))
+                                    fields.Add(columnName);
+                                sqlWrapper += ",";
+                            }
                         }
                     }
+
+                    if (sqlWrapper[sqlWrapper.Length - 1] == ',')
+                    {
+                        sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
+                        if (sqlWrapper.DatabaseType != DatabaseType.Oracle)
+                            sqlWrapper.Append("),");
+                        else
+                            sqlWrapper.Append(" FROM DUAL");
+                    }
+
+                    i++;
                 }
+
                 if (sqlWrapper[sqlWrapper.Length - 1] == ',')
-                {
                     sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
-                    if (sqlWrapper.DatabaseType != DatabaseType.Oracle)
-                        sqlWrapper.Append("),");
-                    else
-                        sqlWrapper.Append(" FROM DUAL");
-                }
+
+                sqlWrapper.Reset(string.Format(sqlWrapper.ToString(), string.Join(",", fields).TrimEnd(',')));
             }
-
-            if (sqlWrapper[sqlWrapper.Length - 1] == ',')
-                sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
-
-            sqlWrapper.Reset(string.Format(sqlWrapper.ToString(), string.Join(",", fields).TrimEnd(',')));
 
             return sqlWrapper;
         }
@@ -829,17 +836,17 @@ namespace SQLBuilder.Expressions
         /// GroupBy
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
 		public override SqlWrapper GroupBy(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
-            var array = (expression.ToObject() as IEnumerable<object>)?.ToList();
-            if (array != null)
+            if (expression.ToObject() is IEnumerable collection)
             {
-                for (var i = 0; i < array.Count; i++)
+                foreach (var item in collection)
                 {
-                    SqlExpressionProvider.GroupBy(Expression.Constant(array[i], array[i].GetType()), sqlWrapper);
+                    SqlExpressionProvider.GroupBy(Expression.Constant(item), sqlWrapper);
                 }
+
                 sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
             }
 
@@ -850,7 +857,7 @@ namespace SQLBuilder.Expressions
         /// Having
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
 		public override SqlWrapper Having(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
@@ -882,25 +889,29 @@ namespace SQLBuilder.Expressions
         /// OrderBy
         /// </summary>
         /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql打包对象</param>
+        /// <param name="sqlWrapper">sql包装器</param>
         /// <param name="orders">排序方式</param>
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper OrderBy(MethodCallExpression expression, SqlWrapper sqlWrapper, params OrderType[] orders)
         {
-            var array = (expression.ToObject() as IEnumerable<object>)?.ToList();
-            if (array != null)
+            if (expression.ToObject() is IEnumerable collection)
             {
-                for (var i = 0; i < array.Count; i++)
+                var i = 0;
+
+                foreach (var item in collection)
                 {
-                    SqlExpressionProvider.OrderBy(Expression.Constant(array[i], array[i].GetType()), sqlWrapper);
+                    SqlExpressionProvider.OrderBy(Expression.Constant(item), sqlWrapper);
 
                     if (i <= orders.Length - 1)
                         sqlWrapper += $" { (orders[i] == OrderType.Descending ? "DESC" : "ASC")},";
-                    else if (!array[i].ToString().ContainsIgnoreCase("ASC", "DESC"))
+                    else if (!item.ToString().ContainsIgnoreCase("ASC", "DESC"))
                         sqlWrapper += " ASC,";
                     else
                         sqlWrapper += ",";
+
+                    i++;
                 }
+
                 sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
             }
 
