@@ -126,7 +126,7 @@ namespace SQLBuilder.Extensions
 
         #region Min
         /// <summary>
-        /// 聚合函数Max
+        /// 聚合函数Min
         /// </summary>
         /// <param name="this"></param>
         /// <returns></returns>
