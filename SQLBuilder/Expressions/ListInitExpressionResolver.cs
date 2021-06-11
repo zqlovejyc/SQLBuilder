@@ -85,8 +85,7 @@ namespace SQLBuilder.Expressions
                     i++;
                 }
 
-                if (sqlWrapper[sqlWrapper.Length - 1] == ',')
-                    sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
+                sqlWrapper.RemoveLast(',');
 
                 sqlWrapper.Reset(string.Format(sqlWrapper.ToString(), string.Join(",", fields).TrimEnd(',')));
             }
@@ -109,9 +108,11 @@ namespace SQLBuilder.Expressions
                 foreach (var item in collection)
                 {
                     SqlExpressionProvider.GroupBy(Expression.Constant(item), sqlWrapper);
+
+                    sqlWrapper += ",";
                 }
 
-                sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
+                sqlWrapper.RemoveLast(',');
             }
 
             return sqlWrapper;
@@ -146,7 +147,7 @@ namespace SQLBuilder.Expressions
                     i++;
                 }
 
-                sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
+                sqlWrapper.RemoveLast(',');
             }
 
             return sqlWrapper;

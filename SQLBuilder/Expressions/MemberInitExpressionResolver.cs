@@ -151,8 +151,7 @@ namespace SQLBuilder.Expressions
                 }
             }
 
-            if (sqlWrapper[sqlWrapper.Length - 1] == ',')
-                sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
+            sqlWrapper.RemoveLast(',');
 
             return sqlWrapper;
         }

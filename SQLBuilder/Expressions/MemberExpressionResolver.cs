@@ -90,8 +90,7 @@ namespace SQLBuilder.Expressions
                 }
             }
 
-            if (sqlWrapper[sqlWrapper.Length - 1] == ',')
-                sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
+            sqlWrapper.RemoveLast(',');
 
             sqlWrapper.Reset(string.Format(sqlWrapper.ToString(), string.Join(",", fields).TrimEnd(',')));
 
@@ -133,8 +132,7 @@ namespace SQLBuilder.Expressions
                 }
             }
 
-            if (sqlWrapper[sqlWrapper.Length - 1] == ',')
-                sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
+            sqlWrapper.RemoveLast(',');
 
             return sqlWrapper;
         }
@@ -348,8 +346,7 @@ namespace SQLBuilder.Expressions
                     sqlWrapper += ",";
                 }
 
-                if (sqlWrapper[sqlWrapper.Length - 1] == ',')
-                    sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
+                sqlWrapper.RemoveLast(',');
 
                 sqlWrapper += ")";
             }
@@ -400,16 +397,15 @@ namespace SQLBuilder.Expressions
                         foreach (var item in collection)
                         {
                             SqlExpressionProvider.GroupBy(Expression.Constant(item), sqlWrapper);
+
+                            sqlWrapper += ",";
                         }
 
-                        sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
+                        sqlWrapper.RemoveLast(',');
                     }
 
                     if (typeof(string) == convertRes.GetType() && convertRes is string str)
-                    {
                         SqlExpressionProvider.GroupBy(Expression.Constant(str), sqlWrapper);
-                        sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
-                    }
                 }
             }
 
@@ -518,7 +514,7 @@ namespace SQLBuilder.Expressions
                             i++;
                         }
 
-                        sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
+                        sqlWrapper.RemoveLast(',');
                     }
 
                     if (typeof(string) == convertRes.GetType() && convertRes is string str)
@@ -532,7 +528,7 @@ namespace SQLBuilder.Expressions
                             else
                                 sqlWrapper += " ASC,";
 
-                            sqlWrapper.Remove(sqlWrapper.Length - 1, 1);
+                            sqlWrapper.RemoveLast(',');
                         }
                     }
                 }
