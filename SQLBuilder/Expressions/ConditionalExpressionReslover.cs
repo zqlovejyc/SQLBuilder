@@ -27,7 +27,7 @@ namespace SQLBuilder.Expressions
     /// </summary>
     public class ConditionalExpressionReslover : BaseExpression<ConditionalExpression>
     {
-        #region Override Base Class Methods
+        #region Where
         /// <summary>
         /// Where
         /// </summary>

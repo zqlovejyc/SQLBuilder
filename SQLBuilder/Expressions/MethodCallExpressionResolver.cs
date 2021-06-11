@@ -22,7 +22,6 @@ using SQLBuilder.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace SQLBuilder.Expressions
@@ -30,14 +29,15 @@ namespace SQLBuilder.Expressions
     /// <summary>
     /// 表示对静态方法或实例方法的调用
     /// </summary>
-	public class MethodCallExpressionResolver : BaseExpression<MethodCallExpression>
+    public class MethodCallExpressionResolver : BaseExpression<MethodCallExpression>
     {
-        #region Private Static Methods
+        #region Methods
+        #region Field
         /// <summary>
         /// methods
         /// </summary>
         private static readonly Dictionary<string, Action<MethodCallExpression, SqlWrapper>> methods =
-            new Dictionary<string, Action<MethodCallExpression, SqlWrapper>>
+            new()
             {
                 ["Like"] = Like,
                 ["LikeLeft"] = LikeLeft,
@@ -59,7 +59,9 @@ namespace SQLBuilder.Expressions
                 ["Max"] = SqlMax,
                 ["Min"] = SqlMin,
             };
+        #endregion
 
+        #region SqlIn
         /// <summary>
         /// In
         /// </summary>
@@ -71,7 +73,9 @@ namespace SQLBuilder.Expressions
             sqlWrapper += " IN ";
             SqlExpressionProvider.In(expression.Arguments[1], sqlWrapper);
         }
+        #endregion
 
+        #region NotIn
         /// <summary>
         /// Not In
         /// </summary>
@@ -83,7 +87,9 @@ namespace SQLBuilder.Expressions
             sqlWrapper += " NOT IN ";
             SqlExpressionProvider.In(expression.Arguments[1], sqlWrapper);
         }
+        #endregion
 
+        #region Like
         /// <summary>
         /// Like
         /// </summary>
@@ -130,7 +136,9 @@ namespace SQLBuilder.Expressions
                     break;
             }
         }
+        #endregion
 
+        #region LikeLeft
         /// <summary>
         /// LikeLeft
         /// </summary>
@@ -169,7 +177,9 @@ namespace SQLBuilder.Expressions
                     break;
             }
         }
+        #endregion
 
+        #region LikeRight
         /// <summary>
         /// LikeRight
         /// </summary>
@@ -214,7 +224,9 @@ namespace SQLBuilder.Expressions
                     break;
             }
         }
+        #endregion
 
+        #region NotLike
         /// <summary>
         /// NotLike
         /// </summary>
@@ -260,7 +272,9 @@ namespace SQLBuilder.Expressions
                     break;
             }
         }
+        #endregion
 
+        #region Contains
         /// <summary>
         /// Contains
         /// </summary>
@@ -321,7 +335,9 @@ namespace SQLBuilder.Expressions
                 SqlExpressionProvider.In(expression.Arguments[0], sqlWrapper);
             }
         }
+        #endregion
 
+        #region IsNullOrEmpty
         /// <summary>
         /// IsNullOrEmpty
         /// </summary>
@@ -336,7 +352,9 @@ namespace SQLBuilder.Expressions
             sqlWrapper += " = ''";
             sqlWrapper += ")";
         }
+        #endregion
 
+        #region Equals
         /// <summary>
         /// Equals
         /// </summary>
@@ -355,7 +373,9 @@ namespace SQLBuilder.Expressions
             else
                 sqlWrapper.Insert(signIndex, " = ");
         }
+        #endregion
 
+        #region ToUpper
         /// <summary>
         /// ToUpper
         /// </summary>
@@ -370,7 +390,9 @@ namespace SQLBuilder.Expressions
                 sqlWrapper += ")";
             }
         }
+        #endregion
 
+        #region ToLower
         /// <summary>
         /// ToLower
         /// </summary>
@@ -385,7 +407,9 @@ namespace SQLBuilder.Expressions
                 sqlWrapper += ")";
             }
         }
+        #endregion
 
+        #region Trim
         /// <summary>
         /// Trim
         /// </summary>
@@ -430,7 +454,9 @@ namespace SQLBuilder.Expressions
                 }
             }
         }
+        #endregion
 
+        #region TrimStart
         /// <summary>
         /// TrimStart
         /// </summary>
@@ -467,7 +493,9 @@ namespace SQLBuilder.Expressions
                 }
             }
         }
+        #endregion
 
+        #region TrimEnd
         /// <summary>
         /// TrimEnd
         /// </summary>
@@ -504,7 +532,9 @@ namespace SQLBuilder.Expressions
                 }
             }
         }
+        #endregion
 
+        #region SqlCount
         /// <summary>
         /// Count
         /// </summary>
@@ -526,7 +556,9 @@ namespace SQLBuilder.Expressions
                 }
             }
         }
+        #endregion
 
+        #region SqlSum
         /// <summary>
         /// Sum
         /// </summary>
@@ -548,7 +580,9 @@ namespace SQLBuilder.Expressions
                 }
             }
         }
+        #endregion
 
+        #region SqlAvg
         /// <summary>
         /// Avg
         /// </summary>
@@ -570,7 +604,9 @@ namespace SQLBuilder.Expressions
                 }
             }
         }
+        #endregion
 
+        #region SqlMax
         /// <summary>
         /// Max
         /// </summary>
@@ -592,7 +628,9 @@ namespace SQLBuilder.Expressions
                 }
             }
         }
+        #endregion
 
+        #region SqlMin
         /// <summary>
         /// Min
         /// </summary>
@@ -614,7 +652,9 @@ namespace SQLBuilder.Expressions
                 }
             }
         }
+        #endregion
 
+        #region SqlSelect
         /// <summary>
         /// SqlSelect
         /// </summary>
@@ -644,7 +684,9 @@ namespace SQLBuilder.Expressions
                 SqlExpressionProvider.Select(Expression.Constant(field), sqlWrapper);
             }
         }
+        #endregion
 
+        #region GetMethodHandler
         /// <summary>
         /// 获取方法处理委托
         /// </summary>
@@ -662,7 +704,9 @@ namespace SQLBuilder.Expressions
 
             return null;
         }
+        #endregion
 
+        #region GetMemberExpression
         /// <summary>
         /// 获取MemberExpression
         /// </summary>
@@ -679,8 +723,9 @@ namespace SQLBuilder.Expressions
             return memberExpr;
         }
         #endregion
+        #endregion
 
-        #region Override Base Class Methods
+        #region In
         /// <summary>
         /// In
         /// </summary>
@@ -715,7 +760,9 @@ namespace SQLBuilder.Expressions
 
             return sqlWrapper;
         }
+        #endregion
 
+        #region Select
         /// <summary>
         /// Select
         /// </summary>
@@ -742,7 +789,9 @@ namespace SQLBuilder.Expressions
 
             return sqlWrapper;
         }
+        #endregion
 
+        #region Where
         /// <summary>
         /// Where
         /// </summary>
@@ -768,7 +817,9 @@ namespace SQLBuilder.Expressions
 
             return sqlWrapper;
         }
+        #endregion
 
+        #region Insert
         /// <summary>
         /// Insert
         /// </summary>
@@ -831,14 +882,16 @@ namespace SQLBuilder.Expressions
 
             return sqlWrapper;
         }
+        #endregion
 
+        #region GroupBy
         /// <summary>
         /// GroupBy
         /// </summary>
         /// <param name="expression">表达式树</param>
         /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
-		public override SqlWrapper GroupBy(MethodCallExpression expression, SqlWrapper sqlWrapper)
+        public override SqlWrapper GroupBy(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             if (expression.ToObject() is IEnumerable collection)
             {
@@ -852,14 +905,16 @@ namespace SQLBuilder.Expressions
 
             return sqlWrapper;
         }
+        #endregion
 
+        #region Having
         /// <summary>
         /// Having
         /// </summary>
         /// <param name="expression">表达式树</param>
         /// <param name="sqlWrapper">sql包装器</param>
         /// <returns>SqlWrapper</returns>
-		public override SqlWrapper Having(MethodCallExpression expression, SqlWrapper sqlWrapper)
+        public override SqlWrapper Having(MethodCallExpression expression, SqlWrapper sqlWrapper)
         {
             var handler = GetMethodHandler(expression);
 
@@ -884,7 +939,9 @@ namespace SQLBuilder.Expressions
 
             return sqlWrapper;
         }
+        #endregion
 
+        #region OrderBy
         /// <summary>
         /// OrderBy
         /// </summary>

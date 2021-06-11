@@ -29,7 +29,7 @@ namespace SQLBuilder.Expressions
     /// </summary>
     public class MemberInitExpressionResolver : BaseExpression<MemberInitExpression>
     {
-        #region Override Base Class Methods
+        #region Select
         /// <summary>
         /// Select
         /// </summary>
@@ -74,7 +74,9 @@ namespace SQLBuilder.Expressions
 
             return sqlWrapper;
         }
+        #endregion
 
+        #region Insert
         /// <summary>
         /// Insert
         /// </summary>
@@ -119,7 +121,9 @@ namespace SQLBuilder.Expressions
             sqlWrapper.Reset(string.Format(sqlWrapper.ToString(), string.Join(",", fields).TrimEnd(',')));
             return sqlWrapper;
         }
+        #endregion
 
+        #region Update
         /// <summary>
         /// Update
         /// </summary>

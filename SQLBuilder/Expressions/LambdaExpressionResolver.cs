@@ -26,7 +26,7 @@ namespace SQLBuilder.Expressions
     /// </summary>
     public class LambdaExpressionResolver : BaseExpression<LambdaExpression>
     {
-        #region Override Base Class Methods
+        #region Where
         /// <summary>
         /// Where
         /// </summary>
@@ -39,20 +39,9 @@ namespace SQLBuilder.Expressions
 
             return sqlWrapper;
         }
+        #endregion
 
-        /// <summary>
-        /// Select
-        /// </summary>
-        /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql包装器</param>
-        /// <returns>SqlWrapper</returns>
-        public override SqlWrapper Select(LambdaExpression expression, SqlWrapper sqlWrapper)
-        {
-            SqlExpressionProvider.Select(expression.Body, sqlWrapper);
-
-            return sqlWrapper;
-        }
-
+        #region Having
         /// <summary>
         /// Having
         /// </summary>
@@ -65,7 +54,24 @@ namespace SQLBuilder.Expressions
 
             return sqlWrapper;
         }
+        #endregion
 
+        #region Select
+        /// <summary>
+        /// Select
+        /// </summary>
+        /// <param name="expression">表达式树</param>
+        /// <param name="sqlWrapper">sql包装器</param>
+        /// <returns>SqlWrapper</returns>
+        public override SqlWrapper Select(LambdaExpression expression, SqlWrapper sqlWrapper)
+        {
+            SqlExpressionProvider.Select(expression.Body, sqlWrapper);
+
+            return sqlWrapper;
+        }
+        #endregion
+
+        #region Join
         /// <summary>
         /// Join
         /// </summary>
