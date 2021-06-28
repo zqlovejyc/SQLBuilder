@@ -16,6 +16,8 @@
  */
 #endregion
 
+using System.ComponentModel;
+
 namespace SQLBuilder.Enums
 {
     /// <summary>
@@ -26,11 +28,11 @@ namespace SQLBuilder.Enums
         /// <summary>
         /// 升序
         /// </summary>
-        Ascending,
+        [Description("Ascending")] Ascending,
 
         /// <summary>
         /// 降序
         /// </summary>
-        Descending
+        [Description("Descending")] Descending
     }
 }
