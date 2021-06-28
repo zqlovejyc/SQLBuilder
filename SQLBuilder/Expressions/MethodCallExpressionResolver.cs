@@ -40,12 +40,15 @@ namespace SQLBuilder.Expressions
             new()
             {
                 ["Like"] = Like,
-                ["LikeLeft"] = LikeLeft,
-                ["LikeRight"] = LikeRight,
                 ["NotLike"] = NotLike,
+                ["StartsWith"] = StartsWith,
+                ["StartsWithIgnoreCase"] = StartsWithIgnoreCase,
+                ["EndsWith"] = EndsWith,
+                ["EndsWithIgnoreCase"] = EndsWithIgnoreCase,
+                ["Contains"] = Contains,
+                ["ContainsIgnoreCase"] = ContainsIgnoreCase,
                 ["In"] = SqlIn,
                 ["NotIn"] = NotIn,
-                ["Contains"] = Contains,
                 ["IsNullOrEmpty"] = IsNullOrEmpty,
                 ["Equals"] = Equals,
                 ["ToUpper"] = ToUpper,
@@ -57,7 +60,7 @@ namespace SQLBuilder.Expressions
                 ["Sum"] = SqlSum,
                 ["Avg"] = SqlAvg,
                 ["Max"] = SqlMax,
-                ["Min"] = SqlMin,
+                ["Min"] = SqlMin
             };
         #endregion
 
@@ -138,94 +141,6 @@ namespace SQLBuilder.Expressions
         }
         #endregion
 
-        #region LikeLeft
-        /// <summary>
-        /// LikeLeft
-        /// </summary>
-        /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql包装器</param>
-        private static void LikeLeft(MethodCallExpression expression, SqlWrapper sqlWrapper)
-        {
-            if (expression.Object != null)
-                SqlExpressionProvider.Where(expression.Object, sqlWrapper);
-
-            SqlExpressionProvider.Where(expression.Arguments[0], sqlWrapper);
-            switch (sqlWrapper.DatabaseType)
-            {
-                case DatabaseType.SqlServer:
-                    sqlWrapper += " LIKE '%' + ";
-                    break;
-                case DatabaseType.MySql:
-                case DatabaseType.PostgreSql:
-                    sqlWrapper += " LIKE CONCAT('%',";
-                    break;
-                case DatabaseType.Oracle:
-                case DatabaseType.Sqlite:
-                    sqlWrapper += " LIKE '%' || ";
-                    break;
-                default:
-                    break;
-            }
-            SqlExpressionProvider.Where(expression.Arguments[1], sqlWrapper);
-            switch (sqlWrapper.DatabaseType)
-            {
-                case DatabaseType.MySql:
-                case DatabaseType.PostgreSql:
-                    sqlWrapper += ")";
-                    break;
-                default:
-                    break;
-            }
-        }
-        #endregion
-
-        #region LikeRight
-        /// <summary>
-        /// LikeRight
-        /// </summary>
-        /// <param name="expression">表达式树</param>
-        /// <param name="sqlWrapper">sql包装器</param>
-        private static void LikeRight(MethodCallExpression expression, SqlWrapper sqlWrapper)
-        {
-            if (expression.Object != null)
-            {
-                SqlExpressionProvider.Where(expression.Object, sqlWrapper);
-            }
-            SqlExpressionProvider.Where(expression.Arguments[0], sqlWrapper);
-            switch (sqlWrapper.DatabaseType)
-            {
-                case DatabaseType.SqlServer:
-                case DatabaseType.Oracle:
-                case DatabaseType.Sqlite:
-                    sqlWrapper += " LIKE ";
-                    break;
-                case DatabaseType.MySql:
-                case DatabaseType.PostgreSql:
-                    sqlWrapper += " LIKE CONCAT(";
-                    break;
-                default:
-                    break;
-            }
-            SqlExpressionProvider.Where(expression.Arguments[1], sqlWrapper);
-            switch (sqlWrapper.DatabaseType)
-            {
-                case DatabaseType.SqlServer:
-                    sqlWrapper += " + '%'";
-                    break;
-                case DatabaseType.MySql:
-                case DatabaseType.PostgreSql:
-                    sqlWrapper += ",'%')";
-                    break;
-                case DatabaseType.Oracle:
-                case DatabaseType.Sqlite:
-                    sqlWrapper += " || '%'";
-                    break;
-                default:
-                    break;
-            }
-        }
-        #endregion
-
         #region NotLike
         /// <summary>
         /// NotLike
@@ -274,6 +189,188 @@ namespace SQLBuilder.Expressions
         }
         #endregion
 
+        #region StartsWith
+        /// <summary>
+        /// StartsWith
+        /// </summary>
+        /// <param name="expression">表达式树</param>
+        /// <param name="sqlWrapper">sql包装器</param>
+        private static void StartsWith(MethodCallExpression expression, SqlWrapper sqlWrapper)
+        {
+            SqlExpressionProvider.Where(expression.Object, sqlWrapper);
+
+            switch (sqlWrapper.DatabaseType)
+            {
+                case DatabaseType.SqlServer:
+                case DatabaseType.Oracle:
+                case DatabaseType.Sqlite:
+                    sqlWrapper += " LIKE ";
+                    break;
+                case DatabaseType.MySql:
+                case DatabaseType.PostgreSql:
+                    sqlWrapper += " LIKE CONCAT(";
+                    break;
+                default:
+                    break;
+            }
+
+            SqlExpressionProvider.Where(expression.Arguments[0], sqlWrapper);
+
+            switch (sqlWrapper.DatabaseType)
+            {
+                case DatabaseType.SqlServer:
+                    sqlWrapper += " + '%'";
+                    break;
+                case DatabaseType.MySql:
+                case DatabaseType.PostgreSql:
+                    sqlWrapper += ",'%')";
+                    break;
+                case DatabaseType.Oracle:
+                case DatabaseType.Sqlite:
+                    sqlWrapper += " || '%'";
+                    break;
+                default:
+                    break;
+            }
+        }
+        #endregion
+
+        #region StartsWithIgnoreCase
+        /// <summary>
+        /// StartsWithIgnoreCase
+        /// </summary>
+        /// <param name="expression">表达式树</param>
+        /// <param name="sqlWrapper">sql包装器</param>
+        private static void StartsWithIgnoreCase(MethodCallExpression expression, SqlWrapper sqlWrapper)
+        {
+            sqlWrapper += "UPPER(";
+            SqlExpressionProvider.Where(expression.Arguments[0], sqlWrapper);
+            sqlWrapper += ")";
+
+            switch (sqlWrapper.DatabaseType)
+            {
+                case DatabaseType.SqlServer:
+                case DatabaseType.Oracle:
+                case DatabaseType.Sqlite:
+                    sqlWrapper += " LIKE ";
+                    break;
+                case DatabaseType.MySql:
+                case DatabaseType.PostgreSql:
+                    sqlWrapper += " LIKE CONCAT(";
+                    break;
+                default:
+                    break;
+            }
+
+            sqlWrapper += "UPPER(";
+            SqlExpressionProvider.Where(expression.Arguments[1], sqlWrapper);
+            sqlWrapper += ")";
+
+            switch (sqlWrapper.DatabaseType)
+            {
+                case DatabaseType.SqlServer:
+                    sqlWrapper += " + '%'";
+                    break;
+                case DatabaseType.MySql:
+                case DatabaseType.PostgreSql:
+                    sqlWrapper += ",'%')";
+                    break;
+                case DatabaseType.Oracle:
+                case DatabaseType.Sqlite:
+                    sqlWrapper += " || '%'";
+                    break;
+                default:
+                    break;
+            }
+        }
+        #endregion
+
+        #region EndsWith
+        /// <summary>
+        /// EndsWith
+        /// </summary>
+        /// <param name="expression">表达式树</param>
+        /// <param name="sqlWrapper">sql包装器</param>
+        private static void EndsWith(MethodCallExpression expression, SqlWrapper sqlWrapper)
+        {
+            SqlExpressionProvider.Where(expression.Object, sqlWrapper);
+
+            switch (sqlWrapper.DatabaseType)
+            {
+                case DatabaseType.SqlServer:
+                    sqlWrapper += " LIKE '%' + ";
+                    break;
+                case DatabaseType.MySql:
+                case DatabaseType.PostgreSql:
+                    sqlWrapper += " LIKE CONCAT('%',";
+                    break;
+                case DatabaseType.Oracle:
+                case DatabaseType.Sqlite:
+                    sqlWrapper += " LIKE '%' || ";
+                    break;
+                default:
+                    break;
+            }
+
+            SqlExpressionProvider.Where(expression.Arguments[0], sqlWrapper);
+
+            switch (sqlWrapper.DatabaseType)
+            {
+                case DatabaseType.MySql:
+                case DatabaseType.PostgreSql:
+                    sqlWrapper += ")";
+                    break;
+                default:
+                    break;
+            }
+        }
+        #endregion
+
+        #region EndsWithIgnoreCase
+        /// <summary>
+        /// EndsWithIgnoreCase
+        /// </summary>
+        /// <param name="expression">表达式树</param>
+        /// <param name="sqlWrapper">sql包装器</param>
+        private static void EndsWithIgnoreCase(MethodCallExpression expression, SqlWrapper sqlWrapper)
+        {
+            sqlWrapper += "UPPER(";
+            SqlExpressionProvider.Where(expression.Arguments[0], sqlWrapper);
+            sqlWrapper += ")";
+
+            switch (sqlWrapper.DatabaseType)
+            {
+                case DatabaseType.SqlServer:
+                    sqlWrapper += " LIKE '%' + ";
+                    break;
+                case DatabaseType.MySql:
+                case DatabaseType.PostgreSql:
+                    sqlWrapper += " LIKE CONCAT('%',";
+                    break;
+                case DatabaseType.Oracle:
+                case DatabaseType.Sqlite:
+                    sqlWrapper += " LIKE '%' || ";
+                    break;
+                default:
+                    break;
+            }
+
+            sqlWrapper += "UPPER(";
+            SqlExpressionProvider.Where(expression.Arguments[1], sqlWrapper);
+            sqlWrapper += ")";
+
+            switch (sqlWrapper.DatabaseType)
+            {
+                case DatabaseType.MySql:
+                case DatabaseType.PostgreSql:
+                    sqlWrapper += ")";
+                    break;
+                default:
+                    break;
+            }
+        }
+        #endregion
+
         #region Contains
         /// <summary>
         /// Contains
@@ -293,6 +390,7 @@ namespace SQLBuilder.Expressions
                 else
                 {
                     SqlExpressionProvider.Where(expression.Object, sqlWrapper);
+
                     switch (sqlWrapper.DatabaseType)
                     {
                         case DatabaseType.SqlServer:
@@ -309,7 +407,9 @@ namespace SQLBuilder.Expressions
                         default:
                             break;
                     }
+
                     SqlExpressionProvider.Where(expression.Arguments[0], sqlWrapper);
+
                     switch (sqlWrapper.DatabaseType)
                     {
                         case DatabaseType.SqlServer:
@@ -333,6 +433,58 @@ namespace SQLBuilder.Expressions
                 SqlExpressionProvider.Where(memberExpression, sqlWrapper);
                 sqlWrapper += " IN ";
                 SqlExpressionProvider.In(expression.Arguments[0], sqlWrapper);
+            }
+        }
+        #endregion
+
+        #region ContainsIgnoreCase
+        /// <summary>
+        /// ContainsIgnoreCase
+        /// </summary>
+        /// <param name="expression">表达式树</param>
+        /// <param name="sqlWrapper">sql包装器</param>
+        private static void ContainsIgnoreCase(MethodCallExpression expression, SqlWrapper sqlWrapper)
+        {
+            sqlWrapper += "UPPER(";
+            SqlExpressionProvider.Where(expression.Arguments[0], sqlWrapper);
+            sqlWrapper += ")";
+
+            switch (sqlWrapper.DatabaseType)
+            {
+                case DatabaseType.SqlServer:
+                    sqlWrapper += " LIKE '%' + ";
+                    break;
+                case DatabaseType.MySql:
+                case DatabaseType.PostgreSql:
+                    sqlWrapper += " LIKE CONCAT('%',";
+                    break;
+                case DatabaseType.Oracle:
+                case DatabaseType.Sqlite:
+                    sqlWrapper += " LIKE '%' || ";
+                    break;
+                default:
+                    break;
+            }
+
+            sqlWrapper += "UPPER(";
+            SqlExpressionProvider.Where(expression.Arguments[1], sqlWrapper);
+            sqlWrapper += ")";
+
+            switch (sqlWrapper.DatabaseType)
+            {
+                case DatabaseType.SqlServer:
+                    sqlWrapper += " + '%'";
+                    break;
+                case DatabaseType.MySql:
+                case DatabaseType.PostgreSql:
+                    sqlWrapper += ",'%')";
+                    break;
+                case DatabaseType.Oracle:
+                case DatabaseType.Sqlite:
+                    sqlWrapper += " || '%'";
+                    break;
+                default:
+                    break;
             }
         }
         #endregion
