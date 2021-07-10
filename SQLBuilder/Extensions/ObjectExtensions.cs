@@ -18,6 +18,7 @@
 
 using SQLBuilder.Attributes;
 using SQLBuilder.Enums;
+using SQLBuilder.Repositories;
 using System;
 using System.ComponentModel;
 using System.Reflection;
@@ -125,10 +126,8 @@ namespace SQLBuilder.Extensions
         /// <param name="this">object对象</param>
         /// <param name="type">type</param>
         /// <returns>object</returns>
-        public static object ToSafeValue(this object @this, Type type)
-        {
-            return @this == null ? null : Convert.ChangeType(@this, type.GetCoreType());
-        }
+        public static object ToSafeValue(this object @this, Type type) =>
+            @this == null ? null : Convert.ChangeType(@this, type.GetCoreType());
         #endregion
 
         #region IsNull
@@ -137,10 +136,8 @@ namespace SQLBuilder.Extensions
         /// </summary>
         /// <param name="this">object对象</param>
         /// <returns>bool</returns>
-        public static bool IsNull(this object @this)
-        {
-            return @this == null || @this == DBNull.Value;
-        }
+        public static bool IsNull(this object @this) =>
+            @this == null || @this == DBNull.Value;
         #endregion
 
         #region IsNotNull
@@ -149,10 +146,8 @@ namespace SQLBuilder.Extensions
         /// </summary>
         /// <param name="this">object对象</param>
         /// <returns>bool</returns>
-        public static bool IsNotNull(this object @this)
-        {
-            return !@this.IsNull();
-        }
+        public static bool IsNotNull(this object @this) =>
+            !@this.IsNull();
         #endregion
 
         #region To
@@ -194,6 +189,15 @@ namespace SQLBuilder.Extensions
         #endregion
 
         #region ToColumns
+        /// <summary>
+        /// 根据实体类型获取所有列的查询字符串
+        /// </summary>
+        /// <param name="this">实体Type类型</param>
+        /// <param name="repository">仓储</param>
+        /// <returns></returns>
+        public static string ToColumns(this Type @this, IRepository repository) =>
+            @this.ToColumns(repository.IsEnableFormat, repository.DatabaseType);
+
         /// <summary>
         /// 根据实体类型获取所有列的查询字符串
         /// </summary>
