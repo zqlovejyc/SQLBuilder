@@ -184,7 +184,7 @@ namespace SQLBuilder.Extensions
                     return (T)(object)null;
             }
 
-            return (T)@this;
+            return @this == null ? default : (T)@this;
         }
         #endregion
 
