@@ -51,12 +51,12 @@ namespace SQLBuilder.Repositories
         /// 诊断日志
         /// </summary>
         private static readonly DiagnosticListener _diagnosticListener =
-            new DiagnosticListener(DiagnosticStrings.DiagnosticListenerName);
+            new(DiagnosticStrings.DiagnosticListenerName);
 
         /// <summary>
-        /// 事务数据库连接对象
+        /// 数据库连接
         /// </summary>
-        private DbConnection _tranConnection;
+        private DbConnection _dbConnection;
         #endregion
 
         #region Property
@@ -81,13 +81,14 @@ namespace SQLBuilder.Repositories
         public virtual (string connectionString, int weight)[] SlaveConnectionStrings { get; set; }
 
         /// <summary>
-        /// 数据库连接对象
+        /// 数据库连接对象<para>关于数据库连接池详情，参考：https://docs.microsoft.com/zh-cn/dotnet/framework/data/adonet/sql-server-connection-pooling</para>
         /// </summary>
         public virtual DbConnection Connection
         {
             get
             {
-                DbConnection connection;
+                if (_dbConnection?.State == ConnectionState.Open)
+                    return _dbConnection;
 
                 if (!Master && SlaveConnectionStrings?.Length > 0 && LoadBalancer != null)
                 {
@@ -95,17 +96,17 @@ namespace SQLBuilder.Repositories
                     var weights = SlaveConnectionStrings.Select(x => x.weight).ToArray();
                     var connectionString = LoadBalancer.Get(MasterConnectionString, connectionStrings, weights);
 
-                    connection = GetDbConnection(connectionString);
+                    _dbConnection = GetDbConnection(connectionString);
                 }
                 else
                 {
-                    connection = GetDbConnection(MasterConnectionString);
+                    _dbConnection = GetDbConnection(MasterConnectionString);
                 }
 
-                if (connection.State != ConnectionState.Open)
-                    connection.Open();
+                if (_dbConnection.State != ConnectionState.Open)
+                    _dbConnection.Open();
 
-                return connection;
+                return _dbConnection;
             }
         }
 
@@ -143,6 +144,11 @@ namespace SQLBuilder.Repositories
         /// 数据库类型
         /// </summary>
         public virtual DatabaseType DatabaseType { get; }
+
+        /// <summary>
+        /// 非事务的情况下，数据库连接是否自动释放，默认：true
+        /// </summary>
+        public virtual bool AutoDispose { get; set; } = true;
         #endregion
 
         #region Constructor
@@ -283,6 +289,19 @@ namespace SQLBuilder.Repositories
         }
         #endregion
 
+        #region UseAutoDispose
+        /// <summary>
+        /// 非事务情况下，使用数据库连接自动释放；若不启用自动释放，需要调用IRepository的Dispose进行数据库连接释放
+        /// </summary>
+        /// <param name="auto">自动释放，默认：true</param>
+        /// <returns></returns>
+        public virtual IRepository UseAutoDispose(bool auto = true)
+        {
+            AutoDispose = auto;
+            return this;
+        }
+        #endregion
+
         #region Transaction
         #region Sync
         /// <summary>
@@ -292,10 +311,7 @@ namespace SQLBuilder.Repositories
         public virtual IRepository BeginTransaction()
         {
             if (Transaction?.Connection == null)
-            {
-                _tranConnection = Connection;
-                Transaction = _tranConnection.BeginTransaction();
-            }
+                Transaction = Connection.BeginTransaction();
 
             return this;
         }
@@ -305,10 +321,13 @@ namespace SQLBuilder.Repositories
         /// </summary>
         public virtual void Commit()
         {
-            Transaction?.Commit();
-            Transaction?.Dispose();
+            if (Transaction != null)
+            {
+                Transaction.Commit();
+                Transaction.Dispose();
+            }
 
-            Close();
+            Dispose();
         }
 
         /// <summary>
@@ -316,10 +335,13 @@ namespace SQLBuilder.Repositories
         /// </summary>
         public virtual void Rollback()
         {
-            Transaction?.Rollback();
-            Transaction?.Dispose();
+            if (Transaction != null)
+            {
+                Transaction.Rollback();
+                Transaction.Dispose();
+            }
 
-            Close();
+            Dispose();
         }
 
         /// <summary>
@@ -493,11 +515,16 @@ namespace SQLBuilder.Repositories
                 var sqlQuery = GetPageSql(false, builder.Sql, builder.Parameters, orderField, isAscending, pageSize, pageIndex);
                 return QueryMultiple<T>(Transaction.Connection, sqlQuery, builder.DynamicParameters, Transaction);
             }
-            else
+            else if (AutoDispose)
             {
                 using var connection = Connection;
                 var sqlQuery = GetPageSql(false, builder.Sql, builder.Parameters, orderField, isAscending, pageSize, pageIndex);
                 return QueryMultiple<T>(connection, sqlQuery, builder.DynamicParameters);
+            }
+            else
+            {
+                var sqlQuery = GetPageSql(false, builder.Sql, builder.Parameters, orderField, isAscending, pageSize, pageIndex);
+                return QueryMultiple<T>(Connection, sqlQuery, builder.DynamicParameters);
             }
         }
 
@@ -520,11 +547,16 @@ namespace SQLBuilder.Repositories
                 var sqlQuery = GetPageSql(isWithSyntax, sql, parameter, orderField, isAscending, pageSize, pageIndex);
                 return QueryMultiple<T>(Transaction.Connection, sqlQuery, parameter, Transaction);
             }
-            else
+            else if (AutoDispose)
             {
                 using var connection = Connection;
                 var sqlQuery = GetPageSql(isWithSyntax, sql, parameter, orderField, isAscending, pageSize, pageIndex);
                 return QueryMultiple<T>(connection, sqlQuery, parameter);
+            }
+            else
+            {
+                var sqlQuery = GetPageSql(isWithSyntax, sql, parameter, orderField, isAscending, pageSize, pageIndex);
+                return QueryMultiple<T>(Connection, sqlQuery, parameter);
             }
         }
 
@@ -546,11 +578,16 @@ namespace SQLBuilder.Repositories
                 var sqlQuery = GetPageSql(isWithSyntax, sql, parameter, orderField, isAscending, pageSize, pageIndex);
                 return QueryMultiple(Transaction.Connection, sqlQuery, parameter, Transaction);
             }
-            else
+            else if (AutoDispose)
             {
                 using var connection = Connection;
                 var sqlQuery = GetPageSql(isWithSyntax, sql, parameter, orderField, isAscending, pageSize, pageIndex);
                 return QueryMultiple(connection, sqlQuery, parameter);
+            }
+            else
+            {
+                var sqlQuery = GetPageSql(isWithSyntax, sql, parameter, orderField, isAscending, pageSize, pageIndex);
+                return QueryMultiple(Connection, sqlQuery, parameter);
             }
         }
         #endregion
@@ -573,11 +610,16 @@ namespace SQLBuilder.Repositories
                 var sqlQuery = GetPageSql(false, builder.Sql, builder.Parameters, orderField, isAscending, pageSize, pageIndex);
                 return await QueryMultipleAsync<T>(Transaction.Connection, sqlQuery, builder.DynamicParameters, Transaction);
             }
-            else
+            else if (AutoDispose)
             {
                 using var connection = Connection;
                 var sqlQuery = GetPageSql(false, builder.Sql, builder.Parameters, orderField, isAscending, pageSize, pageIndex);
                 return await QueryMultipleAsync<T>(connection, sqlQuery, builder.DynamicParameters);
+            }
+            else
+            {
+                var sqlQuery = GetPageSql(false, builder.Sql, builder.Parameters, orderField, isAscending, pageSize, pageIndex);
+                return await QueryMultipleAsync<T>(Connection, sqlQuery, builder.DynamicParameters);
             }
         }
 
@@ -600,11 +642,16 @@ namespace SQLBuilder.Repositories
                 var sqlQuery = GetPageSql(isWithSyntax, sql, parameter, orderField, isAscending, pageSize, pageIndex);
                 return await QueryMultipleAsync<T>(Transaction.Connection, sqlQuery, parameter, Transaction);
             }
-            else
+            else if (AutoDispose)
             {
                 using var connection = Connection;
                 var sqlQuery = GetPageSql(isWithSyntax, sql, parameter, orderField, isAscending, pageSize, pageIndex);
                 return await QueryMultipleAsync<T>(connection, sqlQuery, parameter);
+            }
+            else
+            {
+                var sqlQuery = GetPageSql(isWithSyntax, sql, parameter, orderField, isAscending, pageSize, pageIndex);
+                return await QueryMultipleAsync<T>(Connection, sqlQuery, parameter);
             }
         }
 
@@ -626,11 +673,16 @@ namespace SQLBuilder.Repositories
                 var sqlQuery = GetPageSql(isWithSyntax, sql, parameter, orderField, isAscending, pageSize, pageIndex);
                 return await QueryMultipleAsync(Transaction.Connection, sqlQuery, parameter, Transaction);
             }
-            else
+            else if (AutoDispose)
             {
                 using var connection = Connection;
                 var sqlQuery = GetPageSql(isWithSyntax, sql, parameter, orderField, isAscending, pageSize, pageIndex);
                 return await QueryMultipleAsync(connection, sqlQuery, parameter);
+            }
+            else
+            {
+                var sqlQuery = GetPageSql(isWithSyntax, sql, parameter, orderField, isAscending, pageSize, pageIndex);
+                return await QueryMultipleAsync(Connection, sqlQuery, parameter);
             }
         }
         #endregion
@@ -659,11 +711,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = Transaction.Connection.Query<T>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = connection.Query<T>(sql, parameter, commandTimeout: CommandTimeout);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = Connection.Query<T>(sql, parameter, commandTimeout: CommandTimeout);
                 }
 
                 ExecuteAfter(message);
@@ -702,11 +759,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = Transaction.Connection.Query<T>(sql, parameter, Transaction, commandTimeout: CommandTimeout);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = connection.Query<T>(sql, parameter, commandTimeout: CommandTimeout);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = Connection.Query<T>(sql, parameter, commandTimeout: CommandTimeout);
                 }
 
                 ExecuteAfter(message);
@@ -744,11 +806,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = Transaction.Connection.ExecuteReader(sql, parameter, Transaction, CommandTimeout).ToDataTable();
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = connection.ExecuteReader(sql, parameter, commandTimeout: CommandTimeout).ToDataTable();
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = Connection.ExecuteReader(sql, parameter, commandTimeout: CommandTimeout).ToDataTable();
                 }
 
                 ExecuteAfter(message);
@@ -783,11 +850,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = Transaction.Connection.QueryFirstOrDefault<T>(sql, parameter, Transaction, CommandTimeout);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = connection.QueryFirstOrDefault<T>(sql, parameter, commandTimeout: CommandTimeout);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = Connection.QueryFirstOrDefault<T>(sql, parameter, commandTimeout: CommandTimeout);
                 }
 
                 ExecuteAfter(message);
@@ -826,11 +898,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = Transaction.Connection.QueryFirstOrDefault<T>(sql, parameter, Transaction, CommandTimeout);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = connection.QueryFirstOrDefault<T>(sql, parameter, commandTimeout: CommandTimeout);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = Connection.QueryFirstOrDefault<T>(sql, parameter, commandTimeout: CommandTimeout);
                 }
 
                 ExecuteAfter(message);
@@ -872,11 +949,20 @@ namespace SQLBuilder.Repositories
                         list.Add(result.Read());
                     }
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     var result = connection.QueryMultiple(sql, parameter, commandTimeout: CommandTimeout);
+                    while (result?.IsConsumed == false)
+                    {
+                        list.Add(result.Read());
+                    }
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    var result = Connection.QueryMultiple(sql, parameter, commandTimeout: CommandTimeout);
                     while (result?.IsConsumed == false)
                     {
                         list.Add(result.Read());
@@ -979,11 +1065,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = await Transaction.Connection.QueryAsync<T>(sql, parameter, Transaction, CommandTimeout);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = await connection.QueryAsync<T>(sql, parameter, commandTimeout: CommandTimeout);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = await Connection.QueryAsync<T>(sql, parameter, commandTimeout: CommandTimeout);
                 }
 
                 ExecuteAfter(message);
@@ -1022,11 +1113,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = await Transaction.Connection.QueryAsync<T>(sql, parameter, Transaction, CommandTimeout);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = await connection.QueryAsync<T>(sql, parameter, commandTimeout: CommandTimeout);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = await Connection.QueryAsync<T>(sql, parameter, commandTimeout: CommandTimeout);
                 }
 
                 ExecuteAfter(message);
@@ -1065,11 +1161,17 @@ namespace SQLBuilder.Repositories
                     var reader = await Transaction.Connection.ExecuteReaderAsync(sql, parameter, Transaction, CommandTimeout);
                     result = reader.ToDataTable();
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     var reader = await connection.ExecuteReaderAsync(sql, parameter, commandTimeout: CommandTimeout);
+                    result = reader.ToDataTable();
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    var reader = await Connection.ExecuteReaderAsync(sql, parameter, commandTimeout: CommandTimeout);
                     result = reader.ToDataTable();
                 }
 
@@ -1105,11 +1207,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = await Transaction.Connection.QueryFirstOrDefaultAsync<T>(sql, parameter, Transaction, CommandTimeout);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = await connection.QueryFirstOrDefaultAsync<T>(sql, parameter, commandTimeout: CommandTimeout);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = await Connection.QueryFirstOrDefaultAsync<T>(sql, parameter, commandTimeout: CommandTimeout);
                 }
 
                 ExecuteAfter(message);
@@ -1148,11 +1255,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = await Transaction.Connection.QueryFirstOrDefaultAsync<T>(sql, parameter, Transaction, CommandTimeout);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = await connection.QueryFirstOrDefaultAsync<T>(sql, parameter, commandTimeout: CommandTimeout);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = await Connection.QueryFirstOrDefaultAsync<T>(sql, parameter, commandTimeout: CommandTimeout);
                 }
 
                 ExecuteAfter(message);
@@ -1194,11 +1306,20 @@ namespace SQLBuilder.Repositories
                         list.Add(await result.ReadAsync());
                     }
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     var result = await connection.QueryMultipleAsync(sql, parameter, commandTimeout: CommandTimeout);
+                    while (result?.IsConsumed == false)
+                    {
+                        list.Add(await result.ReadAsync());
+                    }
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    var result = await Connection.QueryMultipleAsync(sql, parameter, commandTimeout: CommandTimeout);
                     while (result?.IsConsumed == false)
                     {
                         list.Add(await result.ReadAsync());
@@ -1305,11 +1426,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = Transaction.Connection.Execute(sql, parameter, Transaction, CommandTimeout, command);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = connection.Execute(sql, parameter, null, CommandTimeout, command);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = Connection.Execute(sql, parameter, null, CommandTimeout, command);
                 }
 
                 ExecuteAfter(message);
@@ -1344,11 +1470,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = Transaction.Connection.Execute(sql, parameter, Transaction, CommandTimeout, command);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = connection.Execute(sql, parameter, null, CommandTimeout, command);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = Connection.Execute(sql, parameter, null, CommandTimeout, command);
                 }
 
                 ExecuteAfter(message);
@@ -1384,11 +1515,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = Transaction.Connection.Query<T>(sql, parameter, Transaction, commandTimeout: CommandTimeout, commandType: command);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = connection.Query<T>(sql, parameter, null, commandTimeout: CommandTimeout, commandType: command);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = Connection.Query<T>(sql, parameter, null, commandTimeout: CommandTimeout, commandType: command);
                 }
 
                 ExecuteAfter(message);
@@ -1426,11 +1562,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = Transaction.Connection.ExecuteScalar<object>(sql, parameter, Transaction, CommandTimeout);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = connection.ExecuteScalar<object>(sql, parameter, commandTimeout: CommandTimeout);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = Connection.ExecuteScalar<object>(sql, parameter, commandTimeout: CommandTimeout);
                 }
 
                 ExecuteAfter(message);
@@ -1468,11 +1609,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = await Transaction.Connection.ExecuteAsync(sql, parameter, Transaction, CommandTimeout, command);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = await connection.ExecuteAsync(sql, parameter, null, CommandTimeout, command);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = await Connection.ExecuteAsync(sql, parameter, null, CommandTimeout, command);
                 }
 
                 ExecuteAfter(message);
@@ -1507,11 +1653,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = await Transaction.Connection.ExecuteAsync(sql, parameter, Transaction, CommandTimeout, command);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = await connection.ExecuteAsync(sql, parameter, null, CommandTimeout, command);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = await Connection.ExecuteAsync(sql, parameter, null, CommandTimeout, command);
                 }
 
                 ExecuteAfter(message);
@@ -1547,11 +1698,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = await Transaction.Connection.QueryAsync<T>(sql, parameter, Transaction, CommandTimeout, command);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = await connection.QueryAsync<T>(sql, parameter, commandTimeout: CommandTimeout, commandType: command);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = await Connection.QueryAsync<T>(sql, parameter, commandTimeout: CommandTimeout, commandType: command);
                 }
 
                 ExecuteAfter(message);
@@ -1589,11 +1745,16 @@ namespace SQLBuilder.Repositories
                     message = ExecuteBefore(sql, parameter, Transaction.Connection.DataSource);
                     result = await Transaction.Connection.ExecuteScalarAsync<object>(sql, parameter, Transaction, CommandTimeout);
                 }
-                else
+                else if (AutoDispose)
                 {
                     using var connection = Connection;
                     message = ExecuteBefore(sql, parameter, connection.DataSource);
                     result = await connection.ExecuteScalarAsync<object>(sql, parameter, commandTimeout: CommandTimeout);
+                }
+                else
+                {
+                    message = ExecuteBefore(sql, parameter, Connection.DataSource);
+                    result = await Connection.ExecuteScalarAsync<object>(sql, parameter, commandTimeout: CommandTimeout);
                 }
 
                 ExecuteAfter(message);
@@ -3681,20 +3842,18 @@ namespace SQLBuilder.Repositories
         /// </summary>
         public virtual void Dispose()
         {
-            Close();
-        }
-        #endregion
+            try
+            {
+                if (_dbConnection != null && _dbConnection.State != ConnectionState.Closed)
+                    _dbConnection.Dispose();
 
-        #region Close
-        /// <summary>
-        /// 关闭连接
-        /// </summary>
-        public virtual void Close()
-        {
-            _tranConnection?.Close();
-            _tranConnection?.Dispose();
-
-            Transaction = null;
+                Transaction = null;
+            }
+            catch (Exception ex)
+            {
+                if (_diagnosticListener.IsEnabled(DiagnosticStrings.DisposeException))
+                    _diagnosticListener.Write(DiagnosticStrings.DisposeException, ex);
+            }
         }
         #endregion
 
