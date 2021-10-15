@@ -54,9 +54,14 @@ namespace SQLBuilder.Repositories
             new(DiagnosticStrings.DiagnosticListenerName);
 
         /// <summary>
-        /// 数据库连接
+        /// 主库数据库连接
         /// </summary>
-        private DbConnection _dbConnection;
+        private DbConnection _masterConnection;
+
+        /// <summary>
+        /// 从库数据库连接
+        /// </summary>
+        private DbConnection _salveConnection;
         #endregion
 
         #region Property
@@ -87,26 +92,42 @@ namespace SQLBuilder.Repositories
         {
             get
             {
-                if (_dbConnection?.State == ConnectionState.Open)
-                    return _dbConnection;
+                //是否主库
+                if (Master && _masterConnection?.State == ConnectionState.Open)
+                    return _masterConnection;
 
+                //是否从库
+                if (!Master && _salveConnection?.State == ConnectionState.Open)
+                    return _salveConnection;
+
+                //从库
                 if (!Master && SlaveConnectionStrings?.Length > 0 && LoadBalancer != null)
                 {
-                    var connectionStrings = SlaveConnectionStrings.Select(x => x.connectionString);
-                    var weights = SlaveConnectionStrings.Select(x => x.weight).ToArray();
-                    var connectionString = LoadBalancer.Get(MasterConnectionString, connectionStrings, weights);
+                    var key = $"{SlaveConnectionStrings.Length}__{MasterConnectionString.GetHashCode()}";
 
-                    _dbConnection = GetDbConnection(connectionString);
+                    var connectionStrings = SlaveConnectionStrings.Select(x => x.connectionString);
+
+                    var weights = SlaveConnectionStrings.Select(x => x.weight).ToArray();
+
+                    var connectionString = LoadBalancer.Get(key, connectionStrings, weights);
+
+                    _salveConnection = GetDbConnection(connectionString);
+
+                    if (_salveConnection.State != ConnectionState.Open)
+                        _salveConnection.Open();
+
+                    return _salveConnection;
                 }
+                //主库
                 else
                 {
-                    _dbConnection = GetDbConnection(MasterConnectionString);
+                    _masterConnection = GetDbConnection(MasterConnectionString);
+
+                    if (_masterConnection.State != ConnectionState.Open)
+                        _masterConnection.Open();
+
+                    return _masterConnection;
                 }
-
-                if (_dbConnection.State != ConnectionState.Open)
-                    _dbConnection.Open();
-
-                return _dbConnection;
             }
         }
 
@@ -3844,8 +3865,13 @@ namespace SQLBuilder.Repositories
         {
             try
             {
-                if (_dbConnection != null && _dbConnection.State != ConnectionState.Closed)
-                    _dbConnection.Dispose();
+                //主库
+                if (_masterConnection != null && _masterConnection.State != ConnectionState.Closed)
+                    _masterConnection.Dispose();
+
+                //从库
+                if (_salveConnection != null && _salveConnection.State != ConnectionState.Closed)
+                    _salveConnection.Dispose();
 
                 Transaction = null;
             }
