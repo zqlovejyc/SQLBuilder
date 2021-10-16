@@ -46,6 +46,11 @@ namespace SQLBuilder.Repositories
         /// <summary>
         /// 构造函数
         /// </summary>
+        public OracleRepository() { }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         /// <param name="connectionString">主库连接字符串，或者链接字符串名称</param>
         public OracleRepository(string connectionString) : base(connectionString) { }
         #endregion

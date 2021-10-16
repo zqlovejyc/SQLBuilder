@@ -40,6 +40,11 @@ namespace SQLBuilder.Repositories
         /// <summary>
         /// 构造函数
         /// </summary>
+        public SqliteRepository() { }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         /// <param name="connectionString">主库连接字符串，或者链接字符串名称</param>
         public SqliteRepository(string connectionString) : base(connectionString) { }
         #endregion
