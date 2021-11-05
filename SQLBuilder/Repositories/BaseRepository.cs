@@ -3880,10 +3880,10 @@ namespace SQLBuilder.Repositories
 
                 Transaction = null;
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
                 if (_diagnosticListener.IsEnabled(DiagnosticStrings.DisposeException))
-                    _diagnosticListener.Write(DiagnosticStrings.DisposeException, ex);
+                    _diagnosticListener.Write(DiagnosticStrings.DisposeException, new { exception });
             }
         }
         #endregion
