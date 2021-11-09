@@ -3880,8 +3880,8 @@ namespace SQLBuilder.Repositories
 
                 Transaction = null;
 
-                if (_diagnosticListener.IsEnabled(DiagnosticStrings.Dispose))
-                    _diagnosticListener.Write(DiagnosticStrings.Dispose,
+                if (_diagnosticListener.IsEnabled(DiagnosticStrings.DisposeExecute))
+                    _diagnosticListener.Write(DiagnosticStrings.DisposeExecute,
                         new
                         {
                             masterConnection = _masterConnection,
