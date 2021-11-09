@@ -3879,6 +3879,14 @@ namespace SQLBuilder.Repositories
                     _salveConnection.Dispose();
 
                 Transaction = null;
+
+                if (_diagnosticListener.IsEnabled(DiagnosticStrings.Dispose))
+                    _diagnosticListener.Write(DiagnosticStrings.Dispose,
+                        new
+                        {
+                            masterConnection = _masterConnection,
+                            salveConnection = _salveConnection
+                        });
             }
             catch (Exception exception)
             {
