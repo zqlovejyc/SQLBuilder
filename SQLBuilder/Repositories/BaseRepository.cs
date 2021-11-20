@@ -93,6 +93,7 @@ namespace SQLBuilder.Repositories
             get
             {
                 //是否主库，注意此处必须添加!AutoDispose条件，SQLiteConnection仓储Dispose后无法再次访问
+                //采用Microsoft.Data.Sqlite这个类库则不会出现Dispose后无法访问的异常，但是最低版本仅支持.net fremwork4.5.1+
                 if (!AutoDispose && Master && _masterConnection?.State == ConnectionState.Open)
                     return _masterConnection;
 
