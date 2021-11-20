@@ -92,12 +92,12 @@ namespace SQLBuilder.Repositories
         {
             get
             {
-                //是否主库
-                if (Master && _masterConnection?.State == ConnectionState.Open)
+                //是否主库，注意此处必须添加!AutoDispose条件，SQLiteConnection仓储Dispose后无法再次访问
+                if (!AutoDispose && Master && _masterConnection?.State == ConnectionState.Open)
                     return _masterConnection;
 
                 //是否从库
-                if (!Master && _salveConnection?.State == ConnectionState.Open)
+                if (!AutoDispose && !Master && _salveConnection?.State == ConnectionState.Open)
                     return _salveConnection;
 
                 //从库
