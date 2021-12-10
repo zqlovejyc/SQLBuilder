@@ -17,34 +17,19 @@
 #endregion
 
 using System;
+using Oracle.ManagedDataAccess.Client;
 
 namespace SQLBuilder.Attributes
 {
     /// <summary>
-    /// 指定表名
+    /// Oracle列特性，此特性仅用于Oracle特殊数据库字段类型使用，如：[OracleColumn(DbType = OracleDbType.NClob)]
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false)]
-    public class TableAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
+    public class OracleColumnAttribute : Attribute
     {
         /// <summary>
-        /// 构造函数
+        /// Oracle数据类型
         /// </summary>
-        /// <param name="name">数据库表名</param>
-        public TableAttribute(string name = null) => Name = name;
-
-        /// <summary>
-        /// 数据库表名
-        /// </summary>
-        public string Name { get; private set; }
-
-        /// <summary>
-        /// 数据库模式
-        /// </summary>
-        public string Schema { get; set; }
-
-        /// <summary>
-        /// 是否启用格式化，用于全局不启用格式化时，该表名为数据库关键字，此时需要单独启用格式化
-        /// </summary>
-        public bool Format { get; set; }
+        public OracleDbType DbType { get; set; }
     }
 }

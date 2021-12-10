@@ -1,6 +1,6 @@
 ﻿#region License
 /***
-* Copyright © 2018-2021, 张强 (943620963@qq.com).
+* Copyright © 2018-2022, 张强 (943620963@qq.com).
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 */
 #endregion
 
+using Oracle.ManagedDataAccess.Client;
 using SQLBuilder.Attributes;
 using SQLBuilder.Enums;
 using SQLBuilder.Repositories;
@@ -296,6 +297,28 @@ namespace SQLBuilder.Extensions
             columns.Remove(columns.Length - 1, 1);
 
             return columns.ToString();
+        }
+        #endregion
+
+        #region GetOracleDbType
+        /// <summary>
+        /// 获取OracelDbType类型
+        /// </summary>
+        /// <param name="this"></param>
+        /// <returns></returns>
+        public static OracleDbType GetOracleDbType(this object @this)
+        {
+            return @this switch
+            {
+                string => OracleDbType.NVarchar2,
+                DateTime => OracleDbType.Date,
+                int => OracleDbType.Int32,
+                byte => OracleDbType.Int16,
+                long => OracleDbType.Long,
+                decimal => OracleDbType.Decimal,
+                double => OracleDbType.Double,
+                _ => OracleDbType.NVarchar2,
+            };
         }
         #endregion
     }
