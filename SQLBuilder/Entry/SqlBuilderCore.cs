@@ -4549,6 +4549,7 @@ namespace SQLBuilder.Entry
         /// <param name="countSyntax">分页计数语法，默认COUNT(*)</param>
         /// <param name="serverVersion">DbConnection的ServerVersion属性</param>
         /// <returns>SqlBuilderCore</returns>
+        /// <remarks>注意：Oracle需要Split(';')分开单独查询总条数和分页数据</remarks>
         public SqlBuilderCore<T> Page(int pageSize, int pageIndex, string orderField, string sql = null, Dictionary<string, object> parameters = null, string countSyntax = "COUNT(*)", string serverVersion = null)
         {
             var sb = new StringBuilder();
@@ -4590,7 +4591,7 @@ namespace SQLBuilder.Entry
                     sb.Append($"SELECT {countSyntax} AS [TOTAL] FROM ({sql}) AS T;SELECT * FROM (SELECT ROW_NUMBER() OVER ({order}) AS [ROWNUMBER], * FROM ({sql}) AS T) AS N WHERE [ROWNUMBER] BETWEEN {(pageIndex - 1) * pageSize + 1} AND {pageIndex * pageSize};");
             }
 
-            //Oracle，注意Oracle需要分开查询总条数和分页数据，此方法仅包含分页语句
+            //Oracle，注意Oracle需要Split(';')分开单独查询总条数和分页数据
             if (this.sqlWrapper.DatabaseType == DatabaseType.Oracle)
             {
                 if (dbVersion > 11)
@@ -4623,6 +4624,7 @@ namespace SQLBuilder.Entry
         /// <param name="countSyntax">分页计数语法，默认COUNT(*)</param>
         /// <param name="serverVersion">DbConnection的ServerVersion属性</param>
         /// <returns>SqlBuilderCore</returns>
+        /// <remarks>注意：Oracle需要Split(';')分开单独查询总条数和分页数据</remarks>
         public SqlBuilderCore<T> PageByWith(int pageSize, int pageIndex, string orderField, string sql = null, Dictionary<string, object> parameters = null, string countSyntax = "COUNT(*)", string serverVersion = null)
         {
             var sb = new StringBuilder();
@@ -4664,7 +4666,7 @@ namespace SQLBuilder.Entry
                     sb.Append($"{sql} SELECT {countSyntax} AS [TOTAL] FROM T;{sql},R AS (SELECT ROW_NUMBER() OVER ({order}) AS [ROWNUMBER], * FROM T) SELECT * FROM R WHERE [ROWNUMBER] BETWEEN {(pageIndex - 1) * pageSize + 1} AND {pageIndex * pageSize};");
             }
 
-            //Oracle，注意Oracle需要分开查询总条数和分页数据，此方法仅包含分页语句
+            //Oracle，注意Oracle需要Split(';')分开单独查询总条数和分页数据
             if (this.sqlWrapper.DatabaseType == DatabaseType.Oracle)
             {
                 if (dbVersion > 11)
