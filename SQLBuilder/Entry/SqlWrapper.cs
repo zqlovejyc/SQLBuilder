@@ -549,6 +549,7 @@ namespace SQLBuilder.Entry
                 if (_aliasDictionary.Values.Contains(tableName))
                     return _aliasDictionary.FirstOrDefault(x => x.Value == tableName).Key;
             }
+
             return string.Empty;
         }
         #endregion

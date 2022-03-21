@@ -17,6 +17,7 @@
 #endregion
 
 using SQLBuilder.Entry;
+using SQLBuilder.Extensions;
 using System.Linq.Expressions;
 
 namespace SQLBuilder.Expressions
@@ -38,7 +39,7 @@ namespace SQLBuilder.Expressions
             var tableName = sqlWrapper.GetTableName(expression.Type);
             var tableAlias = sqlWrapper.GetTableAlias(tableName, expression.Name);
 
-            sqlWrapper.AddField($"{tableAlias}.*");
+            sqlWrapper.AddField($"{(tableAlias.IsNullOrEmpty() ? "" : $"{tableAlias}.")}*");
 
             return sqlWrapper;
         }
