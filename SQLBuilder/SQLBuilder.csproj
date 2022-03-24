@@ -40,11 +40,17 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac, Version=4.9.4.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.4.9.4\lib\net45\Autofac.dll</HintPath>
+    </Reference>
     <Reference Include="Dapper, Version=1.50.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Dapper.1.50.2\lib\net45\Dapper.dll</HintPath>
     </Reference>
     <Reference Include="MySqlConnector, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d33d3e53aa5f8c92, processorArchitecture=MSIL">
       <HintPath>..\packages\MySqlConnector.2.1.8\lib\net45\MySqlConnector.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql, Version=4.0.12.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <HintPath>..\packages\Npgsql.4.0.12\lib\net45\Npgsql.dll</HintPath>
@@ -97,6 +103,7 @@
     <Compile Include="Entry\SqlWrapper.cs" />
     <Compile Include="Enums\DatabaseType.cs" />
     <Compile Include="Enums\OrderType.cs" />
+    <Compile Include="Enums\ServiceLifetime.cs" />
     <Compile Include="Expressions\BaseExpression.cs" />
     <Compile Include="Expressions\BinaryExpressionResolver.cs" />
     <Compile Include="Expressions\ConditionalExpressionReslover.cs" />
@@ -113,6 +120,7 @@
     <Compile Include="Expressions\ParameterExpressionResolver.cs" />
     <Compile Include="Expressions\SqlExpressionProvider.cs" />
     <Compile Include="Expressions\UnaryExpressionResolver.cs" />
+    <Compile Include="Extensions\ContainerBuilderExtensions.cs" />
     <Compile Include="Extensions\IDataReaderExtensions.cs" />
     <Compile Include="Extensions\IDictionaryExtensions.cs" />
     <Compile Include="Extensions\LinqExtensions.cs" />

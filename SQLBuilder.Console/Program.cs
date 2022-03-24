@@ -2,13 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Autofac;
 using SQLBuilder;
 using SQLBuilder.Entry;
 using SQLBuilder.Enums;
 using SQLBuilder.Extensions;
+using SQLBuilder.Repositories;
 
 namespace SQLBuilder
 {
+    public class Log
+    {
+        public int Id { get; set; }
+        public string User { get; set; }
+        public string Message { get; set; }
+    }
+
     public class Program
     {
         #region Print
@@ -55,6 +64,24 @@ namespace SQLBuilder
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
+            #region Repository
+            var builder = new ContainerBuilder();
+
+            //注入SqlBuilder
+            builder.AddSqlBuilder("Base", (sql, parameters) =>
+            {
+                Console.WriteLine(sql);
+
+                return null;
+            });
+
+            var container = builder.Build();
+
+            var repo = container.Resolve<Func<string, IRepository>>()(null);
+
+            var res = repo.Any<Log>(x => x.Id == 2633);
+            #endregion
+
             #region Select
             Print(
                 SqlBuilder.Select<UserInfo>(),
