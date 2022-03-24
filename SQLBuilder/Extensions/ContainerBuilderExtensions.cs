@@ -20,7 +20,7 @@ namespace SQLBuilder.Extensions
         /// 注入泛型仓储
         /// </summary>
         /// <typeparam name="T">仓储类型</typeparam>
-        /// <param name="this">依赖注入服务集合</param>
+        /// <param name="this">autofac容器</param>
         /// <param name="sqlIntercept">sql拦截委托</param>
         /// <param name="isEnableFormat">是否启用对表名和列名格式化，默认：否</param>
         /// <param name="autoDispose">非事务的情况下，数据库连接是否自动释放，默认：是</param>
@@ -83,7 +83,7 @@ namespace SQLBuilder.Extensions
         /// <summary>
         /// 按需注入所有程序依赖的数据库仓储 <para>注意：仓储没有初始化MasterConnectionString和SlaveConnectionStrings</para>
         /// </summary>
-        /// <param name="this">依赖注入服务集合</param>
+        /// <param name="this">autofac容器</param>
         /// <param name="sqlIntercept">sql拦截委托</param>
         /// <param name="isEnableFormat">是否启用对表名和列名格式化，默认：否</param>
         /// <param name="autoDispose">非事务的情况下，数据库连接是否自动释放，默认：是</param>
@@ -196,7 +196,7 @@ namespace SQLBuilder.Extensions
         /// <summary>
         /// 创建IRepository委托，依赖AddAllRepository注入不同类型仓储
         /// </summary>
-        /// <param name="provider">服务驱动</param>
+        /// <param name="provider">autofac组件上下文</param>
         /// <param name="defaultName">默认数据库名称</param>
         /// <param name="connectionStringName">连接字符串配置name</param>
         /// <returns></returns>
@@ -239,7 +239,7 @@ namespace SQLBuilder.Extensions
         /// SQLBuilder仓储注入扩展
         /// <para>注意：若要启用读写分离，则需要注入ILoadBalancer服务；</para>
         /// </summary>
-        /// <param name="this">依赖注入服务集合</param>
+        /// <param name="this">autofac容器</param>
         /// <param name="defaultName">默认数据库名称</param>
         /// <param name="sqlIntercept">sql拦截委托</param>
         /// <param name="isEnableFormat">是否启用对表名和列名格式化，默认：否</param>
