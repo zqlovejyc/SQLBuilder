@@ -68,7 +68,7 @@ namespace SQLBuilder
             var builder = new ContainerBuilder();
 
             //注入SqlBuilder
-            builder.AddSqlBuilder("Base", (sql, parameters) =>
+            builder.RegisterSqlBuilder("Base", (sql, parameters) =>
             {
                 Console.WriteLine(sql);
 
