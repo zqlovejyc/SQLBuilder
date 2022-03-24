@@ -252,7 +252,7 @@ builder.AddSqlBuilder("Base", (sql, parameter) =>
 <add key="ConnectionStrings" value="{'Base':['SqlServer','Server=.;Database=TestDb;Uid=test;Pwd=123;'],'OracleDb':['Oracle','数据库连接字符串'],'MySqlDb':['MySql','数据库连接字符串'],'SqliteDb':['Sqlite','数据库连接字符串'],'PgsqlDb':['PostgreSql','数据库连接字符串']}" />
 
 //connectionStrings
-<add name="" connectionString="{'Base':['SqlServer','Server=.;Database=TestDb;Uid=test;Pwd=123;'],'OracleDb':['Oracle','数据库连接字符串'],'MySqlDb':['MySql','数据库连接字符串'],'SqliteDb':['Sqlite','数据库连接字符串'],'PgsqlDb':['PostgreSql','数据库连接字符串']}"/>
+<add name="ConnectionStrings" connectionString="{'Base':['SqlServer','Server=.;Database=TestDb;Uid=test;Pwd=123;'],'OracleDb':['Oracle','数据库连接字符串'],'MySqlDb':['MySql','数据库连接字符串'],'SqliteDb':['Sqlite','数据库连接字符串'],'PgsqlDb':['PostgreSql','数据库连接字符串']}"/>
 ```
 
 ### 📰 事务
