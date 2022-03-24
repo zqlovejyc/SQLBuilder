@@ -201,8 +201,7 @@ namespace SQLBuilder.Repositories
         /// <summary>
         /// 同步委托队列(SyncQueue)
         /// </summary>
-        public virtual ConcurrentQueue<Func<IRepository, bool>> SyncQueue { get; } =
-            new ConcurrentQueue<Func<IRepository, bool>>();
+        public virtual ConcurrentQueue<Func<IRepository, bool>> SyncQueue { get; } = new();
 
         /// <summary>
         /// 加入同步委托队列(SyncQueue)
@@ -253,8 +252,7 @@ namespace SQLBuilder.Repositories
         /// <summary>
         /// 异步委托队列(AsyncQueue)
         /// </summary>
-        public virtual ConcurrentQueue<Func<IRepository, Task<bool>>> AsyncQueue { get; } =
-            new ConcurrentQueue<Func<IRepository, Task<bool>>>();
+        public virtual ConcurrentQueue<Func<IRepository, Task<bool>>> AsyncQueue { get; } = new();
 
         /// <summary>
         /// 加入异步委托队列(AsyncQueue)
