@@ -240,6 +240,12 @@ builder.AddSqlBuilder("Base", (sql, parameter) =>
     //返回null，不对原始sql进行任何更改，此处可以修改待执行的sql语句
     return null;
 });
+
+var container = builder.Build();
+
+var repo = container.Resolve<Func<string, IRepository>>()(null);
+
+var res = repo.Any<Log>(x => x.Id == 2633);
 ```
 
 ### ⚙ 数据库配置
