@@ -224,21 +224,18 @@ var builder = new ContainerBuilder();
 builder.AddSqlBuilder("Base", (sql, parameter) =>
 {
     //写入文本日志
-    if (WebHostEnvironment.IsDevelopment())
-    {
-        if (parameter is DynamicParameters dynamicParameters)
-            _logger.LogInformation($@"SQL语句：{sql}  参数：{dynamicParameters
-                .ParameterNames?
-                .ToDictionary(k => k, v => dynamicParameters.Get<object>(v))
-                .ToJson()}");
-        else if (parameter is OracleDynamicParameters oracleDynamicParameters)
-            _logger.LogInformation($@"SQL语句：{sql} 参数：{oracleDynamicParameters
-                .OracleParameters
-                .ToDictionary(k => k.ParameterName, v => v.Value)
-                .ToJson()}");
-        else
-            _logger.LogInformation($"SQL语句：{sql}  参数：{parameter.ToJson()}");
-    }
+    if (parameter is DynamicParameters dynamicParameters)
+        _logger.LogInformation($@"SQL语句：{sql}  参数：{dynamicParameters
+            .ParameterNames?
+            .ToDictionary(k => k, v => dynamicParameters.Get<object>(v))
+            .ToJson()}");
+    else if (parameter is OracleDynamicParameters oracleDynamicParameters)
+        _logger.LogInformation($@"SQL语句：{sql} 参数：{oracleDynamicParameters
+            .OracleParameters
+            .ToDictionary(k => k.ParameterName, v => v.Value)
+            .ToJson()}");
+    else
+        _logger.LogInformation($"SQL语句：{sql}  参数：{parameter.ToJson()}");
 
     //返回null，不对原始sql进行任何更改，此处可以修改待执行的sql语句
     return null;
