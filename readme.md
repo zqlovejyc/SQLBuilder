@@ -214,6 +214,46 @@ _repository.AddQueue(async repo =>
 //统一提交队列，默认开启事务
 var res = await _repository.SaveQueueAsync();
 ```
+### 🌌 IOC注入
+
+根据appsettions.json配置自动注入不同类型数据仓储，支持一主多从配置
+
+```csharp
+//注入SQLBuilder仓储
+var builder = new ContainerBuilder();
+builder.AddSqlBuilder("Base", (sql, parameter) =>
+{
+    //写入文本日志
+    if (WebHostEnvironment.IsDevelopment())
+    {
+        if (parameter is DynamicParameters dynamicParameters)
+            _logger.LogInformation($@"SQL语句：{sql}  参数：{dynamicParameters
+                .ParameterNames?
+                .ToDictionary(k => k, v => dynamicParameters.Get<object>(v))
+                .ToJson()}");
+        else if (parameter is OracleDynamicParameters oracleDynamicParameters)
+            _logger.LogInformation($@"SQL语句：{sql} 参数：{oracleDynamicParameters
+                .OracleParameters
+                .ToDictionary(k => k.ParameterName, v => v.Value)
+                .ToJson()}");
+        else
+            _logger.LogInformation($"SQL语句：{sql}  参数：{parameter.ToJson()}");
+    }
+
+    //返回null，不对原始sql进行任何更改，此处可以修改待执行的sql语句
+    return null;
+});
+```
+
+### ⚙ 数据库配置
+
+```csharp
+//appSettings
+<add key="ConnectionStrings" value="{'Base':['SqlServer','Server=.;Database=TestDb;Uid=test;Pwd=123;'],'OracleDb':['Oracle','数据库连接字符串'],'MySqlDb':['MySql','数据库连接字符串'],'SqliteDb':['Sqlite','数据库连接字符串'],'PgsqlDb':['PostgreSql','数据库连接字符串']}" />
+
+//connectionStrings
+<add name="" connectionString="{'Base':['SqlServer','Server=.;Database=TestDb;Uid=test;Pwd=123;'],'OracleDb':['Oracle','数据库连接字符串'],'MySqlDb':['MySql','数据库连接字符串'],'SqliteDb':['Sqlite','数据库连接字符串'],'PgsqlDb':['PostgreSql','数据库连接字符串']}"/>
+```
 
 ### 📰 事务
 
