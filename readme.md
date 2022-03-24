@@ -216,7 +216,7 @@ var res = await _repository.SaveQueueAsync();
 ```
 ### 🌌 IOC注入
 
-根据appsettions.json配置自动注入不同类型数据仓储，支持一主多从配置
+根据config配置自动注入不同类型数据仓储，支持一主多从配置
 
 ```csharp
 //注入SQLBuilder仓储
