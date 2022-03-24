@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Autofac;
 using SQLBuilder;
+using SQLBuilder.Diagnostics;
 using SQLBuilder.Entry;
 using SQLBuilder.Enums;
 using SQLBuilder.Extensions;
@@ -16,6 +19,25 @@ namespace SQLBuilder
         public int Id { get; set; }
         public string User { get; set; }
         public string Message { get; set; }
+    }
+
+    public class MyObserver<T> : IObserver<T>
+    {
+        private Action<T> _next;
+        public MyObserver(Action<T> next)
+        {
+            _next = next;
+        }
+
+        public void OnCompleted()
+        {
+        }
+
+        public void OnError(Exception error)
+        {
+        }
+
+        public void OnNext(T value) => _next(value);
     }
 
     public class Program
@@ -70,16 +92,50 @@ namespace SQLBuilder
             //注入SqlBuilder
             builder.RegisterSqlBuilder("Base", (sql, parameters) =>
             {
-                Console.WriteLine(sql);
+                //Console.WriteLine(sql);
 
                 return null;
             });
 
+            //日志诊断订阅
+            DiagnosticListener.AllListeners.Subscribe(new MyObserver<DiagnosticListener>(listener =>
+            {
+                //判断发布者的名字
+                if (listener.Name == DiagnosticStrings.DiagnosticListenerName)
+                {
+                    //获取订阅信息
+                    listener.Subscribe(new MyObserver<KeyValuePair<string, object>>(listenerData =>
+                    {
+                        Console.WriteLine($"监听名称:{listenerData.Key}");
+                        dynamic listenerDataValue = listenerData.Value;
+
+                        //执行前
+                        if (listenerData.Key == DiagnosticStrings.BeforeExecute)
+                            Console.WriteLine(listenerDataValue.Sql);
+
+                        //执行后
+                        if (listenerData.Key == DiagnosticStrings.AfterExecute)
+                            Console.WriteLine($"耗时:{listenerDataValue.ElapsedMilliseconds}ms");
+
+                        //资源释放
+                        if (listenerData.Key == DiagnosticStrings.DisposeExecute)
+                        {
+                            var ldata = listenerDataValue as object;
+
+                            var conn = ldata?.GetType().GetProperty("masterConnection")?.GetValue(ldata, null) as SqlConnection;
+
+                            Console.WriteLine(conn?.State);
+                        }
+                    }));
+                }
+            }));
+
             var container = builder.Build();
 
-            var repo = container.Resolve<Func<string, IRepository>>()(null);
-
-            var res = repo.Any<Log>(x => x.Id == 2633);
+            using (var repo = container.Resolve<Func<string, IRepository>>()(null))
+            {
+                var res = repo.Any<Log>(x => x.Id == 2633);
+            }
             #endregion
 
             #region Select
