@@ -33,7 +33,7 @@ namespace SQLBuilder.Extensions
     /// </summary>
     public static class ContainerBuilderExtensions
     {
-        #region AddRepository
+        #region RegisterRepository
         /// <summary>
         /// 注入泛型仓储
         /// </summary>
@@ -45,7 +45,7 @@ namespace SQLBuilder.Extensions
         /// <param name="countSyntax">分页计数语法，默认：COUNT(*)</param>
         /// <param name="lifeTime">生命周期，默认：Transient，不建议Singleton</param>
         /// <returns></returns>
-        public static ContainerBuilder AddRepository<T>(
+        public static ContainerBuilder RegisterRepository<T>(
             this ContainerBuilder @this,
             Func<string, object, string> sqlIntercept = null,
             bool isEnableFormat = false,
@@ -97,7 +97,7 @@ namespace SQLBuilder.Extensions
         }
         #endregion
 
-        #region AddAllRepository
+        #region RegisterAllRepository
         /// <summary>
         /// 按需注入所有程序依赖的数据库仓储 <para>注意：仓储没有初始化MasterConnectionString和SlaveConnectionStrings</para>
         /// </summary>
@@ -109,7 +109,7 @@ namespace SQLBuilder.Extensions
         /// <param name="connectionStringName">连接字符串配置name</param>
         /// <param name="lifeTime">生命周期，默认：Transient，不建议Singleton</param>
         /// <returns></returns>
-        public static ContainerBuilder AddAllRepository(
+        public static ContainerBuilder RegisterAllRepository(
             this ContainerBuilder @this,
             Func<string, object, string> sqlIntercept = null,
             bool isEnableFormat = false,
@@ -133,23 +133,23 @@ namespace SQLBuilder.Extensions
                 {
                     //SqlServer
                     if (databaseType.EqualIgnoreCase("SqlServer"))
-                        @this.AddRepository<SqlRepository>(sqlIntercept, isEnableFormat, autoDispose, countSyntax, lifeTime);
+                        @this.RegisterRepository<SqlRepository>(sqlIntercept, isEnableFormat, autoDispose, countSyntax, lifeTime);
 
                     //MySql
                     if (databaseType.EqualIgnoreCase("MySql"))
-                        @this.AddRepository<MySqlRepository>(sqlIntercept, isEnableFormat, autoDispose, countSyntax, lifeTime);
+                        @this.RegisterRepository<MySqlRepository>(sqlIntercept, isEnableFormat, autoDispose, countSyntax, lifeTime);
 
                     //Oracle
                     if (databaseType.EqualIgnoreCase("Oracle"))
-                        @this.AddRepository<OracleRepository>(sqlIntercept, isEnableFormat, autoDispose, countSyntax, lifeTime);
+                        @this.RegisterRepository<OracleRepository>(sqlIntercept, isEnableFormat, autoDispose, countSyntax, lifeTime);
 
                     //Sqlite
                     if (databaseType.EqualIgnoreCase("Sqlite"))
-                        @this.AddRepository<SqliteRepository>(sqlIntercept, isEnableFormat, autoDispose, countSyntax, lifeTime);
+                        @this.RegisterRepository<SqliteRepository>(sqlIntercept, isEnableFormat, autoDispose, countSyntax, lifeTime);
 
                     //PostgreSql
                     if (databaseType.EqualIgnoreCase("PostgreSql"))
-                        @this.AddRepository<NpgsqlRepository>(sqlIntercept, isEnableFormat, autoDispose, countSyntax, lifeTime);
+                        @this.RegisterRepository<NpgsqlRepository>(sqlIntercept, isEnableFormat, autoDispose, countSyntax, lifeTime);
                 }
             }
 
@@ -252,7 +252,7 @@ namespace SQLBuilder.Extensions
         }
         #endregion
 
-        #region AddSqlBuilder
+        #region RegisterSqlBuilder
         /// <summary>
         /// SQLBuilder仓储注入扩展
         /// <para>注意：若要启用读写分离，则需要注入ILoadBalancer服务；</para>
@@ -280,7 +280,7 @@ namespace SQLBuilder.Extensions
         ///     }
         ///     </code>
         /// </remarks>
-        public static ContainerBuilder AddSqlBuilder(
+        public static ContainerBuilder RegisterSqlBuilder(
             this ContainerBuilder @this,
             string defaultName,
             Func<string, object, string> sqlIntercept = null,
@@ -296,7 +296,7 @@ namespace SQLBuilder.Extensions
                 @this.RegisterType<WeightRoundRobinLoadBalancer>().As<ILoadBalancer>().SingleInstance();
 
             //按需注入所有依赖的仓储
-            @this.AddAllRepository(sqlIntercept, isEnableFormat, autoDispose, countSyntax, connectionStringName, lifeTime);
+            @this.RegisterAllRepository(sqlIntercept, isEnableFormat, autoDispose, countSyntax, connectionStringName, lifeTime);
 
             //根据生命周期类型注入服务
             switch (lifeTime)
