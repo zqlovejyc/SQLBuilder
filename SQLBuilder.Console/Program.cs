@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using Autofac;
-using SQLBuilder;
-using SQLBuilder.Diagnostics;
+﻿using Autofac;
+using SQLBuilder.Diagnostics.Extensions;
 using SQLBuilder.Entry;
 using SQLBuilder.Enums;
 using SQLBuilder.Extensions;
 using SQLBuilder.Repositories;
-using SQLBuilder.Diagnostics.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SQLBuilder
 {
@@ -21,26 +16,6 @@ namespace SQLBuilder
         public string User { get; set; }
         public string Message { get; set; }
     }
-
-    public class MyObserver<T> : IObserver<T>
-    {
-        private Action<T> _next;
-        public MyObserver(Action<T> next)
-        {
-            _next = next;
-        }
-
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error)
-        {
-        }
-
-        public void OnNext(T value) => _next(value);
-    }
-
     public class Program
     {
         #region Print
