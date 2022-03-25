@@ -11,6 +11,7 @@ using SQLBuilder.Entry;
 using SQLBuilder.Enums;
 using SQLBuilder.Extensions;
 using SQLBuilder.Repositories;
+using SQLBuilder.Diagnostics.Extensions;
 
 namespace SQLBuilder
 {
@@ -97,38 +98,13 @@ namespace SQLBuilder
                 return null;
             });
 
-            //日志诊断订阅
-            DiagnosticListener.AllListeners.Subscribe(new MyObserver<DiagnosticListener>(listener =>
-            {
-                //判断发布者的名字
-                if (listener.Name == DiagnosticStrings.DiagnosticListenerName)
-                {
-                    //获取订阅信息
-                    listener.Subscribe(new MyObserver<KeyValuePair<string, object>>(listenerData =>
-                    {
-                        Console.WriteLine($"监听名称:{listenerData.Key}");
-                        dynamic listenerDataValue = listenerData.Value;
-
-                        //执行前
-                        if (listenerData.Key == DiagnosticStrings.BeforeExecute)
-                            Console.WriteLine(listenerDataValue.Sql);
-
-                        //执行后
-                        if (listenerData.Key == DiagnosticStrings.AfterExecute)
-                            Console.WriteLine($"耗时:{listenerDataValue.ElapsedMilliseconds}ms");
-
-                        //资源释放
-                        if (listenerData.Key == DiagnosticStrings.DisposeExecute)
-                        {
-                            var ldata = listenerDataValue as object;
-
-                            var conn = ldata?.GetType().GetProperty("masterConnection")?.GetValue(ldata, null) as SqlConnection;
-
-                            Console.WriteLine(conn?.State);
-                        }
-                    }));
-                }
-            }));
+            //注入SqlBuilder日志诊断
+            builder.RegisterSqlBuilderDiagnostic(
+                executeBefore: msg => Console.WriteLine(msg.Sql),
+                executeAfter: msg => Console.WriteLine(msg.ElapsedMilliseconds),
+                executeError: msg => Console.WriteLine(msg.Exception?.Message),
+                executeDispose: msg => Console.WriteLine(msg.MasterConnection.State),
+                disposeError: msg => Console.WriteLine(msg.Exception?.Message));
 
             var container = builder.Build();
 
