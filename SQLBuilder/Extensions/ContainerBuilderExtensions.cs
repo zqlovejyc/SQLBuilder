@@ -272,11 +272,14 @@ namespace SQLBuilder.Extensions
         ///     //appSettings
         ///     &lt;add key="ConnectionStrings" value="{'Base':['SqlServer','Server=.;Database=TestDb;Uid=test;Pwd=123;']}" /&gt;
         ///     
+        ///     //connectionStrings
+        ///     &lt;add name="ConnectionStrings" connectionString="{'Base':['SqlServer','Server=.;Database=TestDb;Uid=test;Pwd=123;']}" /&gt;
+        ///     
         ///     //Controller获取方法
         ///     private readonly IRepository _repository;
         ///     public WeatherForecastController(Func&lt;string, IRepository&gt; handler)
         ///     {
-        ///         _repository = handler("Sqlserver");
+        ///         _repository = handler("Base");
         ///     }
         ///     </code>
         /// </remarks>
