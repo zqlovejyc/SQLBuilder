@@ -23,6 +23,14 @@
 - NuGet：[https://www.nuget.org/packages/Zq.SQLBuilder](https://www.nuget.org/packages/Zq.SQLBuilder)
 - MyGet：[https://www.myget.org/feed/zq-myget/package/nuget/Zq.SQLBuilder](https://www.myget.org/feed/zq-myget/package/nuget/Zq.SQLBuilder)
 
+
+## 🥥 框架扩展包
+
+|                                                                     包类型                                                                      | 名称                                       |                                                                                          版本                                                                                           | 描述                       |
+| :---------------------------------------------------------------------------------------------------------------------------------------------: | ------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | -------------------------- |
+|                   [![nuget](https://shields.io/badge/-Nuget-blue?cacheSeconds=604800)](https://www.nuget.org/packages/Zq.SQLBuilder)                   | Zq.SQLBuilder                                     |                                     [![nuget](https://img.shields.io/nuget/v/Zq.SQLBuilder.svg?cacheSeconds=10800)](https://www.nuget.org/packages/Zq.SQLBuilder)                                     | SQLBuilder 核心包              |
+|   [![nuget](https://shields.io/badge/-Nuget-blue?cacheSeconds=604800)](https://www.nuget.org/packages/Zq.SQLBuilder.Diagnostics)   | Zq.SQLBuilder.Diagnostics     |     [![nuget](https://img.shields.io/nuget/v/Zq.SQLBuilder.Diagnostics.svg?cacheSeconds=10800)](https://www.nuget.org/packages/Zq.SQLBuilder.Diagnostics)     | SQLBuilder Diagnostics扩展包          |
+
 ## 🚀 快速入门
 
 - #### ➕ 新增
@@ -219,9 +227,10 @@ var res = await _repository.SaveQueueAsync();
 根据config配置自动注入不同类型数据仓储，支持一主多从配置
 
 ```csharp
-//注入SQLBuilder仓储
 var builder = new ContainerBuilder();
-builder.AddSqlBuilder("Base", (sql, parameter) =>
+
+//注入SqlBuilder仓储
+builder.RegisterSqlBuilder("Base", (sql, parameter) =>
 {
     //写入文本日志
     if (parameter is DynamicParameters dynamicParameters)
@@ -240,6 +249,14 @@ builder.AddSqlBuilder("Base", (sql, parameter) =>
     //返回null，不对原始sql进行任何更改，此处可以修改待执行的sql语句
     return null;
 });
+
+//注入SqlBuilder日志诊断
+builder.RegisterSqlBuilderDiagnostic(
+    executeBefore: msg => Console.WriteLine(msg.Sql),
+    executeAfter: msg => Console.WriteLine(msg.ElapsedMilliseconds),
+    executeError: msg => Console.WriteLine(msg.Exception?.Message),
+    executeDispose: msg => Console.WriteLine(msg.MasterConnection.State),
+    disposeError: msg => Console.WriteLine(msg.Exception?.Message));
 
 var container = builder.Build();
 
