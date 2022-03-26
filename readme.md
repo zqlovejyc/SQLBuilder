@@ -26,10 +26,10 @@
 
 ## 🥥 框架扩展包
 
-|                                                                     包类型                                                                      | 名称                                       |                                                                                          版本                                                                                           | 描述                       |
-| :---------------------------------------------------------------------------------------------------------------------------------------------: | ------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | -------------------------- |
-|                   [![nuget](https://shields.io/badge/-Nuget-blue?cacheSeconds=604800)](https://www.nuget.org/packages/Zq.SQLBuilder)                   | Zq.SQLBuilder                                     |                                     [![nuget](https://img.shields.io/nuget/v/Zq.SQLBuilder.svg?cacheSeconds=10800)](https://www.nuget.org/packages/Zq.SQLBuilder)                                     | SQLBuilder 核心包              |
-|   [![nuget](https://shields.io/badge/-Nuget-blue?cacheSeconds=604800)](https://www.nuget.org/packages/Zq.SQLBuilder.Diagnostics)   | Zq.SQLBuilder.Diagnostics     |     [![nuget](https://img.shields.io/nuget/v/Zq.SQLBuilder.Diagnostics.svg?cacheSeconds=10800)](https://www.nuget.org/packages/Zq.SQLBuilder.Diagnostics)     | SQLBuilder Diagnostics扩展包          |
+| 包类型 | 名称 | 版本 | 描述 |
+| :---: | --- | :---: | --- |
+| [![nuget](https://shields.io/badge/-Nuget-blue?cacheSeconds=604800)](https://www.nuget.org/packages/Zq.SQLBuilder) | Zq.SQLBuilder | [![nuget](https://img.shields.io/nuget/v/Zq.SQLBuilder.svg?cacheSeconds=10800)](https://www.nuget.org/packages/Zq.SQLBuilder) | SQLBuilder 核心包 |
+| [![nuget](https://shields.io/badge/-Nuget-blue?cacheSeconds=604800)](https://www.nuget.org/packages/Zq.SQLBuilder.Diagnostics) | Zq.SQLBuilder.Diagnostics | [![nuget](https://img.shields.io/nuget/v/Zq.SQLBuilder.Diagnostics.svg?cacheSeconds=10800)](https://www.nuget.org/packages/Zq.SQLBuilder.Diagnostics) | SQLBuilder Diagnostics扩展包 |
 
 ## 🚀 快速入门
 
@@ -205,6 +205,7 @@ await SqlBuilder
 ```
 
 - #### 🎫 队列
+
 ```csharp
 //预提交队列
 _repository.AddQueue(async repo =>
@@ -310,6 +311,26 @@ var res = await _repository.ExecuteTransactionAsync(async trans =>
 
     return code == ErrorCode.Successful && retval;
 });
+```
+### 📯 仓储+切库
+
+```csharp
+private readonly Func<string, IRepository> _handler;
+private readonly IRepository _repository;
+
+public MyService(Func<string, IRepository> hander)
+{
+    _handler = hander;
+
+    //默认base数据仓储
+    _repository = hander(null);
+}
+
+//base仓储
+var baseRepository = _handler("Base");
+
+//cap仓储
+var capRepository = _handler("Cap");
 ```
 
 ### 🎣 读写分离
