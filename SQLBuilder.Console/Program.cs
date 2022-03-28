@@ -16,6 +16,8 @@ namespace SQLBuilder
     {
         [Key, DataType(IsDbType = true, DbType = DbType.Int64)]
         public int Id { get; set; }
+
+        [DataType(IsDbType = true, DbType = DbType.AnsiStringFixedLength)]
         public string User { get; set; }
         public string Message { get; set; }
     }

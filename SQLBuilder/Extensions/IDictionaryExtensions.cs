@@ -116,7 +116,10 @@ namespace SQLBuilder.Extensions
                 var parameter = new OracleDynamicParameters();
 
                 foreach (var item in @this)
-                    parameter.Add(item.Key, item.Value.data, item.Value.type?.OracleDbType);
+                    parameter.Add(item.Key, item.Value.data,
+                        item.Value.type?.IsOracleDbType == true
+                        ? item.Value.type?.OracleDbType
+                        : null);
 
                 return parameter;
             }
@@ -126,7 +129,10 @@ namespace SQLBuilder.Extensions
                 var parameter = new DynamicParameters();
 
                 foreach (var item in @this)
-                    parameter.Add(item.Key, item.Value.data, item.Value.type?.DbType);
+                    parameter.Add(item.Key, item.Value.data,
+                        item.Value.type?.IsDbType == true
+                        ? item.Value.type?.DbType
+                        : null);
 
                 return parameter;
             }
