@@ -1047,7 +1047,7 @@ namespace SQLBuilder.UnitTest
                                 u.Name == entity.name);
 
             Assert.AreEqual("SELECT Id,Name FROM Base_UserInfo WHERE Name = @p__1", builder.Sql);
-            Assert.AreEqual("新用户", builder.Parameters["@p__1"]);
+            Assert.AreEqual("新用户", builder.Parameters["@p__1"].data);
         }
 
         /// <summary>
@@ -1063,7 +1063,7 @@ namespace SQLBuilder.UnitTest
                                 u.Name.Like("张三"));
 
             Assert.AreEqual("SELECT Id FROM Base_UserInfo WHERE Name LIKE '%' + @p__1 + '%'", builder.Sql);
-            Assert.AreEqual("张三", builder.Parameters["@p__1"]);
+            Assert.AreEqual("张三", builder.Parameters["@p__1"].data);
         }
 
         /// <summary>

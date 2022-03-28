@@ -93,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\ColumnAttribute.cs" />
+    <Compile Include="Attributes\DataTypeAttribute.cs" />
     <Compile Include="Attributes\KeyAttribute.cs" />
     <Compile Include="Attributes\OracleColumnAttribute.cs" />
     <Compile Include="Attributes\TableAttribute.cs" />

@@ -10,6 +10,7 @@ namespace SQLBuilder.UnitTest
         /// </summary>
         [Key]
         [Column(Update = false)]
+        [DataType(IsDbType = true, DbType = System.Data.DbType.Int64)]
         public int? Id { get; set; }
         public int Sex { get; set; }
         public string Name { get; set; }

@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using SQLBuilder.Attributes;
 using SQLBuilder.Diagnostics.Extensions;
 using SQLBuilder.Entry;
 using SQLBuilder.Enums;
@@ -6,12 +7,14 @@ using SQLBuilder.Extensions;
 using SQLBuilder.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 namespace SQLBuilder
 {
     public class Log
     {
+        [Key, DataType(IsDbType = true, DbType = DbType.Int64)]
         public int Id { get; set; }
         public string User { get; set; }
         public string Message { get; set; }
@@ -45,7 +48,7 @@ namespace SQLBuilder
                 Console.WriteLine(builder.Sql);
                 if (builder.Parameters != null)
                 {
-                    foreach (KeyValuePair<string, object> item in builder.Parameters)
+                    foreach (KeyValuePair<string, (object data, DataTypeAttribute type)> item in builder.Parameters)
                     {
                         Console.WriteLine(item.ToString());
                     }

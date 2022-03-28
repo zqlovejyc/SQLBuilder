@@ -22,6 +22,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.ComponentModel.DataAnnotations.Schema;
+using SQLBuilder.Attributes;
 using SQLBuilder.Extensions;
 using SQLBuilder.Enums;
 
@@ -51,6 +52,11 @@ namespace SQLBuilder.Entry
         /// 表别名字典
         /// </summary>
         private readonly Dictionary<string, string> _aliasDictionary;
+
+        /// <summary>
+        /// 数据类型缓存
+        /// </summary>
+        private readonly Dictionary<string, DataTypeAttribute> _dataTypeDictionary;
 
         /// <summary>
         /// 格式化列名缓存，多用于以数据库关键字命名的列
@@ -112,7 +118,71 @@ namespace SQLBuilder.Entry
         /// <summary>
         /// 数据库参数
         /// </summary>
-        public Dictionary<string, object> DbParameters { get; set; }
+        public Dictionary<string, (object data, DataTypeAttribute type)> DbParameters { get; set; }
+
+        /// <summary>
+        /// 数据库类型处理后的数据库参数
+        /// </summary>
+        public Dictionary<string, (object data, DataTypeAttribute type)> DataTypedDbParameters
+        {
+            get
+            {
+                //插入、更新已经直接设置了DataType
+                if (this.Contains("INSERT", "UPDATE"))
+                    return this.DbParameters;
+
+                //判断是否需要重新替换参数数据类型
+                if (this._dataTypeDictionary.Count == 0 || !this.DbParameters.Any(x => x.Value.type == null))
+                    return this.DbParameters;
+
+                //分割sql语句
+                var splitSql = this.Sql
+                    .ToString()
+                    .Replace("NOT IN", "IN")
+                    .Replace("NOT LIKE", "LIKE")
+                    .Split(new[] { ' ', ',' })
+                    .Select(x => x.Contains("(") && x.Contains(")")
+                        ? x.Substring("(", ")")
+                        : x.Replace("(", "").Replace(")", ""))
+                    .Where(x => !x.Contains("%", "||", "+"))
+                    .ToList();
+
+                //查询关键字
+                var keyWords = new[] { "=", "<>", "!=", ">=", "<=", "IN", "LIKE" };
+
+                //空数据库类型参数
+                var emptyParameters = this.DbParameters.Where(x => x.Value.type == null).ToList();
+
+                foreach (var parameter in emptyParameters)
+                {
+                    DataTypeAttribute dataType = null;
+
+                    //参数索引
+                    var index = splitSql.FindIndex(x => x == parameter.Key);
+                    if (index <= -1)
+                        continue;
+
+                    //获取关键字索引
+                    var destIndex = this.GetKeyWordIndex(index, keyWords, splitSql);
+                    if (destIndex <= -1)
+                        continue;
+
+                    //获取字段名
+                    var field = splitSql[destIndex];
+                    if (field.Contains("("))
+                        field = field.Substring("(", ")");
+
+                    //判断缓存中是否存在DataType
+                    if (this._dataTypeDictionary.ContainsKey(field))
+                        dataType = this._dataTypeDictionary[field];
+
+                    //赋值数据类型
+                    this.DbParameters[parameter.Key] = (parameter.Value.data, dataType);
+                }
+
+                return this.DbParameters;
+            }
+        }
 
         /// <summary>
         /// 数据参数化前缀
@@ -165,6 +235,7 @@ namespace SQLBuilder.Entry
             this.JoinTypes = new();
             this._aliasDictionary = new();
             this._formatColumns = new();
+            this._dataTypeDictionary = new();
         }
         #endregion
 
@@ -448,6 +519,7 @@ namespace SQLBuilder.Entry
         public SqlWrapper AddJoinType(Type type)
         {
             this.JoinTypes.Add(type);
+
             return this;
         }
 
@@ -480,8 +552,9 @@ namespace SQLBuilder.Entry
         /// 新增格式化参数
         /// </summary>
         /// <param name="parameterValue">参数值</param>
+        /// <param name="type">数据库类型</param>
         /// <param name="parameterKey">参数名称</param>
-        public void AddDbParameter(object parameterValue, string parameterKey = null)
+        public void AddDbParameter(object parameterValue, DataTypeAttribute type = null, string parameterKey = null)
         {
             if (parameterValue == null || parameterValue == DBNull.Value)
                 this.Sql.Append("NULL");
@@ -489,13 +562,13 @@ namespace SQLBuilder.Entry
             else if (parameterKey.IsNullOrEmpty())
             {
                 var name = this.DbParameterPrefix + "p__" + (this.DbParameters.Count + 1);
-                this.DbParameters.Add(name, parameterValue);
+                this.DbParameters.Add(name, (parameterValue, type));
                 this.Sql.Append(name);
             }
             else
             {
                 var name = this.DbParameterPrefix + parameterKey;
-                this.DbParameters.Add(name, parameterValue);
+                this.DbParameters.Add(name, (parameterValue, type));
                 this.Sql.Append(name);
             }
         }
@@ -626,8 +699,9 @@ namespace SQLBuilder.Entry
         /// <param name="type">类型</param>
         /// <param name="member">成员</param>
         /// <returns>Tuple</returns>
-        public (string columnName, bool isInsert, bool isUpdate) GetColumnInfo(Type type, MemberInfo member)
+        public (string columnName, bool isInsert, bool isUpdate, DataTypeAttribute type) GetColumnInfo(Type type, MemberInfo member)
         {
+            DataTypeAttribute dbType = null;
             string columnName = null;
             var isInsert = true;
             var isUpdate = true;
@@ -635,7 +709,7 @@ namespace SQLBuilder.Entry
 
             //判断列成员信息是否为空
             if (member == null)
-                return (columnName, isInsert, isUpdate);
+                return (columnName, isInsert, isUpdate, dbType);
 
             //反射获取属性
             var props = type.GetProperties();
@@ -739,10 +813,43 @@ namespace SQLBuilder.Entry
                 }
             }
 
+            //判断是否含有DataType特性
+            var hasDataTypeAttribute = props.Any(x => x.ContainsAttribute<DataTypeAttribute>());
+            if (hasDataTypeAttribute)
+            {
+                if (member.GetFirstOrDefaultAttribute<DataTypeAttribute>() is DataTypeAttribute dta)
+                    dbType = dta;
+                else
+                {
+                    var prop = props.Where(x => x.Name == member.Name).FirstOrDefault();
+                    if (prop != null)
+                    {
+                        if (prop.GetFirstOrDefaultAttribute<DataTypeAttribute>() is DataTypeAttribute propDta)
+                            dbType = propDta;
+                    }
+                }
+            }
+
+            //是否启用格式化
             if (format)
                 _formatColumns.Add(columnName);
 
-            return (this.GetColumnName(columnName), isInsert, isUpdate);
+            //获取列名
+            columnName = this.GetColumnName(columnName);
+
+            //判断是否声明了DataType
+            if (dbType != null)
+            {
+                //声明表别名
+                var tableAlias = string.Empty;
+                if (this.JoinTypes.Count > 0)
+                    tableAlias = this.GetTableAlias(this.GetTableName(type));
+
+                //记录Column与DataTypeAttribute关系
+                _dataTypeDictionary[$"{(tableAlias.IsNullOrEmpty() ? "" : $"{tableAlias}.")}{columnName}"] = dbType;
+            }
+
+            return (columnName, isInsert, isUpdate, dbType);
         }
         #endregion
 
@@ -752,9 +859,9 @@ namespace SQLBuilder.Entry
         /// </summary>
         /// <param name="type">类型</param>
         /// <returns>List Tuple</returns>
-        public List<(string key, string property)> GetPrimaryKey(Type type)
+        public List<(string key, string property, DataTypeAttribute type)> GetPrimaryKey(Type type)
         {
-            var result = new List<(string key, string property)>();
+            var result = new List<(string key, string property, DataTypeAttribute type)>();
             var props = type.GetProperties();
 
             var hasColumnAttribute = props.Any(x => x.ContainsAttribute<CusKeyAttribute>());
@@ -769,6 +876,7 @@ namespace SQLBuilder.Entry
 
                 foreach (var property in properties)
                 {
+                    DataTypeAttribute dbType = null;
                     var propertyName = property?.Name;
                     string keyName = null;
 
@@ -783,7 +891,10 @@ namespace SQLBuilder.Entry
                         keyName = propertyName;
                     }
 
-                    result.Add((this.GetColumnName(keyName), propertyName));
+                    if (property?.GetFirstOrDefaultAttribute<DataTypeAttribute>() is DataTypeAttribute dta)
+                        dbType = dta;
+
+                    result.Add((this.GetColumnName(keyName), propertyName, dbType));
                 }
             }
             return result;
@@ -797,6 +908,50 @@ namespace SQLBuilder.Entry
         /// <returns>string</returns>
         public override string ToString() => this.Sql.ToString();
         #endregion
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// 获取关键字索引
+        /// </summary>
+        /// <param name="parameterKeyIndex"></param>
+        /// <param name="keyWords"></param>
+        /// <param name="splitSql"></param>
+        /// <returns></returns>
+        private int GetKeyWordIndex(int parameterKeyIndex, string[] keyWords, List<string> splitSql)
+        {
+            var destIndex = -1;
+
+            //判断在左侧
+            if (parameterKeyIndex - 2 > -1)
+            {
+                var isKeyWord = keyWords.Contains(splitSql[parameterKeyIndex - 1]);
+                if (isKeyWord)
+                    return parameterKeyIndex - 2;
+            }
+
+            //判断在右侧
+            if (parameterKeyIndex + 2 <= splitSql.Count - 1)
+            {
+                var isKeyWord = keyWords.Contains(splitSql[parameterKeyIndex + 1]);
+                if (isKeyWord)
+                    return parameterKeyIndex + 2;
+            }
+
+            //判断左侧是否为参数关键字
+            if (parameterKeyIndex - 2 > -1 && splitSql[parameterKeyIndex - 1].Contains(this.DbParameterPrefix))
+            {
+                destIndex = this.GetKeyWordIndex(parameterKeyIndex - 1, keyWords, splitSql);
+                if (destIndex > -1)
+                    return destIndex;
+            }
+
+            //判断右侧是否为参数关键字
+            if (parameterKeyIndex + 2 <= splitSql.Count - 1 && splitSql[parameterKeyIndex + 1].Contains(this.DbParameterPrefix))
+                destIndex = this.GetKeyWordIndex(parameterKeyIndex + 1, keyWords, splitSql);
+
+            return destIndex;
+        }
         #endregion
     }
 }
