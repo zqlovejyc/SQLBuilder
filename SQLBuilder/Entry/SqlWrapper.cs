@@ -169,7 +169,7 @@ namespace SQLBuilder.Entry
                     //获取字段名
                     var field = splitSql[destIndex];
                     if (field.Contains("(") && field.Contains(")"))
-                        field = field.Substring("(", ")");
+                        field = field.Substring("(", ")", false, false);
 
                     //判断缓存中是否存在DataType
                     if (this._dataTypeDictionary.ContainsKey(field))
