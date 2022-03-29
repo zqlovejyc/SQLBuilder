@@ -118,8 +118,11 @@ namespace SQLBuilder.Extensions
                 foreach (var item in @this)
                     parameter.Add(item.Key, item.Value.data,
                         item.Value.type?.IsOracleDbType == true
-                        ? item.Value.type?.OracleDbType
-                        : null);
+                            ? item.Value.type.OracleDbType
+                            : null,
+                        item.Value.type?.IsFixedLength == true
+                            ? item.Value.type.FixedLength
+                            : null);
 
                 return parameter;
             }
@@ -131,8 +134,11 @@ namespace SQLBuilder.Extensions
                 foreach (var item in @this)
                     parameter.Add(item.Key, item.Value.data,
                         item.Value.type?.IsDbType == true
-                        ? item.Value.type?.DbType
-                        : null);
+                            ? item.Value.type.DbType
+                            : null,
+                        size: item.Value.type?.IsFixedLength == true
+                            ? item.Value.type.FixedLength
+                            : null);
 
                 return parameter;
             }
@@ -260,11 +266,17 @@ namespace SQLBuilder.Extensions
             {
                 var parameter = new SqlParameter(x.Key.Replace("?", "@").Replace(":", "@"), x.Value.data);
 
-                if (x.Value.type?.IsDbType == true)
+                if (x.Value.type == null)
+                    return parameter;
+
+                if (x.Value.type.IsDbType)
                     parameter.DbType = x.Value.type.DbType;
 
-                if (x.Value.type?.IsSqlDbType == true)
+                if (x.Value.type.IsSqlDbType)
                     parameter.SqlDbType = x.Value.type.SqlDbType;
+
+                if (x.Value.type.IsFixedLength)
+                    parameter.Size = x.Value.type.FixedLength;
 
                 return parameter;
 
@@ -300,11 +312,17 @@ namespace SQLBuilder.Extensions
             {
                 var parameter = new MySqlParameter(x.Key.Replace("@", "?").Replace(":", "?"), x.Value.data);
 
-                if (x.Value.type?.IsDbType == true)
+                if (x.Value.type == null)
+                    return parameter;
+
+                if (x.Value.type.IsDbType)
                     parameter.DbType = x.Value.type.DbType;
 
-                if (x.Value.type?.IsMySqlDbType == true)
+                if (x.Value.type.IsMySqlDbType)
                     parameter.MySqlDbType = x.Value.type.MySqlDbType;
+
+                if (x.Value.type.IsFixedLength)
+                    parameter.Size = x.Value.type.FixedLength;
 
                 return parameter;
 
@@ -340,8 +358,14 @@ namespace SQLBuilder.Extensions
             {
                 var parameter = new SQLiteParameter(x.Key.Replace("?", "@").Replace(":", "@"), x.Value.data);
 
-                if (x.Value.type?.IsDbType == true)
+                if (x.Value.type == null)
+                    return parameter;
+
+                if (x.Value.type.IsDbType)
                     parameter.DbType = x.Value.type.DbType;
+
+                if (x.Value.type.IsFixedLength)
+                    parameter.Size = x.Value.type.FixedLength;
 
                 return parameter;
 
@@ -377,11 +401,17 @@ namespace SQLBuilder.Extensions
             {
                 var parameter = new OracleParameter(x.Key.Replace("?", ":").Replace("@", ":"), x.Value.data);
 
-                if (x.Value.type?.IsDbType == true)
+                if (x.Value.type == null)
+                    return parameter;
+
+                if (x.Value.type.IsDbType)
                     parameter.DbType = x.Value.type.DbType;
 
-                if (x.Value.type?.IsOracleDbType == true)
+                if (x.Value.type.IsOracleDbType)
                     parameter.OracleDbType = x.Value.type.OracleDbType;
+
+                if (x.Value.type.IsFixedLength)
+                    parameter.Size = x.Value.type.FixedLength;
 
                 return parameter;
 
@@ -417,11 +447,17 @@ namespace SQLBuilder.Extensions
             {
                 var parameter = new NpgsqlParameter(x.Key.Replace("?", ":").Replace("@", ":"), x.Value.data);
 
-                if (x.Value.type?.IsDbType == true)
+                if (x.Value.type == null)
+                    return parameter;
+
+                if (x.Value.type.IsDbType)
                     parameter.DbType = x.Value.type.DbType;
 
-                if (x.Value.type?.IsNpgsqlDbType == true)
+                if (x.Value.type.IsNpgsqlDbType)
                     parameter.NpgsqlDbType = x.Value.type.NpgsqlDbType;
+
+                if (x.Value.type.IsFixedLength)
+                    parameter.Size = x.Value.type.FixedLength;
 
                 return parameter;
 

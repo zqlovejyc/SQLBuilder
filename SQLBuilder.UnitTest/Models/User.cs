@@ -1,4 +1,5 @@
-﻿using SQLBuilder.Attributes;
+﻿using System.Data;
+using SQLBuilder.Attributes;
 
 namespace SQLBuilder.UnitTest
 {
@@ -10,12 +11,14 @@ namespace SQLBuilder.UnitTest
         /// </summary>
         [Key]
         [Column(Update = false)]
-        [DataType(IsDbType = true, DbType = System.Data.DbType.Int64)]
+        [DataType(IsDbType = true, DbType = DbType.Int64)]
         public int? Id { get; set; }
         public int Sex { get; set; }
 
-        [DataType(IsDbType = true, DbType = System.Data.DbType.String)]
+        [DataType(IsDbType = true, DbType = DbType.String)]
         public string Name { get; set; }
+
+        [DataType(IsDbType = true, DbType = DbType.AnsiStringFixedLength, IsFixedLength = true, FixedLength = 20)]
         public string Email { get; set; }
     }
 

@@ -1388,6 +1388,11 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("SELECT * FROM Base_UserInfo WHERE Id > @p__1 OR Email <> @p__2", builder.Sql);
             Assert.AreEqual(2, builder.Parameters.Count);
+
+            Assert.IsTrue(builder.Parameters["@p__2"].type.IsDbType);
+            Assert.IsTrue(builder.Parameters["@p__2"].type.IsFixedLength);
+            Assert.AreEqual(20, builder.Parameters["@p__2"].type.FixedLength);
+            Assert.AreEqual(DbType.AnsiStringFixedLength, builder.Parameters["@p__2"].type.DbType);
         }
 
         /// <summary>

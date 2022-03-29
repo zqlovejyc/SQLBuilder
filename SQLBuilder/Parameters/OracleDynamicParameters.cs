@@ -62,6 +62,18 @@ namespace SQLBuilder.Parameters
         /// 新增参数
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="oracleDbType"></param>
+        /// <param name="size"></param>
+        public void Add(string name, object value, OracleDbType? oracleDbType, int? size)
+        {
+            this.Add(name, oracleDbType, ParameterDirection.Input, value, size);
+        }
+
+        /// <summary>
+        /// 新增参数
+        /// </summary>
+        /// <param name="name"></param>
         /// <param name="oracleDbType"></param>
         /// <param name="direction"></param>
         public void Add(string name, OracleDbType? oracleDbType, ParameterDirection direction)

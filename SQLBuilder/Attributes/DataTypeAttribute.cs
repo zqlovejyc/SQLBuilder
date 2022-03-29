@@ -79,5 +79,15 @@ namespace SQLBuilder.Attributes
         /// Npgsql特定数据类型
         /// </summary>
         public NpgsqlDbType NpgsqlDbType { get; set; }
+
+        /// <summary>
+        /// 是否固定长度 
+        /// </summary>
+        public bool IsFixedLength { get; set; }
+
+        /// <summary>
+        /// 固定长度
+        /// </summary>
+        public int FixedLength { get; set; }
     }
 }
