@@ -1055,6 +1055,9 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("SELECT Id,Name FROM Base_UserInfo WHERE Name = @p__1", builder.Sql);
             Assert.AreEqual("新用户", builder.Parameters["@p__1"].data);
+
+            Assert.IsTrue(builder.Parameters["@p__1"].type.IsDbType);
+            Assert.AreEqual(DbType.String, builder.Parameters["@p__1"].type.DbType);
         }
 
         /// <summary>
@@ -1344,6 +1347,9 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("SELECT `Id`,`Name` FROM `Base_UserInfo` WHERE (`Name` = ?p__1)", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
+
+            Assert.IsTrue(builder.Parameters["?p__1"].type.IsDbType);
+            Assert.AreEqual(DbType.String, builder.Parameters["?p__1"].type.DbType);
         }
 
         /// <summary>
