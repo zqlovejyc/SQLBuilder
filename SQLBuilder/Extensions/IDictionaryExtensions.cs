@@ -162,7 +162,9 @@ namespace SQLBuilder.Extensions
                 var parameter = command.CreateParameter();
                 parameter.ParameterName = x.Key;
                 parameter.Value = x.Value;
+
                 return parameter;
+
             }).ToArray();
         }
 
@@ -183,8 +185,14 @@ namespace SQLBuilder.Extensions
                 parameter.ParameterName = x.Key;
                 parameter.Value = x.Value.data;
 
-                if (x.Value.type?.IsDbType == true)
+                if (x.Value.type == null)
+                    return parameter;
+
+                if (x.Value.type.IsDbType)
                     parameter.DbType = x.Value.type.DbType;
+
+                if (x.Value.type.IsFixedLength)
+                    parameter.Size = x.Value.type.FixedLength;
 
                 return parameter;
 
@@ -208,7 +216,9 @@ namespace SQLBuilder.Extensions
                 var parameter = command.CreateParameter();
                 parameter.ParameterName = x.Key;
                 parameter.Value = x.Value;
+
                 return parameter;
+
             }).ToArray();
         }
 
@@ -230,10 +240,17 @@ namespace SQLBuilder.Extensions
                 parameter.ParameterName = x.Key;
                 parameter.Value = x.Value.data;
 
-                if (x.Value.type?.IsDbType == true)
+                if (x.Value.type == null)
+                    return parameter;
+
+                if (x.Value.type.IsDbType)
                     parameter.DbType = x.Value.type.DbType;
 
+                if (x.Value.type.IsFixedLength)
+                    parameter.Size = x.Value.type.FixedLength;
+
                 return parameter;
+
             }).ToArray();
         }
         #endregion
