@@ -38,6 +38,11 @@ namespace SQLBuilder.Repositories
 
         #region Constructor
         /// <summary>
+        /// 析构函数
+        /// </summary>
+        ~SqliteRepository() => base.Dispose(false);
+
+        /// <summary>
         /// 构造函数
         /// </summary>
         public SqliteRepository() { }
