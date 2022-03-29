@@ -38,11 +38,6 @@ namespace SQLBuilder.Repositories
 
         #region Constructor
         /// <summary>
-        /// 析构函数
-        /// </summary>
-        ~MySqlRepository() => base.Dispose(false);
-
-        /// <summary>
         /// 构造函数
         /// </summary>
         public MySqlRepository() { }
