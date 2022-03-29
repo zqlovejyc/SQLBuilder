@@ -3,6 +3,7 @@ using SQLBuilder.Entry;
 using SQLBuilder.Enums;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace SQLBuilder.UnitTest
 {
@@ -160,6 +161,9 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("INSERT INTO Base_UserInfo (Name,Sex) SELECT :p__1,:p__2 FROM DUAL UNION ALL SELECT :p__3,:p__4 FROM DUAL", builder.Sql);
             Assert.AreEqual(4, builder.Parameters.Count);
+
+            Assert.IsTrue(builder.Parameters[":p__1"].type.IsDbType);
+            Assert.AreEqual(DbType.String, builder.Parameters[":p__1"].type.DbType);
         }
 
         /// <summary>
@@ -178,6 +182,12 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("INSERT INTO Base_UserInfo (Name,Sex) VALUES (@p__1,@p__2),(@p__3,@p__4)", builder.Sql);
             Assert.AreEqual(4, builder.Parameters.Count);
+
+            Assert.IsTrue(builder.Parameters["@p__1"].type.IsDbType);
+            Assert.IsTrue(builder.Parameters["@p__3"].type.IsDbType);
+
+            Assert.AreEqual(DbType.String, builder.Parameters["@p__1"].type.DbType);
+            Assert.AreEqual(DbType.String, builder.Parameters["@p__3"].type.DbType);
         }
 
         /// <summary>

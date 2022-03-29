@@ -127,8 +127,8 @@ namespace SQLBuilder.Entry
         {
             get
             {
-                //插入、更新已经直接设置了DataType
-                if (this.Contains("INSERT", "UPDATE"))
+                //新增已经直接设置了DataType
+                if (this.Contains("INSERT"))
                     return this.DbParameters;
 
                 //判断是否需要重新替换参数数据类型
