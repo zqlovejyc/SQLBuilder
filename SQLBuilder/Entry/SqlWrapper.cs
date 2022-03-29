@@ -136,19 +136,18 @@ namespace SQLBuilder.Entry
                     return this.DbParameters;
 
                 //分割sql语句
-                var splitSql = this.Sql
-                    .ToString()
-                    .Replace("NOT IN", "IN")
-                    .Replace("NOT LIKE", "LIKE")
-                    .Split(new[] { ' ', ',' })
-                    .Select(x => x.Contains("(") && x.Contains(")")
-                        ? x.Substring("(", ")")
-                        : x.Replace("(", "").Replace(")", ""))
-                    .Where(x => !x.Contains("%", "||", "+"))
-                    .ToList();
+                var splitSql = this.Replace("NOT IN", "IN")
+                                   .Replace("NOT LIKE", "LIKE")
+                                   .ToString()
+                                   .Split(new[] { ' ', ',' })
+                                   .Select(x => x.Contains("(") && x.Contains(")")
+                                        ? x.Substring("(", ")", false, false)
+                                        : x.Replace("(", "").Replace(")", ""))
+                                   .Where(x => !x.Contains("%", "||", "+"))
+                                   .ToList();
 
                 //查询关键字
-                var keyWords = new[] { "=", "<>", "!=", ">=", "<=", "IN", "LIKE" };
+                var keyWords = new[] { "=", "<>", "!=", ">", ">=", "<", "<=", "IN", "LIKE" };
 
                 //空数据库类型参数
                 var emptyParameters = this.DbParameters.Where(x => x.Value.type == null).ToList();
@@ -169,7 +168,7 @@ namespace SQLBuilder.Entry
 
                     //获取字段名
                     var field = splitSql[destIndex];
-                    if (field.Contains("("))
+                    if (field.Contains("(") && field.Contains(")"))
                         field = field.Substring("(", ")");
 
                     //判断缓存中是否存在DataType
@@ -698,7 +697,7 @@ namespace SQLBuilder.Entry
         /// </summary>
         /// <param name="type">类型</param>
         /// <param name="member">成员</param>
-        /// <returns>Tuple</returns>
+        /// <returns>返回表列信息元组</returns>
         public (string columnName, bool isInsert, bool isUpdate, DataTypeAttribute type) GetColumnInfo(Type type, MemberInfo member)
         {
             DataTypeAttribute dbType = null;
@@ -858,45 +857,49 @@ namespace SQLBuilder.Entry
         /// 获取主键
         /// </summary>
         /// <param name="type">类型</param>
-        /// <returns>List Tuple</returns>
+        /// <returns>返回主键元组集合</returns>
         public List<(string key, string property, DataTypeAttribute type)> GetPrimaryKey(Type type)
         {
             var result = new List<(string key, string property, DataTypeAttribute type)>();
             var props = type.GetProperties();
 
-            var hasColumnAttribute = props.Any(x => x.ContainsAttribute<CusKeyAttribute>());
-            if (!hasColumnAttribute)
-                hasColumnAttribute = props.Any(x => x.ContainsAttribute<SysKeyAttribute>());
+            var hasKeyAttribute = props.Any(x => x.ContainsAttribute<CusKeyAttribute>());
+            if (!hasKeyAttribute)
+                hasKeyAttribute = props.Any(x => x.ContainsAttribute<SysKeyAttribute>());
 
-            if (hasColumnAttribute)
+            if (!hasKeyAttribute)
+                return result;
+
+            var properties = props.Where(x => x.ContainsAttribute<CusKeyAttribute>()).ToList();
+            if (properties.Count == 0)
+                properties = props.Where(x => x.ContainsAttribute<SysKeyAttribute>()).ToList();
+
+            if (properties.Count == 0)
+                return result;
+
+            foreach (var property in properties)
             {
-                var properties = props.Where(x => x.ContainsAttribute<CusKeyAttribute>()).ToList();
-                if (properties.Count() == 0)
-                    properties = props.Where(x => x.ContainsAttribute<SysKeyAttribute>()).ToList();
+                DataTypeAttribute dbType = null;
+                var propertyName = property.Name;
+                string keyName = null;
 
-                foreach (var property in properties)
+                if (property.GetFirstOrDefaultAttribute<CusKeyAttribute>() is CusKeyAttribute cka)
                 {
-                    DataTypeAttribute dbType = null;
-                    var propertyName = property?.Name;
-                    string keyName = null;
-
-                    if (property?.GetFirstOrDefaultAttribute<CusKeyAttribute>() is CusKeyAttribute cka)
-                    {
-                        keyName = cka.Name ?? propertyName;
-                        if (cka.Format)
-                            _formatColumns.Add(keyName);
-                    }
-                    else if (property?.GetFirstOrDefaultAttribute<SysKeyAttribute>() is SysKeyAttribute ska)
-                    {
-                        keyName = propertyName;
-                    }
-
-                    if (property?.GetFirstOrDefaultAttribute<DataTypeAttribute>() is DataTypeAttribute dta)
-                        dbType = dta;
-
-                    result.Add((this.GetColumnName(keyName), propertyName, dbType));
+                    keyName = cka.Name ?? propertyName;
+                    if (cka.Format)
+                        _formatColumns.Add(keyName);
                 }
+                else if (property.GetFirstOrDefaultAttribute<SysKeyAttribute>() is SysKeyAttribute ska)
+                {
+                    keyName = propertyName;
+                }
+
+                if (property.GetFirstOrDefaultAttribute<DataTypeAttribute>() is DataTypeAttribute dta)
+                    dbType = dta;
+
+                result.Add((this.GetColumnName(keyName), propertyName, dbType));
             }
+
             return result;
         }
         #endregion
@@ -914,10 +917,10 @@ namespace SQLBuilder.Entry
         /// <summary>
         /// 获取关键字索引
         /// </summary>
-        /// <param name="parameterKeyIndex"></param>
-        /// <param name="keyWords"></param>
-        /// <param name="splitSql"></param>
-        /// <returns></returns>
+        /// <param name="parameterKeyIndex">参数key索引</param>
+        /// <param name="keyWords">操作关键字</param>
+        /// <param name="splitSql">分割后的sql集合</param>
+        /// <returns>返回关键字索引</returns>
         private int GetKeyWordIndex(int parameterKeyIndex, string[] keyWords, List<string> splitSql)
         {
             var destIndex = -1;

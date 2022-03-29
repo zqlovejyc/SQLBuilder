@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SQLBuilder.Entry;
+using System.Data;
 
 namespace SQLBuilder.UnitTest
 {
@@ -32,6 +33,9 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("DELETE FROM Base_UserInfo WHERE Id = @p__1", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
+
+            Assert.IsTrue(builder.Parameters["@p__1"].type.IsDbType);
+            Assert.AreEqual(DbType.Int64, builder.Parameters["@p__1"].type.DbType);
         }
 
         /// <summary>

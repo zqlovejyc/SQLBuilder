@@ -13,6 +13,8 @@ namespace SQLBuilder.UnitTest
         [DataType(IsDbType = true, DbType = System.Data.DbType.Int64)]
         public int? Id { get; set; }
         public int Sex { get; set; }
+
+        [DataType(IsDbType = true, DbType = System.Data.DbType.String)]
         public string Name { get; set; }
         public string Email { get; set; }
     }

@@ -4,6 +4,7 @@ using SQLBuilder.Enums;
 using SQLBuilder.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 namespace SQLBuilder.UnitTest
@@ -595,6 +596,9 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("SELECT x.ClassId FROM Base_Teacher AS x INNER JOIN Base_Class AS y ON x.ClassId = y.Id AND (y.Name IS NOT NULL AND y.Name <> '') WHERE x.ClassId <> @p__1 GROUP BY x.ClassId HAVING (COUNT(x.ClassId) = @p__2 AND (x.ClassId = @p__3 OR x.ClassId = @p__4)) AND x.ClassId <= @p__5 AND x.ClassId <= @p__6", builder.Sql);
             Assert.AreEqual(6, builder.Parameters.Count);
+
+            Assert.IsTrue(builder.Parameters["@p__2"].type.IsDbType);
+            Assert.AreEqual(DbType.Int32, builder.Parameters["@p__2"].type.DbType);
         }
         #endregion
 
@@ -879,6 +883,9 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("SELECT [x].[Email],[y].[Name] FROM [Base_UserInfo] AS [x] INNER JOIN [Base_Student] AS [y] ON [x].[Id] = [y].[UserId] WHERE [x].[Name] = @p__1 GROUP BY [x].[Email],[y].[Name] ORDER BY [y].[Name]", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
+
+            Assert.IsTrue(builder.Parameters["@p__1"].type.IsDbType);
+            Assert.AreEqual(DbType.String, builder.Parameters["@p__1"].type.DbType);
         }
 
         /// <summary>
@@ -1166,6 +1173,14 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("SELECT Name FROM Base_UserInfo WHERE Id NOT IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
+
+            Assert.IsTrue(builder.Parameters["@p__1"].type.IsDbType);
+            Assert.IsTrue(builder.Parameters["@p__2"].type.IsDbType);
+            Assert.IsTrue(builder.Parameters["@p__3"].type.IsDbType);
+
+            Assert.AreEqual(DbType.Int64, builder.Parameters["@p__1"].type.DbType);
+            Assert.AreEqual(DbType.Int64, builder.Parameters["@p__2"].type.DbType);
+            Assert.AreEqual(DbType.Int64, builder.Parameters["@p__3"].type.DbType);
         }
 
         /// <summary>
@@ -1190,6 +1205,15 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("SELECT Id FROM Base_UserInfo WHERE (((((((Name = @p__1 AND (Id > @p__2 AND Name IS NOT NULL)) AND Id > @p__3) AND Id < @p__4) AND Id IN (@p__5,@p__6,@p__7)) AND Name LIKE '%' + @p__8 + '%') AND Name LIKE '%' + @p__9) AND Name LIKE @p__10 + '%') OR Id IS NULL", builder.Sql);
             Assert.AreEqual(10, builder.Parameters.Count);
+
+            Assert.IsTrue(builder.Parameters["@p__1"].type.IsDbType);
+            Assert.AreEqual(DbType.String, builder.Parameters["@p__1"].type.DbType);
+
+            Assert.IsTrue(builder.Parameters["@p__5"].type.IsDbType);
+            Assert.AreEqual(DbType.Int64, builder.Parameters["@p__5"].type.DbType);
+
+            Assert.IsTrue(builder.Parameters["@p__10"].type.IsDbType);
+            Assert.AreEqual(DbType.String, builder.Parameters["@p__10"].type.DbType);
         }
 
         /// <summary>
@@ -1831,6 +1855,9 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("SELECT \"Id\",\"City_Name\" AS \"CityName\",\"Age\",\"Address\" FROM \"Base_City3\" WHERE TRIM(\"City_Name\") LIKE '%' || TRIM(@p__1) || '%'", builder.Sql);
             Assert.AreEqual(1, builder.Parameters.Count);
+
+            Assert.IsTrue(builder.Parameters["@p__1"].type.IsDbType);
+            Assert.AreEqual(DbType.AnsiString, builder.Parameters["@p__1"].type.DbType);
         }
 
         /// <summary>
