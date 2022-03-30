@@ -78,86 +78,88 @@ namespace SQLBuilder.Diagnostics.Extensions
             Action<SqlBuilderDiagnosticErrorMessage> disposeError = null)
         {
             var enableDiagnosticListener = bool.Parse(ConfigurationManager.AppSettings["SqlBuilder.EnableDiagnosticListener"] ?? "false");
-            if (enableDiagnosticListener)
+
+            if (!enableDiagnosticListener)
+                return @this;
+
+            //日志诊断订阅
+            DiagnosticListener.AllListeners.Subscribe(new SqlBuilderObserver<DiagnosticListener>(listener =>
             {
-                //日志诊断订阅
-                DiagnosticListener.AllListeners.Subscribe(new SqlBuilderObserver<DiagnosticListener>(listener =>
+                //判断发布者的名字
+                if (listener.Name != DiagnosticStrings.DiagnosticListenerName)
+                    return;
+
+                //获取订阅信息
+                listener.Subscribe(new SqlBuilderObserver<KeyValuePair<string, dynamic>>(listenerData =>
                 {
-                    //判断发布者的名字
-                    if (listener.Name == DiagnosticStrings.DiagnosticListenerName)
-                    {
-                        //获取订阅信息
-                        listener.Subscribe(new SqlBuilderObserver<KeyValuePair<string, dynamic>>(listenerData =>
+                    var now = DateTime.Now;
+
+                    //执行前
+                    if (listenerData.Key == DiagnosticStrings.BeforeExecute && executeBefore != null)
+                        executeBefore(new SqlBuilderDiagnosticBeforeMessage
                         {
-                            var now = DateTime.Now;
+                            Sql = listenerData.Value.Sql,
+                            ParameterJson = GetParameterJson(listenerData.Value.Parameters),
+                            DatabaseType = listenerData.Value.DatabaseType,
+                            DataSource = listenerData.Value.DataSource,
+                            Timespan = listenerData.Value.Timestamp,
+                            OperationId = listenerData.Value.OperationId,
+                            ExecuteBefore = now
+                        });
 
-                            //执行前
-                            if (listenerData.Key == DiagnosticStrings.BeforeExecute && executeBefore != null)
-                                executeBefore(new SqlBuilderDiagnosticBeforeMessage
-                                {
-                                    Sql = listenerData.Value.Sql,
-                                    ParameterJson = GetParameterJson(listenerData.Value.Parameters),
-                                    DatabaseType = listenerData.Value.DatabaseType,
-                                    DataSource = listenerData.Value.DataSource,
-                                    Timespan = listenerData.Value.Timestamp,
-                                    OperationId = listenerData.Value.OperationId,
-                                    ExecuteBefore = now
-                                });
+                    //执行后
+                    if (listenerData.Key == DiagnosticStrings.AfterExecute && executeAfter != null)
+                        executeAfter(new SqlBuilderDiagnosticAfterMessage
+                        {
+                            Sql = listenerData.Value.Sql,
+                            ParameterJson = GetParameterJson(listenerData.Value.Parameters),
+                            DataSource = listenerData.Value.DataSource,
+                            OperationId = listenerData.Value.OperationId,
+                            ElapsedMilliseconds = listenerData.Value.ElapsedMilliseconds,
+                            ExecuteAfter = now
+                        });
 
-                            //执行后
-                            if (listenerData.Key == DiagnosticStrings.AfterExecute && executeAfter != null)
-                                executeAfter(new SqlBuilderDiagnosticAfterMessage
-                                {
-                                    Sql = listenerData.Value.Sql,
-                                    ParameterJson = GetParameterJson(listenerData.Value.Parameters),
-                                    DataSource = listenerData.Value.DataSource,
-                                    OperationId = listenerData.Value.OperationId,
-                                    ElapsedMilliseconds = listenerData.Value.ElapsedMilliseconds,
-                                    ExecuteAfter = now
-                                });
+                    //执行异常
+                    if (listenerData.Key == DiagnosticStrings.ErrorExecute && executeError != null)
+                        executeError(new SqlBuilderDiagnosticErrorMessage
+                        {
+                            Exception = listenerData.Value.Exception,
+                            OperationId = listenerData.Value.OperationId,
+                            ElapsedMilliseconds = listenerData.Value.ElapsedMilliseconds,
+                            ExecuteError = now
+                        });
 
-                            //执行异常
-                            if (listenerData.Key == DiagnosticStrings.ErrorExecute && executeError != null)
-                                executeError(new SqlBuilderDiagnosticErrorMessage
-                                {
-                                    Exception = listenerData.Value.Exception,
-                                    OperationId = listenerData.Value.OperationId,
-                                    ElapsedMilliseconds = listenerData.Value.ElapsedMilliseconds,
-                                    ExecuteError = now
-                                });
+                    //资源释放
+                    if (listenerData.Key == DiagnosticStrings.DisposeExecute && executeDispose != null)
+                    {
+                        var disposeData = listenerData.Value as object;
+                        var dataType = disposeData.GetType();
 
-                            //资源释放
-                            if (listenerData.Key == DiagnosticStrings.DisposeExecute && executeDispose != null)
-                            {
-                                var disposeData = listenerData.Value as object;
+                        var masterConnection = dataType.GetProperty("masterConnection").GetValue(disposeData) as DbConnection;
+                        var salveConnection = dataType.GetProperty("salveConnection").GetValue(disposeData) as DbConnection;
 
-                                var masterConnection = disposeData.GetType().GetProperty("masterConnection").GetValue(disposeData) as DbConnection;
-                                var salveConnection = disposeData.GetType().GetProperty("salveConnection").GetValue(disposeData) as DbConnection;
+                        executeDispose(new SqlBuilderDiagnosticDisposeMessage
+                        {
+                            MasterConnection = masterConnection,
+                            SalveConnection = salveConnection
+                        });
+                    }
 
-                                executeDispose(new SqlBuilderDiagnosticDisposeMessage
-                                {
-                                    MasterConnection = masterConnection,
-                                    SalveConnection = salveConnection
-                                });
-                            }
+                    //资源释放异常
+                    if (listenerData.Key == DiagnosticStrings.DisposeException && disposeError != null)
+                    {
+                        var disposeErrorData = listenerData.Value as object;
 
-                            //资源释放异常
-                            if (listenerData.Key == DiagnosticStrings.DisposeException && disposeError != null)
-                            {
-                                var disposeErrorData = listenerData.Value as object;
+                        var exception = disposeErrorData.GetType().GetProperty("exception").GetValue(disposeErrorData) as Exception;
 
-                                var exception = disposeErrorData.GetType().GetProperty("exception").GetValue(disposeErrorData) as Exception;
-
-                                disposeError(new SqlBuilderDiagnosticErrorMessage
-                                {
-                                    Exception = exception,
-                                    ExecuteError = now
-                                });
-                            }
-                        }));
+                        disposeError(new SqlBuilderDiagnosticErrorMessage
+                        {
+                            Exception = exception,
+                            ExecuteError = now
+                        });
                     }
                 }));
-            }
+            }));
 
             return @this;
         }
