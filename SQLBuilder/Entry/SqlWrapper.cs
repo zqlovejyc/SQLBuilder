@@ -234,7 +234,7 @@ namespace SQLBuilder.Entry
             this.JoinTypes = new();
             this._aliasDictionary = new();
             this._formatColumns = new();
-            this._dataTypeDictionary = new();
+            this._dataTypeDictionary = new(StringComparer.OrdinalIgnoreCase);
         }
         #endregion
 
@@ -600,9 +600,10 @@ namespace SQLBuilder.Entry
 
             tableAlias = this.GetFormatName(tableAlias);
 
-            if (!this._aliasDictionary.Keys.Contains(tableAlias))
+            if (!this._aliasDictionary.ContainsKey(tableAlias))
             {
                 this._aliasDictionary.Add(tableAlias, tableName);
+
                 return true;
             }
 
@@ -626,12 +627,12 @@ namespace SQLBuilder.Entry
                     tableAlias = this.GetFormatName(tableAlias);
 
                     //表别名+表名 同时满足
-                    if (_aliasDictionary.Keys.Contains(tableAlias) && _aliasDictionary[tableAlias] == tableName)
+                    if (_aliasDictionary.ContainsKey(tableAlias) && _aliasDictionary[tableAlias] == tableName)
                         return tableAlias;
                 }
 
                 //根据表名获取别名
-                if (_aliasDictionary.Values.Contains(tableName))
+                if (_aliasDictionary.ContainsValue(tableName))
                     return _aliasDictionary.FirstOrDefault(x => x.Value == tableName).Key;
             }
 
@@ -941,7 +942,7 @@ namespace SQLBuilder.Entry
             //判断在左侧
             if (parameterKeyIndex - 2 > -1)
             {
-                var isKeyWord = keyWords.Contains(splitSql[parameterKeyIndex - 1]);
+                var isKeyWord = keyWords.Any(x => x.EqualIgnoreCase(splitSql[parameterKeyIndex - 1]));
                 if (isKeyWord)
                     return parameterKeyIndex - 2;
             }
@@ -949,7 +950,7 @@ namespace SQLBuilder.Entry
             //判断在右侧
             if (parameterKeyIndex + 2 <= splitSql.Count - 1)
             {
-                var isKeyWord = keyWords.Contains(splitSql[parameterKeyIndex + 1]);
+                var isKeyWord = keyWords.Any(x => x.EqualIgnoreCase(splitSql[parameterKeyIndex + 1]));
                 if (isKeyWord)
                     return parameterKeyIndex + 2;
             }
