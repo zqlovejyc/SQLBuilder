@@ -60,7 +60,7 @@ namespace SQLBuilder.Entry
                 var sql = this.sqlWrapper.ToString();
 
                 //添加sql日志拦截
-                return this.SqlIntercept?.Invoke(sql, this.sqlWrapper.DbParameters) ?? sql;
+                return this.SqlIntercept?.Invoke(sql, this.sqlWrapper.DataTypedDbParameters) ?? sql;
             }
         }
 
