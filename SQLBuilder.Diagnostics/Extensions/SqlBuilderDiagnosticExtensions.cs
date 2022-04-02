@@ -77,7 +77,8 @@ namespace SQLBuilder.Diagnostics.Extensions
             Action<SqlBuilderDiagnosticDisposeMessage> executeDispose = null,
             Action<SqlBuilderDiagnosticErrorMessage> disposeError = null)
         {
-            var enableDiagnosticListener = bool.Parse(ConfigurationManager.AppSettings["SqlBuilder.EnableDiagnosticListener"] ?? "false");
+            //获取是否启用日志诊断订阅
+            bool.TryParse(ConfigurationManager.AppSettings["SqlBuilder.EnableDiagnosticListener"], out var enableDiagnosticListener);
 
             if (!enableDiagnosticListener)
                 return @this;
