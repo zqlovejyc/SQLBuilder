@@ -95,10 +95,10 @@
     <Compile Include="Attributes\ColumnAttribute.cs" />
     <Compile Include="Attributes\DataTypeAttribute.cs" />
     <Compile Include="Attributes\KeyAttribute.cs" />
-    <Compile Include="Attributes\OracleColumnAttribute.cs" />
     <Compile Include="Attributes\TableAttribute.cs" />
     <Compile Include="Diagnostics\DiagnosticsMessage.cs" />
     <Compile Include="Diagnostics\DiagnosticStrings.cs" />
+    <Compile Include="Models\ColumnInfo.cs" />
     <Compile Include="Entry\SqlBuilder.cs" />
     <Compile Include="Entry\SqlBuilderCore.cs" />
     <Compile Include="Entry\SqlWrapper.cs" />

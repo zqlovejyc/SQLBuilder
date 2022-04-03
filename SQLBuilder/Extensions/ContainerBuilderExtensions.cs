@@ -29,7 +29,7 @@ using System.Linq;
 namespace SQLBuilder.Extensions
 {
     /// <summary>
-    /// ContainerBuilder扩展类
+    /// Autofac的ContainerBuilder扩展类
     /// </summary>
     public static class ContainerBuilderExtensions
     {

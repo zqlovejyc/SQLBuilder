@@ -1971,6 +1971,16 @@ namespace SQLBuilder.Repositories
         }
 
         /// <summary>
+        ///  插入单个实体
+        /// </summary>
+        /// <typeparam name="T">泛型类型</typeparam>
+        /// <param name="entity">要插入的实体</param>
+        /// <param name="identity">是否返回自增主键值</param>
+        /// <param name="identitySql">返回自增主键sql</param>
+        /// <returns>若 <paramref name="identity"/>为 true，则返回自增主键值，否则返回受影响行数</returns>
+        public abstract long Insert<T>(T entity, bool identity, string identitySql = null) where T : class;
+
+        /// <summary>
         /// 插入多个实体
         /// </summary>
         /// <typeparam name="T">泛型类型</typeparam>
@@ -2030,6 +2040,16 @@ namespace SQLBuilder.Repositories
             var builder = Sql.Insert<T>(() => entity, DatabaseType, IsEnableNullValue, SqlIntercept, IsEnableFormat);
             return await ExecuteAsync(builder);
         }
+
+        /// <summary>
+        ///  插入单个实体
+        /// </summary>
+        /// <typeparam name="T">泛型类型</typeparam>
+        /// <param name="entity">要插入的实体</param>
+        /// <param name="identity">是否返回自增主键值</param>
+        /// <param name="identitySql">返回自增主键sql</param>
+        /// <returns>若 <paramref name="identity"/>为 true，则返回自增主键值，否则返回受影响行数</returns>
+        public abstract Task<long> InsertAsync<T>(T entity, bool identity, string identitySql = null) where T : class;
 
         /// <summary>
         /// 插入多个实体

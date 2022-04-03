@@ -20,6 +20,7 @@ using SQLBuilder.Attributes;
 using SQLBuilder.Enums;
 using SQLBuilder.Expressions;
 using SQLBuilder.Extensions;
+using SQLBuilder.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -73,7 +74,7 @@ namespace SQLBuilder.Entry
         /// <summary>
         /// Dapper格式化参数
         /// </summary>
-        public IDynamicParameters DynamicParameters => 
+        public IDynamicParameters DynamicParameters =>
             this.Parameters.ToDynamicParameters();
 
         /// <summary>
@@ -3757,14 +3758,14 @@ namespace SQLBuilder.Entry
             {
                 for (int i = 0; i < keys.Count; i++)
                 {
-                    var (key, property, dbType) = keys[i];
-                    if (key.IsNotNullOrEmpty())
+                    var columnInfo = keys[i];
+                    if (columnInfo.ColumnName.IsNotNullOrEmpty())
                     {
-                        var keyValue = typeof(T).GetProperty(property)?.GetValue(entity, null);
+                        var keyValue = typeof(T).GetProperty(columnInfo.PropertyName)?.GetValue(entity, null);
                         if (keyValue != null)
                         {
-                            this.sqlWrapper += $" {(sql.ContainsIgnoreCase("WHERE") || i > 0 ? "AND" : "WHERE")} {(tableAlias + key)} = ";
-                            this.sqlWrapper.AddDbParameter(keyValue, dbType);
+                            this.sqlWrapper += $" {(sql.ContainsIgnoreCase("WHERE") || i > 0 ? "AND" : "WHERE")} {tableAlias + columnInfo.ColumnName} = ";
+                            this.sqlWrapper.AddDbParameter(keyValue, columnInfo.DataType);
                         }
                         else
                         {
@@ -3808,11 +3809,12 @@ namespace SQLBuilder.Entry
             {
                 for (int i = 0; i < keys.Count; i++)
                 {
-                    var (key, property, dbType) = keys[i];
-                    if (key.IsNotNullOrEmpty())
+                    var columnInfo = keys[i];
+                    //var (key, property, dbType) = keys[i];
+                    if (columnInfo.ColumnName.IsNotNullOrEmpty())
                     {
-                        this.sqlWrapper += $" {(sql.ContainsIgnoreCase("WHERE") || i > 0 ? "AND" : "WHERE")} {(tableAlias + key)} = ";
-                        this.sqlWrapper.AddDbParameter(keyValue[i], dbType);
+                        this.sqlWrapper += $" {(sql.ContainsIgnoreCase("WHERE") || i > 0 ? "AND" : "WHERE")} {tableAlias + columnInfo.ColumnName} = ";
+                        this.sqlWrapper.AddDbParameter(keyValue[i], columnInfo.DataType);
                     }
                 }
             }
@@ -5245,12 +5247,12 @@ namespace SQLBuilder.Entry
 
         #region GetPrimaryKey
         /// <summary>
-        /// 获取实体对应表的主键名称
+        /// 获取实体对应表的主键信息
         /// </summary>
         /// <returns></returns>
-        public List<string> GetPrimaryKey()
+        public List<ColumnInfo> GetPrimaryKey()
         {
-            return this.sqlWrapper.GetPrimaryKey(typeof(T)).Select(o => o.key).ToList();
+            return this.sqlWrapper.GetPrimaryKey(typeof(T));
         }
         #endregion
         #endregion
