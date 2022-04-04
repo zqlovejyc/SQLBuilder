@@ -160,7 +160,7 @@ namespace SQLBuilder.Repositories
         public override async Task<long> InsertAsync<T>(T entity, bool identity, string identitySql = null) where T : class
         {
             if (!identity)
-                return Insert(entity);
+                return await InsertAsync(entity);
 
             identitySql ??= "SELECT SCOPE_IDENTITY()";
 
