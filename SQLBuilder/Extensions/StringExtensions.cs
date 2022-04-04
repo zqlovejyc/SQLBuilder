@@ -44,6 +44,7 @@ namespace SQLBuilder.Extensions
             if (separator.IsNullOrEmpty())
                 return string.Empty;
 
+            //分隔符索引
             var startIndex = lastIndexOf
                 ? @this.LastIndexOf(separator, StringComparison.OrdinalIgnoreCase)
                 : @this.IndexOf(separator, StringComparison.OrdinalIgnoreCase);
@@ -53,6 +54,7 @@ namespace SQLBuilder.Extensions
 
             startIndex += separator.Length;
 
+            //截取长度
             var length = @this.Length - startIndex;
 
             return @this.Substring(startIndex, length);
@@ -78,6 +80,7 @@ namespace SQLBuilder.Extensions
             if (end.IsNullOrEmpty())
                 return string.Empty;
 
+            //开始字符串索引
             int startIndex;
 
             if (startIsIndexOf)
@@ -90,6 +93,7 @@ namespace SQLBuilder.Extensions
 
             startIndex += start.Length;
 
+            //结束字符串索引
             int endIndex;
 
             if (endIsIndexOf)
@@ -100,7 +104,11 @@ namespace SQLBuilder.Extensions
             if (endIndex == -1)
                 return string.Empty;
 
+            //截取长度
             var length = endIndex - startIndex;
+
+            if (length < 0)
+                return string.Empty;
 
             return @this.Substring(startIndex, length);
         }
