@@ -98,6 +98,7 @@
     <Compile Include="Attributes\TableAttribute.cs" />
     <Compile Include="Diagnostics\DiagnosticsMessage.cs" />
     <Compile Include="Diagnostics\DiagnosticStrings.cs" />
+    <Compile Include="Enums\MatchType.cs" />
     <Compile Include="Models\ColumnInfo.cs" />
     <Compile Include="Entry\SqlBuilder.cs" />
     <Compile Include="Entry\SqlBuilderCore.cs" />
