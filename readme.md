@@ -20,6 +20,7 @@
 
 - Gitee：[https://gitee.com/zqlovejyc/SQLBuilder](https://gitee.com/zqlovejyc/SQLBuilder)
 - GitHub：[https://github.com/zqlovejyc/SQLBuilder](https://github.com/zqlovejyc/SQLBuilder)
+- GitLab：[https://gitlab.com/zqlovejyc/SQLBuilder](https://gitlab.com/zqlovejyc/SQLBuilder)
 - NuGet：[https://www.nuget.org/packages/Zq.SQLBuilder](https://www.nuget.org/packages/Zq.SQLBuilder)
 - MyGet：[https://www.myget.org/feed/zq-myget/package/nuget/Zq.SQLBuilder](https://www.myget.org/feed/zq-myget/package/nuget/Zq.SQLBuilder)
 
