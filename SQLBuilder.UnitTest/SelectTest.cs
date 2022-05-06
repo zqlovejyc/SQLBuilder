@@ -2,6 +2,7 @@
 using SQLBuilder.Entry;
 using SQLBuilder.Enums;
 using SQLBuilder.Extensions;
+using SQLBuilder.UnitTest.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -3384,6 +3385,40 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("SELECT [SEX],Name FROM Base_UserInfo", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
+        }
+
+        /// <summary>
+        /// 查询123
+        /// </summary>
+        [TestMethod]
+        public void Test_Select_123()
+        {
+            var log = new Log { Id = Guid.NewGuid() };
+
+            var builder = SqlBuilder
+                            .Select<Log>()
+                            .Where(x => x.Id == log.Id);
+
+            Assert.AreEqual("SELECT * FROM Base_Log WHERE Id = @p__1", builder.Sql);
+            Assert.AreEqual(log.Id, builder.Parameters["@p__1"].data);
+            Assert.AreEqual(DbType.Guid, builder.Parameters["@p__1"].type.DbType);
+        }
+
+        /// <summary>
+        /// 查询124
+        /// </summary>
+        [TestMethod]
+        public void Test_Select_124()
+        {
+            var id = Guid.NewGuid();
+
+            var builder = SqlBuilder
+                            .Select<Log>()
+                            .Where(x => x.Id == id);
+
+            Assert.AreEqual("SELECT * FROM Base_Log WHERE Id = @p__1", builder.Sql);
+            Assert.AreEqual(id, builder.Parameters["@p__1"].data);
+            Assert.AreEqual(DbType.Guid, builder.Parameters["@p__1"].type.DbType);
         }
         #endregion
 
