@@ -381,8 +381,8 @@ namespace SQLBuilder.Expressions
                     {
                         if (new HashSet<DatabaseType>
                         {
-                            DatabaseType.PostgreSql,
-                            DatabaseType.MySql
+                            DatabaseType.MySql,
+                            DatabaseType.PostgreSql
                         }.Contains(sqlWrapper.DatabaseType))
                             sqlWrapper += " IS TRUE";
                         else
@@ -519,8 +519,8 @@ namespace SQLBuilder.Expressions
                     {
                         if (new HashSet<DatabaseType>
                         {
-                            DatabaseType.PostgreSql,
-                            DatabaseType.MySql
+                            DatabaseType.MySql,
+                            DatabaseType.PostgreSql
                         }.Contains(sqlWrapper.DatabaseType))
                             sqlWrapper += " IS TRUE";
                         else
@@ -568,7 +568,7 @@ namespace SQLBuilder.Expressions
             {
                 sqlWrapper += tableAlias + sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).ColumnName;
                 if (orders?.Length > 0)
-                    sqlWrapper += $" { (orders[0] == OrderType.Descending ? "DESC" : "ASC")}";
+                    sqlWrapper += $" {(orders[0] == OrderType.Descending ? "DESC" : "ASC")}";
             }
 
             if (expression.Expression.NodeType == ExpressionType.Constant ||
@@ -586,7 +586,7 @@ namespace SQLBuilder.Expressions
                             SqlExpressionProvider.OrderBy(Expression.Constant(item), sqlWrapper);
 
                             if (i <= orders.Length - 1)
-                                sqlWrapper += $" { (orders[i] == OrderType.Descending ? "DESC" : "ASC")},";
+                                sqlWrapper += $" {(orders[i] == OrderType.Descending ? "DESC" : "ASC")},";
                             else if (item.ToString().ContainsIgnoreCase("ASC", "DESC") == false)
                                 sqlWrapper += " ASC,";
                             else
@@ -605,7 +605,7 @@ namespace SQLBuilder.Expressions
                         if (!str.ContainsIgnoreCase("ASC", "DESC"))
                         {
                             if (orders.Length >= 1)
-                                sqlWrapper += $" { (orders[0] == OrderType.Descending ? "DESC" : "ASC")},";
+                                sqlWrapper += $" {(orders[0] == OrderType.Descending ? "DESC" : "ASC")},";
                             else
                                 sqlWrapper += " ASC,";
 
