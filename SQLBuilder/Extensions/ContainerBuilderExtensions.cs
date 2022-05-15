@@ -128,7 +128,7 @@ namespace SQLBuilder.Extensions
             //注入所有数据库
             if (configs.IsNotNull() && configs.Values.IsNotNull() && configs.Values.Any(x => x.IsNotNullOrEmpty()))
             {
-                var databaseTypes = configs.Values.Where(x => x.IsNotNullOrEmpty()).Select(x => x[0].ToLower()).Distinct();
+                var databaseTypes = configs.Values.Where(x => x.IsNotNullOrEmpty()).Select(x => x[0]).Distinct();
                 foreach (var databaseType in databaseTypes)
                 {
                     //SqlServer
