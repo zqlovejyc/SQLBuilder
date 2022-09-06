@@ -94,7 +94,7 @@ namespace SQLBuilder.Extensions
                 }
             }
 
-            return default;
+            return dt;
         }
         #endregion
 
