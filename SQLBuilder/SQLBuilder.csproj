@@ -99,6 +99,12 @@
     <Compile Include="Diagnostics\DiagnosticsMessage.cs" />
     <Compile Include="Diagnostics\DiagnosticStrings.cs" />
     <Compile Include="Enums\MatchType.cs" />
+    <Compile Include="FastMember\CallSiteCache.cs" />
+    <Compile Include="FastMember\MemberSet.cs" />
+    <Compile Include="FastMember\ObjectAccessor.cs" />
+    <Compile Include="FastMember\ObjectReader.cs" />
+    <Compile Include="FastMember\OrdinalAttribute.cs" />
+    <Compile Include="FastMember\TypeAccessor.cs" />
     <Compile Include="Models\ColumnInfo.cs" />
     <Compile Include="Entry\SqlBuilder.cs" />
     <Compile Include="Entry\SqlBuilderCore.cs" />

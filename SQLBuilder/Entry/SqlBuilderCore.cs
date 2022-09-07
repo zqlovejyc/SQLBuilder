@@ -20,6 +20,7 @@ using SQLBuilder.Attributes;
 using SQLBuilder.Enums;
 using SQLBuilder.Expressions;
 using SQLBuilder.Extensions;
+using SQLBuilder.FastMember;
 using SQLBuilder.Models;
 using System;
 using System.Collections.Generic;
@@ -3855,6 +3856,8 @@ namespace SQLBuilder.Entry
             if (tableAlias.IsNotNullOrEmpty())
                 tableAlias += ".";
 
+            var accessor = ObjectAccessor.Create(entity);
+
             var keys = this.sqlWrapper.GetPrimaryKey(typeof(T));
             if (keys.Count > 0 && entity != null)
             {
@@ -3863,7 +3866,7 @@ namespace SQLBuilder.Entry
                     var columnInfo = keys[i];
                     if (columnInfo.ColumnName.IsNotNullOrEmpty())
                     {
-                        var keyValue = typeof(T).GetProperty(columnInfo.PropertyName)?.GetValue(entity, null);
+                        var keyValue = accessor[columnInfo.PropertyName];
                         if (keyValue != null)
                         {
                             this.sqlWrapper += $" {(sql.ContainsIgnoreCase("WHERE") || i > 0 ? "AND" : "WHERE")} {tableAlias + columnInfo.ColumnName} = ";
