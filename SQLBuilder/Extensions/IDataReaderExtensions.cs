@@ -263,18 +263,20 @@ namespace SQLBuilder.Extensions
 
                 while (@this.Read())
                 {
-                    var instance = Activator.CreateInstance<T>();
-
-                    foreach (var member in members)
+                    if (accessor.CreateNew() is T instance)
                     {
-                        if (!member.CanWrite)
-                            continue;
+                        foreach (var member in members)
+                        {
+                            if (!member.CanWrite)
+                                continue;
 
-                        var field = fields.FirstOrDefault(o => o.EqualIgnoreCase(member.Name));
-                        if (field.IsNotNullOrEmpty() && @this[field].IsNotNull())
-                            accessor[instance, member.Name] = @this[field].ToSafeValue(member.Type);
+                            var field = fields.FirstOrDefault(o => o.EqualIgnoreCase(member.Name));
+                            if (field.IsNotNullOrEmpty() && @this[field].IsNotNull())
+                                accessor[instance, member.Name] = @this[field].ToSafeValue(member.Type);
+                        }
+
+                        yield return instance;
                     }
-                    yield return instance;
                 }
             }
         }
@@ -364,7 +366,7 @@ namespace SQLBuilder.Extensions
                         for (int i = 0; i < @this.FieldCount; i++)
                             fields.Add(@this.GetName(i));
 
-                        var accessor = TypeAccessor.Create(typeof(T));
+                        var accessor = TypeAccessor.Create(type);
                         var members = accessor.GetMembers();
 
                         if (members.IsNullOrEmpty())
@@ -372,19 +374,20 @@ namespace SQLBuilder.Extensions
 
                         while (@this.Read())
                         {
-                            var instance = Activator.CreateInstance<T>();
-
-                            foreach (var member in members)
+                            if (accessor.CreateNew() is T instance)
                             {
-                                if (!member.CanWrite)
-                                    continue;
+                                foreach (var member in members)
+                                {
+                                    if (!member.CanWrite)
+                                        continue;
 
-                                var field = fields.FirstOrDefault(o => o.EqualIgnoreCase(member.Name));
-                                if (field.IsNotNullOrEmpty() && @this[field].IsNotNull())
-                                    accessor[instance, member.Name] = @this[field].ToSafeValue(member.Type);
+                                    var field = fields.FirstOrDefault(o => o.EqualIgnoreCase(member.Name));
+                                    if (field.IsNotNullOrEmpty() && @this[field].IsNotNull())
+                                        accessor[instance, member.Name] = @this[field].ToSafeValue(member.Type);
+                                }
+
+                                list.Add(instance);
                             }
-
-                            list.Add(instance);
                         }
 
                         result.Add(list);
