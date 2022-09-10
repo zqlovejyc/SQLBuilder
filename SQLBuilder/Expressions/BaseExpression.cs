@@ -18,8 +18,12 @@
 
 using SQLBuilder.Entry;
 using SQLBuilder.Enums;
+using SQLBuilder.Extensions;
+using SQLBuilder.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace SQLBuilder.Expressions
 {
@@ -29,6 +33,13 @@ namespace SQLBuilder.Expressions
     /// <typeparam name="T">泛型类型</typeparam>
     public abstract class BaseExpression<T> : IExpression where T : Expression
     {
+        #region Field
+        /// <summary>
+        /// 缓存columnInfo信息
+        /// </summary>
+        private readonly Dictionary<(Type type, MemberInfo member), ColumnInfo> ColumnInfoCache = new();
+        #endregion
+
         #region Virtural Methods
         /// <summary>
         /// Update
@@ -156,6 +167,16 @@ namespace SQLBuilder.Expressions
         /// <returns>SqlWrapper</returns>
         public virtual SqlWrapper Sum(T expression, SqlWrapper sqlWrapper) =>
             throw new NotImplementedException("NotImplemented " + typeof(T).Name + "IExpression Sum");
+
+        /// <summary>
+        /// 获取列信息
+        /// </summary>
+        /// <param name="type">字段类型</param>
+        /// <param name="member">字段信息</param>
+        /// <param name="sqlWrapper">sql包装器</param>
+        /// <returns>返回列信息</returns>
+        public virtual ColumnInfo GetColumnInfo(Type type, MemberInfo member, SqlWrapper sqlWrapper) =>
+            ColumnInfoCache.TryGetOrAdd((type, member), () => sqlWrapper.GetColumnInfo(type, member));
         #endregion
 
         #region Implemented Methods

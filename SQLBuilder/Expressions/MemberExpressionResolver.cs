@@ -48,8 +48,7 @@ namespace SQLBuilder.Expressions
             if (convertRes.IsNull())
                 return sqlWrapper;
 
-            if (!convertRes.GetType().IsDictionaryType() &&
-                convertRes is IEnumerable collection)
+            if (!convertRes.GetType().IsDictionaryType() && convertRes is IEnumerable collection)
                 foreach (var item in collection)
                 {
                     objectArray.Add(item);
@@ -94,13 +93,13 @@ namespace SQLBuilder.Expressions
                         sqlWrapper.DefaultType :
                         member.DeclaringType;
 
-                    var columnInfo = sqlWrapper.GetColumnInfo(type, member.MemberInfo);
+                    var columnInfo = GetColumnInfo(type, member.MemberInfo, sqlWrapper);
                     if (columnInfo.IsInsert)
                     {
                         object value;
 
                         if (isDictionaryType)
-                            value = objectDic.FirstOrDefault(x => x.Key.EqualIgnoreCase(member.Name)).Value;
+                            value = objectDic.TryGetValue(member.Name, true, null);
                         else
                             value = accessor[objectArray[i], member.Name];
 
@@ -178,13 +177,13 @@ namespace SQLBuilder.Expressions
                     sqlWrapper.DefaultType :
                     member.DeclaringType;
 
-                var columnInfo = sqlWrapper.GetColumnInfo(type, member.MemberInfo);
+                var columnInfo = GetColumnInfo(type, member.MemberInfo, sqlWrapper);
                 if (columnInfo.IsUpdate)
                 {
                     object value;
 
                     if (isDictionaryType)
-                        value = convertDic.FirstOrDefault(x => x.Key.EqualIgnoreCase(member.Name)).Value;
+                        value = convertDic.TryGetValue(member.Name, true, null);
                     else
                         value = accessor[convertRes, member.Name];
 
@@ -225,7 +224,7 @@ namespace SQLBuilder.Expressions
                 if (tableAlias.IsNotNullOrEmpty())
                     tableAlias += ".";
 
-                sqlWrapper.AddField(tableAlias + sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).ColumnName);
+                sqlWrapper.AddField(tableAlias + GetColumnInfo(expression.Member.DeclaringType, expression.Member, sqlWrapper).ColumnName);
             }
             else
             {
@@ -257,7 +256,7 @@ namespace SQLBuilder.Expressions
             if (tableAlias.IsNotNullOrEmpty())
                 tableAlias += ".";
 
-            sqlWrapper += tableAlias + sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).ColumnName;
+            sqlWrapper += tableAlias + GetColumnInfo(expression.Member.DeclaringType, expression.Member, sqlWrapper).ColumnName;
 
             return sqlWrapper;
         }
@@ -274,7 +273,7 @@ namespace SQLBuilder.Expressions
         {
             if (expression?.Member != null)
             {
-                var columnName = sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).ColumnName;
+                var columnName = GetColumnInfo(expression.Member.DeclaringType, expression.Member, sqlWrapper).ColumnName;
                 sqlWrapper.AddField(columnName);
             }
 
@@ -293,7 +292,7 @@ namespace SQLBuilder.Expressions
         {
             if (expression?.Member != null)
             {
-                var columnName = sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).ColumnName;
+                var columnName = GetColumnInfo(expression.Member.DeclaringType, expression.Member, sqlWrapper).ColumnName;
                 sqlWrapper.AddField(columnName);
             }
 
@@ -312,7 +311,7 @@ namespace SQLBuilder.Expressions
         {
             if (expression?.Member != null)
             {
-                var columnName = sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).ColumnName;
+                var columnName = GetColumnInfo(expression.Member.DeclaringType, expression.Member, sqlWrapper).ColumnName;
                 sqlWrapper.AddField(columnName);
             }
 
@@ -331,7 +330,7 @@ namespace SQLBuilder.Expressions
         {
             if (expression?.Member != null)
             {
-                var columnName = sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).ColumnName;
+                var columnName = GetColumnInfo(expression.Member.DeclaringType, expression.Member, sqlWrapper).ColumnName;
                 sqlWrapper.AddField(columnName);
             }
 
@@ -350,7 +349,7 @@ namespace SQLBuilder.Expressions
         {
             if (expression?.Member != null)
             {
-                var columnName = sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).ColumnName;
+                var columnName = GetColumnInfo(expression.Member.DeclaringType, expression.Member, sqlWrapper).ColumnName;
                 sqlWrapper.AddField(columnName);
             }
 
@@ -386,7 +385,7 @@ namespace SQLBuilder.Expressions
                     if (tableAlias.IsNotNullOrEmpty())
                         tableAlias += ".";
 
-                    sqlWrapper += tableAlias + sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).ColumnName;
+                    sqlWrapper += tableAlias + GetColumnInfo(expression.Member.DeclaringType, expression.Member, sqlWrapper).ColumnName;
 
                     //字段是bool类型
                     if (expression.NodeType == ExpressionType.MemberAccess && expression.Type.GetCoreType() == typeof(bool))
@@ -463,7 +462,7 @@ namespace SQLBuilder.Expressions
                 tableAlias += ".";
 
             if (expression.Expression.NodeType == ExpressionType.Parameter)
-                sqlWrapper += tableAlias + sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).ColumnName;
+                sqlWrapper += tableAlias + GetColumnInfo(expression.Member.DeclaringType, expression.Member, sqlWrapper).ColumnName;
 
             if (expression.Expression.NodeType == ExpressionType.Constant ||
                 expression.Expression.NodeType == ExpressionType.MemberAccess)
@@ -520,7 +519,7 @@ namespace SQLBuilder.Expressions
                     if (tableAlias.IsNotNullOrEmpty())
                         tableAlias += ".";
 
-                    sqlWrapper += tableAlias + sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).ColumnName;
+                    sqlWrapper += tableAlias + GetColumnInfo(expression.Member.DeclaringType, expression.Member, sqlWrapper).ColumnName;
 
                     //字段是bool类型
                     if (expression.NodeType == ExpressionType.MemberAccess && expression.Type.GetCoreType() == typeof(bool))
@@ -570,7 +569,7 @@ namespace SQLBuilder.Expressions
 
             if (expression.Expression.NodeType == ExpressionType.Parameter)
             {
-                sqlWrapper += tableAlias + sqlWrapper.GetColumnInfo(expression.Member.DeclaringType, expression.Member).ColumnName;
+                sqlWrapper += tableAlias + GetColumnInfo(expression.Member.DeclaringType, expression.Member, sqlWrapper).ColumnName;
                 if (orders?.Length > 0)
                     sqlWrapper += $" {(orders[0] == OrderType.Descending ? "DESC" : "ASC")}";
             }

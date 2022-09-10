@@ -52,7 +52,7 @@ namespace SQLBuilder.Expressions
                         if (tableAlias.IsNotNullOrEmpty())
                             tableAlias += ".";
 
-                        var fieldName = tableAlias + sqlWrapper.GetColumnInfo(type, memberExpr.Member).ColumnName;
+                        var fieldName = tableAlias + GetColumnInfo(type, memberExpr.Member, sqlWrapper).ColumnName;
 
                         sqlWrapper.AddField(fieldName);
                     }
@@ -96,16 +96,16 @@ namespace SQLBuilder.Expressions
                 sqlWrapper.Append("(");
 
             var fields = new List<string>();
-            foreach (MemberAssignment m in expression.Bindings)
+            foreach (MemberAssignment ma in expression.Bindings)
             {
-                var type = m.Member.DeclaringType.IsAnonymousType() ?
+                var type = ma.Member.DeclaringType.IsAnonymousType() ?
                     sqlWrapper.DefaultType :
-                    m.Member.DeclaringType;
+                    ma.Member.DeclaringType;
 
-                var columnInfo = sqlWrapper.GetColumnInfo(type, m.Member);
+                var columnInfo = GetColumnInfo(type, ma.Member, sqlWrapper);
                 if (columnInfo.IsInsert)
                 {
-                    var value = m.Expression.ToObject();
+                    var value = ma.Expression.ToObject();
                     if (value != null || (sqlWrapper.IsEnableNullValue && value == null))
                     {
                         sqlWrapper.AddDbParameter(value, columnInfo.DataType);
@@ -139,16 +139,16 @@ namespace SQLBuilder.Expressions
         /// <returns>SqlWrapper</returns>
         public override SqlWrapper Update(MemberInitExpression expression, SqlWrapper sqlWrapper)
         {
-            foreach (MemberAssignment m in expression.Bindings)
+            foreach (MemberAssignment ma in expression.Bindings)
             {
-                var type = m.Member.DeclaringType.IsAnonymousType() ?
+                var type = ma.Member.DeclaringType.IsAnonymousType() ?
                     sqlWrapper.DefaultType :
-                    m.Member.DeclaringType;
+                    ma.Member.DeclaringType;
 
-                var columnInfo = sqlWrapper.GetColumnInfo(type, m.Member);
+                var columnInfo = GetColumnInfo(type, ma.Member, sqlWrapper);
                 if (columnInfo.IsUpdate)
                 {
-                    var value = m.Expression.ToObject();
+                    var value = ma.Expression.ToObject();
                     if (value != null || (sqlWrapper.IsEnableNullValue && value == null))
                     {
                         sqlWrapper += columnInfo.ColumnName + " = ";

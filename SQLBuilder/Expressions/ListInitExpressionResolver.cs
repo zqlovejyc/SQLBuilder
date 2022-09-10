@@ -76,7 +76,7 @@ namespace SQLBuilder.Expressions
                             sqlWrapper.DefaultType :
                             member.DeclaringType;
 
-                        var columnInfo = sqlWrapper.GetColumnInfo(type, member.MemberInfo);
+                        var columnInfo = GetColumnInfo(type, member.MemberInfo, sqlWrapper);
                         if (columnInfo.IsInsert)
                         {
                             var value = accessor[item, member.Name];
@@ -155,7 +155,7 @@ namespace SQLBuilder.Expressions
                     SqlExpressionProvider.OrderBy(Expression.Constant(item), sqlWrapper);
 
                     if (i <= orders.Length - 1)
-                        sqlWrapper += $" { (orders[i] == OrderType.Descending ? "DESC" : "ASC")},";
+                        sqlWrapper += $" {(orders[i] == OrderType.Descending ? "DESC" : "ASC")},";
                     else if (!item.ToString().ContainsIgnoreCase("ASC", "DESC"))
                         sqlWrapper += " ASC,";
                     else
