@@ -832,7 +832,7 @@ namespace SQLBuilder.Expressions
 
                 var columnName = tableAlias + sqlWrapper.GetColumnInfo(memberExpr.Member.DeclaringType, memberExpr.Member).ColumnName;
 
-                var field = string.Format(methodFormat, columnName);
+                var field = methodFormat.Format(columnName);
 
                 SqlExpressionProvider.Select(Expression.Constant(field), sqlWrapper);
             }
@@ -1045,7 +1045,7 @@ namespace SQLBuilder.Expressions
 
                 sqlWrapper.RemoveLast(',');
 
-                sqlWrapper.Reset(string.Format(sqlWrapper.ToString(), fields.Join().TrimEnd(',')));
+                sqlWrapper.Reset(sqlWrapper.ToString().Format(fields.Join()));
             }
 
             return sqlWrapper;

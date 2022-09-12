@@ -109,7 +109,7 @@ namespace SQLBuilder.Expressions
                     sqlWrapper.Append(" FROM DUAL");
             }
 
-            sqlWrapper.Reset(string.Format(sqlWrapper.ToString(), fields.Join().TrimEnd(',')));
+            sqlWrapper.Reset(sqlWrapper.ToString().Format(fields.Join()));
 
             return sqlWrapper;
         }
