@@ -1045,7 +1045,7 @@ namespace SQLBuilder.Expressions
 
                 sqlWrapper.RemoveLast(',');
 
-                sqlWrapper.Reset(string.Format(sqlWrapper.ToString(), string.Join(",", fields).TrimEnd(',')));
+                sqlWrapper.Reset(string.Format(sqlWrapper.ToString(), fields.Join().TrimEnd(',')));
             }
 
             return sqlWrapper;

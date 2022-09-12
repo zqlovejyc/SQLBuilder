@@ -23,7 +23,7 @@ using SQLBuilder.Attributes;
 using SQLBuilder.Enums;
 using SQLBuilder.Repositories;
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Data;
 using System.Reflection;
@@ -458,6 +458,48 @@ namespace SQLBuilder.Extensions
                 DbType.Xml => typeof(string),
                 _ => default,
             };
+        }
+        #endregion
+
+        #region Separate
+        /// <summary>
+        /// 追加分隔符字符串，忽略开头，常用于拼接
+        /// </summary>
+        /// <param name="this">字符串构造者</param>
+        /// <param name="separator">分隔符</param>
+        /// <returns></returns>
+        public static StringBuilder Separate(this StringBuilder @this, string separator)
+        {
+            if (@this.IsNull() || separator.IsNullOrEmpty())
+                return @this;
+
+            if (@this.Length > 0)
+                @this.Append(separator);
+
+            return @this;
+        }
+        #endregion
+
+        #region Join
+        /// <summary>
+        /// 把一个列表组合成为一个字符串，默认逗号分隔
+        /// </summary>
+        /// <param name="this"></param>
+        /// <param name="separator">组合分隔符，默认逗号</param>
+        /// <returns>string</returns>
+        public static string Join(this IEnumerable @this, string separator = ",")
+        {
+            var sb = new StringBuilder();
+
+            if (@this.IsNull())
+                return sb.ToString();
+
+            foreach (var item in @this)
+            {
+                sb.Separate(separator).Append(item + "");
+            }
+
+            return sb.ToString();
         }
         #endregion
     }
