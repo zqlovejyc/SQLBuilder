@@ -43,7 +43,7 @@ namespace SQLBuilder.Expressions
         public override SqlWrapper Insert(MemberExpression expression, SqlWrapper sqlWrapper)
         {
             var objectArray = new List<object>();
-            var fields = new List<string>();
+            var fields = new HashSet<string>();
             var convertRes = expression.ToObject();
             if (convertRes.IsNull())
                 return sqlWrapper;
@@ -107,8 +107,7 @@ namespace SQLBuilder.Expressions
                         {
                             sqlWrapper.AddDbParameter(value, columnInfo.DataType);
 
-                            if (!fields.Contains(columnInfo.ColumnName))
-                                fields.Add(columnInfo.ColumnName);
+                            fields.Add(columnInfo.ColumnName);
 
                             sqlWrapper += ",";
                         }

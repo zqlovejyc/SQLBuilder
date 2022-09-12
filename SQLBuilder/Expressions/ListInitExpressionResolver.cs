@@ -43,7 +43,7 @@ namespace SQLBuilder.Expressions
             if (expression.ToObject() is IEnumerable collection)
             {
                 var i = 0;
-                var fields = new List<string>();
+                var fields = new HashSet<string>();
 
                 TypeAccessor accessor = null;
                 MemberSet members = null;
@@ -83,8 +83,9 @@ namespace SQLBuilder.Expressions
                             if (value != null || (sqlWrapper.IsEnableNullValue && value == null))
                             {
                                 sqlWrapper.AddDbParameter(value, columnInfo.DataType);
-                                if (!fields.Contains(columnInfo.ColumnName))
-                                    fields.Add(columnInfo.ColumnName);
+
+                                fields.Add(columnInfo.ColumnName);
+
                                 sqlWrapper += ",";
                             }
                         }

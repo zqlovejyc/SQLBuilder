@@ -95,7 +95,7 @@ namespace SQLBuilder.Expressions
             if (sqlWrapper.DatabaseType != DatabaseType.Oracle)
                 sqlWrapper.Append("(");
 
-            var fields = new List<string>();
+            var fields = new HashSet<string>();
             foreach (MemberAssignment ma in expression.Bindings)
             {
                 var type = ma.Member.DeclaringType.IsAnonymousType() ?
@@ -109,8 +109,9 @@ namespace SQLBuilder.Expressions
                     if (value != null || (sqlWrapper.IsEnableNullValue && value == null))
                     {
                         sqlWrapper.AddDbParameter(value, columnInfo.DataType);
-                        if (!fields.Contains(columnInfo.ColumnName))
-                            fields.Add(columnInfo.ColumnName);
+
+                        fields.Add(columnInfo.ColumnName);
+
                         sqlWrapper += ",";
                     }
                 }
