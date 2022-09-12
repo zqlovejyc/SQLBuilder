@@ -60,6 +60,7 @@
     <Compile Include="Models\Class.cs" />
     <Compile Include="Models\Country.cs" />
     <Compile Include="Models\Log.cs" />
+    <Compile Include="Models\MultiplePrimaryKeyEntity.cs" />
     <Compile Include="Models\MyStudent.cs" />
     <Compile Include="Models\Student.cs" />
     <Compile Include="Models\Teacher.cs" />
