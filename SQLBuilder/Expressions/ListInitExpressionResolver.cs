@@ -31,6 +31,34 @@ namespace SQLBuilder.Expressions
     /// </summary>
     public class ListInitExpressionResolver : BaseExpression<ListInitExpression>
     {
+        #region In
+        /// <summary>
+        /// In
+        /// </summary>
+        /// <param name="expression">表达式树</param>
+        /// <param name="sqlWrapper">sql包装器</param>
+        /// <returns>SqlWrapper</returns>
+        public override SqlWrapper In(ListInitExpression expression, SqlWrapper sqlWrapper)
+        {
+            if (expression.ToObject() is IEnumerable collection)
+            {
+                sqlWrapper += "(";
+
+                foreach (var item in collection)
+                {
+                    sqlWrapper.AddDbParameter(item);
+                    sqlWrapper += ",";
+                }
+
+                sqlWrapper.RemoveLast(',');
+
+                sqlWrapper += ")";
+            }
+
+            return sqlWrapper;
+        }
+        #endregion
+
         #region Insert
         /// <summary>
         /// Insert

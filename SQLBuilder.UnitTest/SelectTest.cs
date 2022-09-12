@@ -2844,9 +2844,7 @@ namespace SQLBuilder.UnitTest
                             .Select<UserInfo>(u =>
                                 new { u.Id, UserName = $"Name" })
                             .Where(x =>
-                                new HashSet<int> { 1, 2, 3 }
-                                .ToArray()
-                                .Contains(x.Id.Value));
+                                new HashSet<int> { 1, 2, 3 }.Contains(x.Id.Value));
 
             Assert.AreEqual("SELECT Id,Name AS UserName FROM Base_UserInfo WHERE Id IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
@@ -3483,6 +3481,24 @@ namespace SQLBuilder.UnitTest
 
             Assert.AreEqual("SELECT * FROM student WHERE IsEffective IS NOT FALSE AND IsOnLine IS TRUE", builder.Sql);
             Assert.AreEqual(0, builder.Parameters.Count);
+        }
+
+        /// <summary>
+        /// 查询129
+        /// </summary>
+        [TestMethod]
+        public void Test_Select_129()
+        {
+            var idHash = new HashSet<int> { 1, 2, 3 };
+
+            var builder = SqlBuilder
+                            .Select<UserInfo>(u =>
+                                new { u.Id, UserName = $"Name" })
+                            .Where(x =>
+                                idHash.Contains(x.Id.Value));
+
+            Assert.AreEqual("SELECT Id,Name AS UserName FROM Base_UserInfo WHERE Id IN (@p__1,@p__2,@p__3)", builder.Sql);
+            Assert.AreEqual(3, builder.Parameters.Count);
         }
         #endregion
 
