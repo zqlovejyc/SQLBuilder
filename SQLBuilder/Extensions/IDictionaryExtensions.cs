@@ -62,7 +62,7 @@ namespace SQLBuilder.Extensions
         /// <returns></returns>
         public static IDynamicParameters ToDynamicParameters(this List<DbParameter> @this)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             var args = new DynamicParameters();
@@ -92,7 +92,7 @@ namespace SQLBuilder.Extensions
         /// <returns></returns>
         public static IDynamicParameters ToDynamicParameters(this IDictionary<string, object> @this)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             var args = new DynamicParameters();
@@ -109,7 +109,7 @@ namespace SQLBuilder.Extensions
         /// <returns></returns>
         public static IDynamicParameters ToDynamicParameters(this IDictionary<string, (object data, DataTypeAttribute type)> @this)
         {
-            if (@this.IsNull() || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             //OracleDbType
@@ -156,7 +156,7 @@ namespace SQLBuilder.Extensions
         /// <returns>The given data converted to a DbParameter[].</returns>
         public static DbParameter[] ToDbParameters(this IDictionary<string, object> @this, DbCommand command)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             return @this.Select(x =>
@@ -178,7 +178,7 @@ namespace SQLBuilder.Extensions
         /// <returns>The given data converted to a DbParameter[].</returns>
         public static DbParameter[] ToDbParameters(this IDictionary<string, (object data, DataTypeAttribute type)> @this, DbCommand command)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             return @this.Select(x =>
@@ -209,7 +209,7 @@ namespace SQLBuilder.Extensions
         /// <returns>The given data converted to a DbParameter[].</returns>
         public static DbParameter[] ToDbParameters(this IDictionary<string, object> @this, DbConnection connection)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             var command = connection.CreateCommand();
@@ -232,7 +232,7 @@ namespace SQLBuilder.Extensions
         /// <returns>The given data converted to a DbParameter[].</returns>
         public static DbParameter[] ToDbParameters(this IDictionary<string, (object data, DataTypeAttribute type)> @this, DbConnection connection)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             var command = connection.CreateCommand();
@@ -265,7 +265,7 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a SqlParameter[].</returns>
         public static SqlParameter[] ToSqlParameters(this IDictionary<string, object> @this)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             return @this.Select(x => new SqlParameter(x.Key.Replace("?", "@").Replace(":", "@"), x.Value)).ToArray();
@@ -278,7 +278,7 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a SqlParameter[].</returns>
         public static SqlParameter[] ToSqlParameters(this IDictionary<string, (object data, DataTypeAttribute type)> @this)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             return @this.Select(x =>
@@ -311,7 +311,7 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a MySqlParameter[].</returns>
         public static MySqlParameter[] ToMySqlParameters(this IDictionary<string, object> @this)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             return @this.Select(x => new MySqlParameter(x.Key.Replace("@", "?").Replace(":", "?"), x.Value)).ToArray();
@@ -324,7 +324,7 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a MySqlParameter[].</returns>
         public static MySqlParameter[] ToMySqlParameters(this IDictionary<string, (object data, DataTypeAttribute type)> @this)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             return @this.Select(x =>
@@ -357,7 +357,7 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a SQLiteParameter[].</returns>
         public static SQLiteParameter[] ToSqliteParameters(this IDictionary<string, object> @this)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             return @this.Select(x => new SQLiteParameter(x.Key.Replace("?", "@").Replace(":", "@"), x.Value)).ToArray();
@@ -370,7 +370,7 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a SQLiteParameter[].</returns>
         public static SQLiteParameter[] ToSqliteParameters(this IDictionary<string, (object data, DataTypeAttribute type)> @this)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             return @this.Select(x =>
@@ -400,7 +400,7 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a OracleParameter[].</returns>
         public static OracleParameter[] ToOracleParameters(this IDictionary<string, object> @this)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             return @this.Select(x => new OracleParameter(x.Key.Replace("?", ":").Replace("@", ":"), x.Value)).ToArray();
@@ -413,7 +413,7 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a OracleParameter[].</returns>
         public static OracleParameter[] ToOracleParameters(this IDictionary<string, (object data, DataTypeAttribute type)> @this)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             return @this.Select(x =>
@@ -446,7 +446,7 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a NpgsqlParameter[].</returns>
         public static NpgsqlParameter[] ToNpgsqlParameters(this IDictionary<string, object> @this)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             return @this.Select(x => new NpgsqlParameter(x.Key.Replace("?", ":").Replace("@", ":"), x.Value)).ToArray();
@@ -459,7 +459,7 @@ namespace SQLBuilder.Extensions
         /// <returns>@this as a NpgsqlParameter[].</returns>
         public static NpgsqlParameter[] ToNpgsqlParameters(this IDictionary<string, (object data, DataTypeAttribute type)> @this)
         {
-            if (@this == null || @this.Count == 0)
+            if (@this.IsNullOrEmpty())
                 return null;
 
             return @this.Select(x =>

@@ -18,6 +18,7 @@
 
 using SQLBuilder.Enums;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -159,16 +160,43 @@ namespace SQLBuilder.Extensions
         /// </summary>
         /// <typeparam name="T">Generic type parameter.</typeparam>
         /// <param name="this">The collection to act on.</param>
-        /// <returns>true if a null or is t>, false if not.</returns>
+        /// <returns>true if is null or empty, false if not.</returns>
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> @this)
         {
-            return @this == null || !@this.Any();
+            return @this is null || !@this.Any();
+        }
+
+        /// <summary>
+        /// 判断集合是否为空
+        /// </summary>
+        /// <typeparam name="T">Generic type parameter.</typeparam>
+        /// <param name="this">The collection to act on.</param>
+        /// <returns>true if is null or empty false if not.</returns>
+        public static bool IsNullOrEmpty<T>(this ICollection<T> @this)
+        {
+            return @this is null || @this.Count == 0;
+        }
+
+        /// <summary>
+        /// 判断集合是否为空
+        /// </summary>
+        /// <param name="this">The collection to act on.</param>
+        /// <returns>true if is null or empty, false if not.</returns>
+        public static bool IsNullOrEmpty(this IEnumerable @this)
+        {
+            if (@this is null)
+                return true;
+
+            if (@this.GetEnumerator().MoveNext())
+                return false;
+
+            return true;
         }
         #endregion
 
         #region IsNotNullOrEmpty
         /// <summary>
-        /// 判断字符串是否不为空
+        /// 判断字符串是否非空
         /// </summary>
         /// <param name="this">待验证的字符串</param>
         /// <returns>bool</returns>
@@ -178,26 +206,59 @@ namespace SQLBuilder.Extensions
         }
 
         /// <summary>
-        /// 判断集合是否不为空
+        /// 判断集合是否非空
         /// </summary>
         /// <typeparam name="T">Generic type parameter.</typeparam>
         /// <param name="this">The collection to act on.</param>
-        /// <returns>true if a not null or is t>, false if not.</returns>
+        /// <returns>true if is not null and not empty, false if not.</returns>
         public static bool IsNotNullOrEmpty<T>(this IEnumerable<T> @this)
         {
-            return @this != null && @this.Any();
+            return !@this.IsNullOrEmpty();
+        }
+
+        /// <summary>
+        /// 判断集合是否非空
+        /// </summary>
+        /// <typeparam name="T">Generic type parameter.</typeparam>
+        /// <param name="this">The collection to act on.</param>
+        /// <returns>true if is not null and not empty, false if not.</returns>
+        public static bool IsNotNullOrEmpty<T>(this ICollection<T> @this)
+        {
+            return !@this.IsNullOrEmpty();
+        }
+
+        /// <summary>
+        /// 判断集合是否非空
+        /// </summary>
+        /// <param name="this">The collection to act on.</param>
+        /// <returns>true if is not null and not empty, false if not.</returns>
+        public static bool IsNotNullOrEmpty(this IEnumerable @this)
+        {
+            return !@this.IsNullOrEmpty();
         }
         #endregion
 
         #region IsNullOrWhiteSpace
         /// <summary>
-        /// 判断字符串是否为空
+        /// 判断字符串是否为空或者空白字符串
         /// </summary>
         /// <param name="this">待验证的字符串</param>
         /// <returns>bool</returns>
         public static bool IsNullOrWhiteSpace(this string @this)
         {
             return string.IsNullOrWhiteSpace(@this);
+        }
+        #endregion
+
+        #region IsNotNullOrWhiteSpace
+        /// <summary>
+        /// 判断字符串是否非空且非空白字符串
+        /// </summary>
+        /// <param name="this">待验证的字符串</param>
+        /// <returns>bool</returns>
+        public static bool IsNotNullOrWhiteSpace(this string @this)
+        {
+            return !@this.IsNullOrWhiteSpace();
         }
         #endregion
 
