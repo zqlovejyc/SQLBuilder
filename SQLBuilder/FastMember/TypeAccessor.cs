@@ -62,7 +62,7 @@ namespace SQLBuilder.FastMember
 
             lock (lookup)
             {
-                return lookup.GetOrAdd(type, type => lookup[type] = CreateNew(type, allowNonPublicAccessors));
+                return lookup.GetOrAdd(type, type => CreateNew(type, allowNonPublicAccessors));
             }
         }
 
@@ -315,8 +315,8 @@ namespace SQLBuilder.FastMember
 
             foreach (var field in fields)
                 if (!map.ContainsKey(field.Name))
-                { 
-                    map.Add(field.Name, i++); 
+                {
+                    map.Add(field.Name, i++);
                     members.Add(field);
                 }
 
