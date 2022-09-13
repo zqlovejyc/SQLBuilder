@@ -3500,6 +3500,24 @@ namespace SQLBuilder.UnitTest
             Assert.AreEqual("SELECT Id,Name AS UserName FROM Base_UserInfo WHERE Id IN (@p__1,@p__2,@p__3)", builder.Sql);
             Assert.AreEqual(3, builder.Parameters.Count);
         }
+
+        /// <summary>
+        /// 查询130
+        /// </summary>
+        [TestMethod]
+        public void Test_Select_130()
+        {
+            var idHash = new HashSet<int> { 1, 2, 3 };
+
+            var builder = SqlBuilder
+                            .Select<UserInfo>(u =>
+                                new { u.Id, UserName = $"Name" })
+                            .Where(x =>
+                                !idHash.Contains(x.Id.Value));
+
+            Assert.AreEqual("SELECT Id,Name AS UserName FROM Base_UserInfo WHERE Id NOT IN (@p__1,@p__2,@p__3)", builder.Sql);
+            Assert.AreEqual(3, builder.Parameters.Count);
+        }
         #endregion
 
         #region Page
