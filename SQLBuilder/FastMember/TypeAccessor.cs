@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
@@ -19,7 +18,7 @@ namespace SQLBuilder.FastMember
         /// <summary>
         /// cache the TypeAccesscor for a specific Type
         /// </summary>
-        private static readonly ConcurrentDictionary<Type, TypeAccessor> publicAccessorsOnly = new(), nonPublicAccessors = new();
+        private static readonly ConcurrentDictionary<Type, Lazy<TypeAccessor>> publicAccessorsOnly = new(), nonPublicAccessors = new();
 
         /// <summary>
         /// Does this type support new instances via a parameterless constructor?
@@ -57,13 +56,7 @@ namespace SQLBuilder.FastMember
 
             var lookup = allowNonPublicAccessors ? nonPublicAccessors : publicAccessorsOnly;
 
-            if (lookup.ContainsKey(type))
-                return lookup[type];
-
-            lock (lookup)
-            {
-                return lookup.GetOrAdd(type, type => CreateNew(type, allowNonPublicAccessors));
-            }
+            return lookup.GetOrAdd(type, type => new Lazy<TypeAccessor>(() => CreateNew(type, allowNonPublicAccessors))).Value;
         }
 
         sealed class DynamicAccessor : TypeAccessor
