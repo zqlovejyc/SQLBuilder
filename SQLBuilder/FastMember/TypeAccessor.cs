@@ -52,7 +52,7 @@ namespace SQLBuilder.FastMember
         public static TypeAccessor Create(Type type, bool allowNonPublicAccessors)
         {
             if (type is null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             var lookup = allowNonPublicAccessors ? nonPublicAccessors : publicAccessorsOnly;
 
