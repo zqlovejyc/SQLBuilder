@@ -79,36 +79,13 @@ namespace SQLBuilder.LoadBalancer
 
         #region 方法
         /// <summary>
-        /// 获取最大状态
-        /// </summary>
-        /// <param name="states"></param>
-        /// <returns></returns>
-        private static int GetMaxIndex(int[] states)
-        {
-            var index = 0;
-
-            var state = int.MinValue;
-
-            for (var i = 0; i < states.Length; i++)
-            {
-                if (states[i] > state)
-                {
-                    state = states[i];
-                    index = i;
-                }
-            }
-
-            return index;
-        }
-
-        /// <summary>
         /// 根据权重选择，并返回该项是第几次选中
         /// </summary>
         /// <param name="times"></param>
         /// <returns></returns>
         public int Get(out int times)
         {
-            var index = GetMaxIndex(_states);
+            var index = _states.MaxIndex();
 
             _states[index] -= _totalWeight;
 
