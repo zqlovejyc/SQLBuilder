@@ -382,7 +382,7 @@ namespace SQLBuilder.Expressions
         {
             if (expression.Object != null)
             {
-                if (expression.Object.Type.AssignableTo(typeof(IList), typeof(ICollection<>)))
+                if (expression.Object.Type.AssignableTo(typeof(ICollection<>)))
                 {
                     SqlExpressionProvider.Where(expression.Arguments[0], sqlWrapper);
                     sqlWrapper += " IN ";
