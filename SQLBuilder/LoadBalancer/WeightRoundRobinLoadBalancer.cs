@@ -143,7 +143,7 @@ namespace SQLBuilder.LoadBalancer
                 }
             }
 
-            key = $"{key}_{weightList.Join("_")}";
+            key = $"{key}_{data.GetHashCode()}";
 
             var weightRoundRobin = _weightRoundRobins.GetOrAdd(key,
                 key => new Lazy<WeightRoundRobin>(() => new WeightRoundRobin(weightList.ToArray()))).Value;
