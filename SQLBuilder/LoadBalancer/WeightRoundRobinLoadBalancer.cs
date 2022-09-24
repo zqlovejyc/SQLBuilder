@@ -127,6 +127,9 @@ namespace SQLBuilder.LoadBalancer
         /// <returns></returns>
         public T Get<T>(string key, IEnumerable<T> data, int[] weights = null)
         {
+            if (data.IsNullOrEmpty())
+                return default;
+
             var count = data.Count();
             var weightList = new List<int>();
 

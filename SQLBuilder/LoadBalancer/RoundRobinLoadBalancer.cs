@@ -16,6 +16,7 @@
  */
 #endregion
 
+using SQLBuilder.Extensions;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -82,6 +83,9 @@ namespace SQLBuilder.LoadBalancer
         /// <returns></returns>
         public T Get<T>(string key, IEnumerable<T> data, int[] weights = null)
         {
+            if (data.IsNullOrEmpty())
+                return default;
+
             var count = data.Count();
 
             key = $"{key}_{data.GetHashCode()}";
