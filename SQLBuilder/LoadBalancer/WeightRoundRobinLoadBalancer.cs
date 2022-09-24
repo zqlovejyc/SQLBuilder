@@ -125,7 +125,7 @@ namespace SQLBuilder.LoadBalancer
         /// <param name="data">数据集合</param>
         /// <param name="weights">权重集合</param>
         /// <returns></returns>
-        public T Get<T>(string key, IEnumerable<T> data, int[] weights = null)
+        public T Get<T>(string key, IEnumerable<T> data, params int[] weights)
         {
             if (data.IsNullOrEmpty())
                 return default;
@@ -134,7 +134,7 @@ namespace SQLBuilder.LoadBalancer
             var weightList = new List<int>();
 
             if (weights == null)
-                data.ToList().ForEach(x => weightList.Add(1));
+                data.ForEach(x => weightList.Add(1));
             else
             {
                 for (int i = 0; i < count; i++)

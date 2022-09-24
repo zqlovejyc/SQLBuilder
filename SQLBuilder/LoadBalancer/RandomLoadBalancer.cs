@@ -16,10 +16,10 @@
  */
 #endregion
 
-using SQLBuilder.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SQLBuilder.Extensions;
 
 namespace SQLBuilder.LoadBalancer
 {
@@ -47,7 +47,7 @@ namespace SQLBuilder.LoadBalancer
         /// <param name="data">数据集合</param>
         /// <param name="weights">权重集合，当前随机方式，权重无效</param>
         /// <returns></returns>
-        public T Get<T>(string key, IEnumerable<T> data, int[] weights = null)
+        public T Get<T>(string key, IEnumerable<T> data, params int[] weights)
         {
             if (data.IsNullOrEmpty())
                 return default;
