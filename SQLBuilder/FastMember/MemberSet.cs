@@ -21,6 +21,7 @@ namespace SQLBuilder.FastMember
                 .Concat(type.GetFields(PublicInstance).Cast<MemberInfo>())
                 .Select(member => new Member(member)).ToArray();
         }
+
         /// <summary>
         /// Return a sequence of all defined members
         /// </summary>
@@ -29,14 +30,17 @@ namespace SQLBuilder.FastMember
             foreach (var member in members)
                 yield return member;
         }
+
         /// <summary>
         /// Get a member by index
         /// </summary>
         public Member this[int index] => members[index];
+
         /// <summary>
         /// The number of members defined for this type
         /// </summary>
         public int Count => members.Length;
+
         Member IList<Member>.this[int index]
         {
             get { return members[index]; }

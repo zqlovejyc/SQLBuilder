@@ -244,7 +244,10 @@ namespace SQLBuilder.FastMember
             var accessor = this.accessor;
 
             int count = Math.Min(values.Length, members.Length);
-            for (int i = 0; i < count; i++) values[i] = accessor[current, members[i]] ?? DBNull.Value;
+
+            for (int i = 0; i < count; i++)
+                values[i] = accessor[current, members[i]] ?? DBNull.Value;
+
             return count;
         }
 

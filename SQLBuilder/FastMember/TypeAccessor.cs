@@ -207,7 +207,6 @@ namespace SQLBuilder.FastMember
             }
         }
 
-
         private static readonly MethodInfo strinqEquals = typeof(string).GetMethod("op_Equality", new Type[] { typeof(string), typeof(string) });
 
         /// <summary>
