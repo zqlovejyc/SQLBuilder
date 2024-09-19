@@ -163,10 +163,15 @@ namespace SQLBuilder.Extensions
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="this"></param>
+        /// <param name="defaultValue"></param>
+        /// <param name="throwEx"></param>
         /// <returns></returns>
-        public static T To<T>(this object @this)
+        public static T To<T>(this object @this, T defaultValue = default, bool throwEx = true)
         {
-            if (@this != null)
+            if (@this == null)
+                return defaultValue;
+
+            try
             {
                 var targetType = typeof(T);
 
@@ -179,7 +184,7 @@ namespace SQLBuilder.Extensions
                     if (converter.CanConvertTo(targetType))
                         return (T)converter.ConvertTo(@this, targetType);
                 }
-
+                
                 converter = TypeDescriptor.GetConverter(targetType);
                 if (converter != null)
                 {
@@ -189,9 +194,16 @@ namespace SQLBuilder.Extensions
 
                 if (@this == DBNull.Value)
                     return (T)(object)null;
-            }
 
-            return @this == null ? default : (T)@this;
+                return (T)@this;
+            }
+            catch (Exception)
+            {
+                if (throwEx)
+                    throw;
+                else
+                    return defaultValue;
+            }
         }
         #endregion
 

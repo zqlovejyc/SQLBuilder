@@ -493,13 +493,18 @@ namespace SQLBuilder.Extensions
         /// <param name="key">Key</param>
         /// <param name="defaultValue">default value if key not exists</param>
         /// <returns>The value corresponding to the dictionary key otherwise return the defaultValue</returns>
-        public static T TryGetValue<T>(this IDictionary<string, object> @this, string key, T defaultValue)
+        public static T TryGetValue<T>(this IDictionary<string, object> @this, string key, T defaultValue = default)
         {
-            if (@this.IsNull() || !@this.ContainsKey(key))
+            if (key == null || @this == null)
                 return defaultValue;
 
-            if (@this[key] is T t)
-                return t;
+            if (@this.TryGetValue(key, out var keyValue) && keyValue != null)
+            {
+                if (keyValue is T retVal)
+                    return retVal;
+
+                return keyValue.To<T>(defaultValue, false);
+            }
 
             return defaultValue;
         }
@@ -515,14 +520,33 @@ namespace SQLBuilder.Extensions
         /// <returns>The value corresponding to the dictionary key otherwise return the defaultValue</returns>
         public static T TryGetValue<T>(this IDictionary<string, object> @this, string key, bool ignoreCase, T defaultValue = default)
         {
+            if (key == null || @this == null)
+                return defaultValue;
+
             if (!ignoreCase)
                 return @this.TryGetValue(key, defaultValue);
 
-            if (@this.IsNull() || !@this.Keys.Any(k => k.EqualIgnoreCase(key)))
-                return defaultValue;
+            if (@this is Dictionary<string, object> dict && dict?.Comparer == StringComparer.OrdinalIgnoreCase)
+            {
+                if (dict.TryGetValue(key, out var keyValue) && keyValue != null)
+                {
+                    if (keyValue is T retVal)
+                        return retVal;
 
-            if (@this.FirstOrDefault(o => o.Key.EqualIgnoreCase(key)).Value is T t)
-                return t;
+                    return keyValue.To<T>(defaultValue, false);
+                }
+            }
+            else
+            {
+                var value = @this.FirstOrDefault(o => o.Key.EqualIgnoreCase(key)).Value;
+                if (value != null)
+                {
+                    if (value is T retVal)
+                        return retVal;
+
+                    return value.To<T>(defaultValue, false);
+                }
+            }
 
             return defaultValue;
         }
@@ -538,10 +562,13 @@ namespace SQLBuilder.Extensions
         /// <returns>The value corresponding to the dictionary key otherwise return the defaultValue</returns>
         public static TValue TryGetValue<TKey, TValue>(this IDictionary<TKey, TValue> @this, TKey key, TValue defaultValue = default)
         {
-            if (@this.IsNull() || !@this.ContainsKey(key))
+            if (key == null || @this == null)
                 return defaultValue;
 
-            return @this[key];
+            if (@this.TryGetValue(key, out var keyValue) && keyValue != null)
+                return keyValue;
+
+            return defaultValue;
         }
 
         /// <summary>
@@ -556,18 +583,31 @@ namespace SQLBuilder.Extensions
         /// <returns>The value corresponding to the dictionary key otherwise return the defaultValue</returns>
         public static TValue TryGetValue<TKey, TValue>(this IDictionary<TKey, TValue> @this, TKey key, bool ignoreCase, TValue defaultValue = default)
         {
+            if (key == null || @this == null)
+                return defaultValue;
+
             if (!ignoreCase)
                 return @this.TryGetValue(key, defaultValue);
 
-            bool match(TKey k) =>
-                typeof(TKey) == typeof(string)
-                ? string.Equals(k as string, key as string, StringComparison.OrdinalIgnoreCase)
-                : Equals(k, key);
+            if (@this is Dictionary<TKey, TValue> dict && dict?.Comparer == StringComparer.OrdinalIgnoreCase)
+            {
+                if (dict.TryGetValue(key, out var keyValue) && keyValue != null)
+                    return keyValue;
+            }
+            else
+            {
+                bool match(TKey k) =>
+                   typeof(TKey) == typeof(string)
+                   ? string.Equals(k as string, key as string, StringComparison.OrdinalIgnoreCase)
+                   : Equals(k, key);
 
-            if (@this.IsNull() || !@this.Keys.Any(match))
-                return defaultValue;
+                var retValue = @this.FirstOrDefault(o => match(o.Key)).Value;
 
-            return @this.FirstOrDefault(o => match(o.Key)).Value;
+                if (retValue != null)
+                    return retValue;
+            }
+
+            return defaultValue;
         }
         #endregion
 
@@ -585,12 +625,12 @@ namespace SQLBuilder.Extensions
             if (@this.IsNull() || func.IsNull())
                 return default;
 
-            if (@this.TryGetValue(key, out var val) && val is T retval)
-                return retval;
+            if (@this.TryGetValue(key, out var keyValue) && keyValue is T retValue)
+                return retValue;
 
-            @this[key] = retval = func();
+            @this[key] = retValue = func();
 
-            return retval;
+            return retValue;
         }
 
         /// <summary>
@@ -610,15 +650,27 @@ namespace SQLBuilder.Extensions
             if (@this.IsNull() || func.IsNull())
                 return default;
 
-            if (!@this.Keys.Any(k => k.EqualIgnoreCase(key)))
+            if (@this is Dictionary<string, object> dict && dict?.Comparer == StringComparer.OrdinalIgnoreCase)
             {
-                var retval = func();
-                @this[key] = retval;
-                return retval;
-            }
+                if (dict.TryGetValue(key, out var keyValue) && keyValue is T retValue)
+                    return retValue;
 
-            if (@this.FirstOrDefault(o => o.Key.EqualIgnoreCase(key)).Value is T t)
-                return t;
+                @this[key] = retValue = func();
+
+                return retValue;
+            }
+            else
+            {
+                if (!@this.Keys.Any(k => k.EqualIgnoreCase(key)))
+                {
+                    var retval = func();
+                    @this[key] = retval;
+                    return retval;
+                }
+
+                if (@this.FirstOrDefault(o => o.Key.EqualIgnoreCase(key)).Value is T retValue)
+                    return retValue;
+            }
 
             return default;
         }
@@ -637,12 +689,12 @@ namespace SQLBuilder.Extensions
             if (@this.IsNull() || func.IsNull())
                 return default;
 
-            if (@this.TryGetValue(key, out var val) && val is TValue retval)
-                return retval;
+            if (@this.TryGetValue(key, out var keyValue) && keyValue is TValue retValue)
+                return retValue;
 
-            @this[key] = retval = func();
+            @this[key] = retValue = func();
 
-            return retval;
+            return retValue;
         }
 
         /// <summary>
@@ -663,15 +715,27 @@ namespace SQLBuilder.Extensions
             if (@this.IsNull() || func.IsNull())
                 return default;
 
-            bool match(TKey k) =>
-                 typeof(TKey) == typeof(string)
-                 ? string.Equals(k as string, key as string, StringComparison.OrdinalIgnoreCase)
-                 : Equals(k, key);
+            if (@this is Dictionary<TKey, TValue> dict && dict?.Comparer == StringComparer.OrdinalIgnoreCase)
+            {
+                if (dict.TryGetValue(key, out var keyValue))
+                    return keyValue;
 
-            if (!@this.Keys.Any(match))
-                return @this[key] = func();
+                @this[key] = keyValue = func();
 
-            return @this.FirstOrDefault(o => match(o.Key)).Value;
+                return keyValue;
+            }
+            else
+            {
+                bool match(TKey k) =>
+                    typeof(TKey) == typeof(string)
+                    ? string.Equals(k as string, key as string, StringComparison.OrdinalIgnoreCase)
+                    : Equals(k, key);
+
+                if (!@this.Keys.Any(match))
+                    return @this[key] = func();
+
+                return @this.FirstOrDefault(o => match(o.Key)).Value;
+            }
         }
         #endregion
 
@@ -690,6 +754,9 @@ namespace SQLBuilder.Extensions
 
             if (!ignoreCase)
                 return @this.ContainsKey(key);
+
+            if (@this is Dictionary<string, T> dict && dict?.Comparer == StringComparer.OrdinalIgnoreCase)
+                return dict.ContainsKey(key);
 
             return @this.Keys.Any(k => k.EqualIgnoreCase(key));
         }
